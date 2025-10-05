@@ -13,8 +13,8 @@
       lib = nixpkgs.lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+
       systemSettings = {
-        system = "x86_64-linux";
 	hostname = "mini";
 	timezone = "America/Edmonton";
 	local = "en_GB.UTF-8";
