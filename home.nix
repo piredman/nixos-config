@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, userSettings, ... }:
 
 {
   imports = [
@@ -8,8 +8,8 @@
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
-  home.username = "redman";
-  home.homeDirectory = "/home/redman";
+  home.username = userSettings.username;
+  home.homeDirectory = "/home/" + userSettings.username;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -19,6 +19,17 @@
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
   home.stateVersion = "25.05"; # Please read the comment before changing.
+
+  programs.git = {
+    enable = true;
+
+    userName = "Paul Ian Redman";
+    userEmail = "piredman@users.noreply.github.com";
+    extraConfig = {
+      init.defaultBranch = "main";
+      safe.directory = "/home/" + userSettings.username + "/.dotfiles";
+    };
+  };
 
   # The home.packages option allows you to install Nix packages into your
   # environment.

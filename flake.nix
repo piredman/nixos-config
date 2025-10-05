@@ -13,12 +13,26 @@
       lib = nixpkgs.lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      systemSettings = {
+        system = "x86_64-linux";
+	hostname = "mini";
+	timezone = "America/Edmonton";
+	local = "en_GB.UTF-8";
+      };
+      userSettings = {
+        username = "redman";
+        name = "Paul";
+      };
     in {
 
     nixosConfigurations = {
       mini = lib.nixosSystem {
 	inherit system;
 	modules = [ ./configuration.nix ];
+	specialArgs = {
+	  inherit systemSettings;
+	  inherit userSettings;
+	};
       };
     };
 
@@ -26,6 +40,10 @@
       redman = home-manager.lib.homeManagerConfiguration {
 	inherit pkgs;
 	modules = [ ./home.nix ];
+	extraSpecialArgs = {
+	  inherit systemSettings;
+	  inherit userSettings;
+	};
       };
     };
 

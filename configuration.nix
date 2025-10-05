@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, systemSettings, userSettings, ... }:
 
 {
   imports =
@@ -13,7 +13,7 @@
 
   environment.shells = with pkgs; [ zsh ];
 
-  networking.hostName = "mini"; # Define your hostname.
+  networking.hostName = systemSettings.hostname;
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -24,10 +24,10 @@
   networking.networkmanager.enable = true;
 
   # Set your time zone.
-  time.timeZone = "America/Edmonton";
+  time.timeZone = systemSettings.timezone;
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "en_GB.UTF-8";
+  i18n.defaultLocale = systemSettings.local;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -48,14 +48,14 @@
     users.redman = {
       shell = pkgs.zsh;
       isNormalUser = true;
-      description = "Paul Redman";
+      description = userSettings.name;
       extraGroups = [ "networkmanager" "wheel" ];
       packages = with pkgs; [];
     };
   };
 
   # Enable automatic login for the user.
-  services.getty.autologinUser = "redman";
+  services.getty.autologinUser = userSettings.username;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
