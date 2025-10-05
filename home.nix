@@ -23,7 +23,7 @@
   programs.git = {
     enable = true;
 
-    userName = "Paul Ian Redman";
+    userName = "Paul Redman";
     userEmail = "piredman@users.noreply.github.com";
     extraConfig = {
       init.defaultBranch = "main";
