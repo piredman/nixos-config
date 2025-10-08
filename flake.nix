@@ -28,7 +28,7 @@
     nixosConfigurations = {
       mini = lib.nixosSystem {
 	inherit system;
-	modules = [ ./configuration.nix ];
+	modules = [ ./hosts/mini/configuration.nix ];
 	specialArgs = {
 	  inherit systemSettings;
 	  inherit userSettings;
@@ -39,7 +39,7 @@
     homeConfigurations = {
       redman = home-manager.lib.homeManagerConfiguration {
 	inherit pkgs;
-	modules = [ ./home.nix ];
+	modules = [ ./home/redman.nix ];
 	extraSpecialArgs = {
 	  inherit systemSettings;
 	  inherit userSettings;

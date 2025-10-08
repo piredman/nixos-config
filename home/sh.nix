@@ -1,4 +1,4 @@
-{ config, pkg, ... }:
+{ config, pkgs, ... }:
 let
   myAliases = {
     la = "ls -la";
