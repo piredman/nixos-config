@@ -1,35 +1,29 @@
 { config, pkgs, userSettings, ... }:
 
 {
-	imports = [
-		./sh.nix
-		./hyprland.nix
-	];
+  imports = [ ./sh.nix ./hyprland.nix ];
 
-	home.username = userSettings.username;
-	home.homeDirectory = "/home/" + userSettings.username;
+  home.username = userSettings.username;
+  home.homeDirectory = "/home/" + userSettings.username;
 
-	home.stateVersion = "25.05";
+  home.stateVersion = "25.05";
 
-	programs.git = {
-		enable = true;
+  programs.git = {
+    enable = true;
 
-		userName = "Paul Redman";
-		userEmail = "piredman@users.noreply.github.com";
-		extraConfig = {
-			init.defaultBranch = "main";
-			safe.directory = "/home/" + userSettings.username + "/.dotfiles";
-		};
-	};
+    userName = "Paul Redman";
+    userEmail = "piredman@users.noreply.github.com";
+    extraConfig = {
+      init.defaultBranch = "main";
+      safe.directory = "/home/" + userSettings.username + "/.dotfiles";
+    };
+  };
 
-	home.packages = [
-	];
+  home.packages = [ ];
 
-	home.file = {
-	};
+  home.file = { };
 
-	home.sessionVariables = {
-	};
+  home.sessionVariables = { };
 
-	programs.home-manager.enable = true;
+  programs.home-manager.enable = true;
 }

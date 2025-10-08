@@ -14,7 +14,7 @@
 
 ## Code Style
 - Language: Nix expressions
-- Indentation: Tabs (not spaces)
+- Indentation: 4 spaces (not tabs)
 - Imports: Place in `imports = [ ./file.nix ];` block at top of file
 - Variables: Use camelCase (e.g., `systemSettings`, `userSettings`)
 - Attribute sets: Use `{ }` with consistent spacing

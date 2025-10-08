@@ -1,5 +1,5 @@
 {
-  
+
   description = "My Flake";
 
   inputs = {
@@ -15,9 +15,9 @@
       pkgs = nixpkgs.legacyPackages.${system};
 
       systemSettings = {
-	hostname = "mini";
-	timezone = "America/Edmonton";
-	local = "en_GB.UTF-8";
+        hostname = "mini";
+        timezone = "America/Edmonton";
+        local = "en_GB.UTF-8";
       };
       userSettings = {
         username = "redman";
@@ -25,27 +25,27 @@
       };
     in {
 
-    nixosConfigurations = {
-      mini = lib.nixosSystem {
-	inherit system;
-	modules = [ ./hosts/mini/configuration.nix ];
-	specialArgs = {
-	  inherit systemSettings;
-	  inherit userSettings;
-	};
+      nixosConfigurations = {
+        mini = lib.nixosSystem {
+          inherit system;
+          modules = [ ./hosts/mini/configuration.nix ];
+          specialArgs = {
+            inherit systemSettings;
+            inherit userSettings;
+          };
+        };
       };
-    };
 
-    homeConfigurations = {
-      redman = home-manager.lib.homeManagerConfiguration {
-	inherit pkgs;
-	modules = [ ./home/redman.nix ];
-	extraSpecialArgs = {
-	  inherit systemSettings;
-	  inherit userSettings;
-	};
+      homeConfigurations = {
+        redman = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [ ./home/redman.nix ];
+          extraSpecialArgs = {
+            inherit systemSettings;
+            inherit userSettings;
+          };
+        };
       };
-    };
 
-  };
+    };
 }
