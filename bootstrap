@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "🚀 NixOS Configuration Bootstrap"
+echo "================================"
+echo ""
+
+DETECTED_HOSTNAME=$(hostname)
+DETECTED_USERNAME=$USER
+DETECTED_TIMEZONE=$(cat /etc/timezone 2>/dev/null || echo "America/Edmonton")
+DETECTED_LOCALE=${LANG:-en_GB.UTF-8}
+
+read -p "Hostname [$DETECTED_HOSTNAME]: " INPUT_HOSTNAME
+HOSTNAME=${INPUT_HOSTNAME:-$DETECTED_HOSTNAME}
+
+read -p "Username [$DETECTED_USERNAME]: " INPUT_USERNAME
+USERNAME=${INPUT_USERNAME:-$DETECTED_USERNAME}
+
+read -p "Full name: " FULLNAME
+while [ -z "$FULLNAME" ]; do
+    echo "Full name is required"
+    read -p "Full name: " FULLNAME
+done
+
+read -p "Timezone [$DETECTED_TIMEZONE]: " INPUT_TIMEZONE
+TIMEZONE=${INPUT_TIMEZONE:-$DETECTED_TIMEZONE}
+
+read -p "Locale [$DETECTED_LOCALE]: " INPUT_LOCALE
+LOCALE=${INPUT_LOCALE:-$DETECTED_LOCALE}
+
+REPO_URL="https://github.com/piredman/nixos-config.git"
+TARGET_DIR="/home/$USERNAME/.dotfiles"
+
+echo ""
+echo "📋 Configuration Summary:"
+echo "  Hostname: $HOSTNAME"
+echo "  Username: $USERNAME"
+echo "  Full name: $FULLNAME"
+echo "  Timezone: $TIMEZONE"
+echo "  Locale: $LOCALE"
+echo "  Target: $TARGET_DIR"
+echo ""
+
+read -p "Proceed? (y/N): " CONFIRM
+if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 1
+fi
+
+echo ""
+echo "📦 Cloning repository..."
+if [ -d "$TARGET_DIR" ]; then
+    echo "⚠️  Directory $TARGET_DIR already exists!"
+    read -p "Remove and re-clone? (y/N): " RECLONE
+    if [[ "$RECLONE" =~ ^[Yy]$ ]]; then
+        rm -rf "$TARGET_DIR"
+    else
+        echo "Aborted."
+        exit 1
+    fi
+fi
+
+git clone "$REPO_URL" "$TARGET_DIR"
+cd "$TARGET_DIR"
+
+echo ""
+echo "⚙️  Setting up host configuration..."
+chmod +x ./scripts/setup-host.sh
+./scripts/setup-host.sh "$HOSTNAME" "$USERNAME" "$FULLNAME" "$TIMEZONE" "$LOCALE"
+
+echo ""
+echo "🔧 Ensuring flakes are enabled..."
+if ! grep -q "experimental-features" /etc/nixos/configuration.nix 2>/dev/null; then
+    echo "⚠️  You may need to enable flakes manually if not already enabled"
+    echo "   Add to /etc/nixos/configuration.nix:"
+    echo "   nix.settings.experimental-features = [ \"nix-command\" \"flakes\" ];"
+    echo ""
+    read -p "Press Enter to continue..."
+fi
+
+echo ""
+echo "🚀 Applying NixOS configuration..."
+echo "   Running: sudo nixos-rebuild switch --flake .#$HOSTNAME"
+echo ""
+read -p "Apply now? (y/N): " APPLY
+if [[ "$APPLY" =~ ^[Yy]$ ]]; then
+    sudo nixos-rebuild switch --flake ".#$HOSTNAME"
+
+    echo ""
+    echo "✅ System configuration applied!"
+    echo ""
+    read -p "Apply Home Manager configuration? (y/N): " APPLY_HOME
+    if [[ "$APPLY_HOME" =~ ^[Yy]$ ]]; then
+        home-manager switch --flake ".#$USERNAME"
+        echo "✅ Home Manager configuration applied!"
+    fi
+fi
+
+echo ""
+echo "✨ Bootstrap complete!"
+echo ""
+echo "📚 Next steps:"
+echo "  1. Review configuration: cd $TARGET_DIR"
+echo "  2. Customize as needed"
+echo "  3. Rebuild: sudo nixos-rebuild switch --flake .#$HOSTNAME"
+echo "  4. Home Manager: home-manager switch --flake .#$USERNAME"
+echo ""

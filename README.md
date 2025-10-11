@@ -1,20 +1,51 @@
 # My NixOS Setup
 
+## Quick Bootstrap (New System)
+
+On a fresh NixOS install, run this single command:
+
+```bash
+nix-shell -p curl git --run "bash <(curl -fsSL https://raw.githubusercontent.com/piredman/nixos-config/master/bootstrap)"
+```
+
+This will:
+
+- Auto-detect your hostname and username
+- Clone this repository
+- Set up your host and home configurations
+- Apply the NixOS configuration
+
+The bootstrap script will prompt you for:
+
+- Hostname (defaults to current system hostname)
+- Username (defaults to current user)
+- Full name
+- Timezone (defaults to America/Edmonton)
+- Locale (defaults to en_GB.UTF-8)
+
 ## Repository Structure
 
 ```
 nixos-config/
+├── bootstrap           # Bootstrap script for new systems
+├── scripts/            # Helper scripts
+│   └── setup-host.sh
 ├── hosts/              # Per-host configurations
-│   └── mini/
-│       ├── configuration.nix
-│       └── hardware-configuration.nix
+│   ├── mini/
+│   │   ├── configuration.nix
+│   │   ├── hardware-configuration.nix
+│   │   └── settings.nix
+│   └── template/       # Template for new hosts
 ├── home/               # Home Manager user configurations
-│   ├── redman.nix
-│   ├── sh.nix
-│   └── hyprland.nix
+│   ├── redman/
+│   │   ├── default.nix
+│   │   ├── settings.nix
+│   │   ├── sh.nix
+│   │   └── hyprland.nix
+│   └── template/       # Template for new users
 ├── common/             # Shared system configuration
 │   └── default.nix
-└── flake.nix
+└── flake.nix           # Auto-discovers hosts and users
 ```
 
 ## System Configuration
@@ -25,13 +56,13 @@ Update system packages:
 nix flake update
 ```
 
-Update system (current host): 
+Update system (current host):
 
 ```bash
 sudo nixos-rebuild switch --flake .#mini
 ```
 
-Update system for alternate host: 
+Update system for alternate host:
 
 ```bash
 sudo nixos-rebuild switch --flake .#hostname
@@ -39,13 +70,13 @@ sudo nixos-rebuild switch --flake .#hostname
 
 ## Home Manager Configuration
 
-Update user config (current user): 
+Update user config (current user):
 
 ```bash
 home-manager switch --flake .#redman
 ```
 
-Update user config for alternate user: 
+Update user config for alternate user:
 
 ```bash
 home-manager switch --flake .#username
@@ -66,9 +97,22 @@ home-manager generations
 
 ## Adding a New Host
 
+The flake automatically discovers all hosts in the `hosts/` directory (except `template`).
+
+### Automated Method
+
+Use the setup script:
+
+```bash
+./scripts/setup-host.sh <hostname> <username> <fullname> <timezone> <locale>
+```
+
+### Manual Method
+
 1. Create host directory: `mkdir -p hosts/newhostname`
 2. Copy generated hardware config: `sudo cp /etc/nixos/hardware-configuration.nix hosts/newhostname/`
-3. Create `hosts/newhostname/configuration.nix` (use `hosts/mini/configuration.nix` as template)
-4. Add host to `flake.nix` nixosConfigurations
+3. Create `hosts/newhostname/configuration.nix` (use `hosts/template/configuration.nix` as template)
+4. Create `hosts/newhostname/settings.nix` with your settings
 5. Rebuild: `sudo nixos-rebuild switch --flake .#newhostname`
 
+Note: The flake will automatically pick up the new host configuration.

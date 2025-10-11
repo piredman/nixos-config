@@ -5,8 +5,6 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-78b6ad84-a02d-4115-908f-330e744e43b3".device =
-    "/dev/disk/by-uuid/78b6ad84-a02d-4115-908f-330e744e43b3";
 
   environment.shells = with pkgs; [ zsh ];
 

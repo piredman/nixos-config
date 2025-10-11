@@ -1,0 +1,4 @@
+{
+  username = "USERNAME_PLACEHOLDER";
+  name = "FULLNAME_PLACEHOLDER";
+}

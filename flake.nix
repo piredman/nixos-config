@@ -1,6 +1,6 @@
 {
 
-  description = "My Flake";
+  description = "Flake that does the things";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-25.05";
@@ -14,38 +14,40 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
-      systemSettings = {
-        hostname = "mini";
-        timezone = "America/Edmonton";
-        local = "en_GB.UTF-8";
-      };
-      userSettings = {
-        username = "redman";
-        name = "Paul";
-      };
+      mkSystemSettings = hostname: import ./hosts/${hostname}/settings.nix;
+      mkUserSettings = username: import ./home/${username}/settings.nix;
+
+      hosts = builtins.attrNames (builtins.readDir ./hosts);
+      validHosts = builtins.filter (name: name != "template") hosts;
+
+      homeDirs = builtins.attrNames (builtins.readDir ./home);
+      validUsers = builtins.filter (name: name != "template") homeDirs;
+
     in {
 
-      nixosConfigurations = {
-        mini = lib.nixosSystem {
+      nixosConfigurations = builtins.listToAttrs (map (hostname: {
+        name = hostname;
+        value = lib.nixosSystem {
           inherit system;
-          modules = [ ./hosts/mini/configuration.nix ];
+          modules = [ ./hosts/${hostname}/configuration.nix ];
           specialArgs = {
-            inherit systemSettings;
-            inherit userSettings;
+            systemSettings = mkSystemSettings hostname;
+            userSettings = mkUserSettings (builtins.head validUsers);
           };
         };
-      };
+      }) validHosts);
 
-      homeConfigurations = {
-        redman = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations = builtins.listToAttrs (map (username: {
+        name = username;
+        value = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          modules = [ ./home/redman.nix ];
+          modules = [ ./home/${username}/default.nix ];
           extraSpecialArgs = {
-            inherit systemSettings;
-            inherit userSettings;
+            systemSettings = mkSystemSettings (builtins.head validHosts);
+            userSettings = mkUserSettings username;
           };
         };
-      };
+      }) validUsers);
 
     };
 }
