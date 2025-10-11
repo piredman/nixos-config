@@ -1,6 +1,17 @@
-# My NixOS Setup
+# NixOS Configuration
 
-## Quick Bootstrap (New System)
+A modular, declarative NixOS configuration with automatic host discovery and rolling release (unstable) + stable package support.
+
+## Features
+
+- 🚀 **One-command bootstrap** - Set up a new system in minutes
+- 🔄 **Rolling release** - NixOS unstable with stable fallback
+- 🔍 **Auto-discovery** - Automatically detects hosts and users
+- 📝 **Declarative** - Everything is reproducible and version-controlled
+- 🛠️ **Template-based** - Easy setup for new hosts
+- 🏠 **Home Manager** - User-level package and configuration management
+
+## Quick Start
 
 On a fresh NixOS install, run this single command:
 
@@ -8,111 +19,166 @@ On a fresh NixOS install, run this single command:
 nix-shell -p curl git --run "bash <(curl -fsSL https://raw.githubusercontent.com/piredman/nixos-config/master/bootstrap)"
 ```
 
-This will:
+See the [Bootstrap Guide](docs/BOOTSTRAP.md) for detailed scenarios and what happens during bootstrap.
 
-- Auto-detect your hostname and username
-- Clone this repository
-- Set up your host and home configurations
-- Apply the NixOS configuration
+## Documentation
 
-The bootstrap script will prompt you for:
-
-- Hostname (defaults to current system hostname)
-- Username (defaults to current user)
-- Full name
-- Timezone (defaults to America/Edmonton)
-- Locale (defaults to en_GB.UTF-8)
+- 📦 [Bootstrap Guide](docs/BOOTSTRAP.md) - Installation scenarios & workflows
+- 🎯 [Package Management](docs/PACKAGES.md) - Using stable vs unstable packages
+- 💻 [Daily Usage](docs/DAILY-USAGE.md) - Common commands & workflows
+- 🛠️ [Scripts Reference](docs/SCRIPTS.md) - Helper scripts documentation
+- ⚙️ [Advanced Topics](docs/ADVANCED.md) - Manual configuration & customization
 
 ## Repository Structure
 
 ```
 nixos-config/
-├── bootstrap           # Bootstrap script for new systems
-├── scripts/            # Helper scripts
-│   └── setup-host.sh
-├── hosts/              # Per-host configurations
+├── bootstrap                # Bootstrap script for new systems
+├── scripts/
+│   └── setup-host.sh       # Helper to create new host/user configs
+├── hosts/                   # Per-host system configurations
 │   ├── mini/
 │   │   ├── configuration.nix
 │   │   ├── hardware-configuration.nix
 │   │   └── settings.nix
-│   └── template/       # Template for new hosts
-├── home/               # Home Manager user configurations
+│   └── template/            # Template for new hosts
+│       ├── configuration.nix
+│       └── settings.nix
+├── home/                    # Home Manager user configurations
 │   ├── redman/
 │   │   ├── default.nix
 │   │   ├── settings.nix
 │   │   ├── sh.nix
 │   │   └── hyprland.nix
-│   └── template/       # Template for new users
-├── common/             # Shared system configuration
+│   └── template/            # Template for new users
+│       ├── default.nix
+│       └── settings.nix
+├── common/                  # Shared configuration (unfree, flakes)
 │   └── default.nix
-└── flake.nix           # Auto-discovers hosts and users
+├── docs/                    # Documentation
+└── flake.nix               # Flake with auto-discovery
 ```
 
-## System Configuration
+## Quick Reference
 
-Update system packages:
+### Update Everything
 
 ```bash
+cd ~/.dotfiles
 nix flake update
-```
-
-Update system (current host):
-
-```bash
 sudo nixos-rebuild switch --flake .#mini
+home-manager switch --flake .#redman
 ```
 
-Update system for alternate host:
+### Rebuild System
 
 ```bash
 sudo nixos-rebuild switch --flake .#hostname
 ```
 
-## Home Manager Configuration
-
-Update user config (current user):
-
-```bash
-home-manager switch --flake .#redman
-```
-
-Update user config for alternate user:
+### Rebuild Home
 
 ```bash
 home-manager switch --flake .#username
 ```
 
-Rollback config:
+### Rollback System
 
 ```bash
-home-manager generations
-
-# output
-2025-10-03 07:35 : id 5 -> /nix/store/i240y16jblsipy8dq5lnma8xszck8a2q-home-manager-generation
-2025-10-03 07:30 : id 4 -> /nix/store/41v7pax83lby5c098j79g3lmmlrn6j6m-home-manager-generation
-
-# use the generation path + /activate, so for id 4:
-/nix/store/41v7pax83lby5c098j79g3lmmlrn6j6m-home-manager-generation/activate
+sudo nixos-rebuild switch --rollback
 ```
+
+### Clean Up
+
+```bash
+sudo nix-collect-garbage --delete-older-than 7d
+sudo nix-store --optimize
+```
+
+See [Daily Usage](docs/DAILY-USAGE.md) for more commands.
+
+## Current Hosts
+
+- **mini** - Primary workstation (x86_64-linux)
+
+## Current Users
+
+- **redman** - Paul Redman
+
+## How It Works
+
+### Auto-Discovery
+
+The flake automatically discovers all hosts and users:
+
+```nix
+# All directories in hosts/ become available configurations
+hosts/mini/      -> nixosConfigurations.mini
+hosts/laptop/    -> nixosConfigurations.laptop
+
+# All directories in home/ become available configurations  
+home/redman/     -> homeConfigurations.redman
+home/alice/      -> homeConfigurations.alice
+```
+
+The `template` directories are excluded from discovery.
+
+### Package Management
+
+Default: **nixos-unstable** (rolling release)
+
+```nix
+environment.systemPackages = with pkgs; [
+  firefox   # Latest from unstable
+];
+```
+
+Fallback: **nixos-stable** (25.05) when needed
+
+```nix
+environment.systemPackages = with pkgs; [
+  firefox
+] ++ [
+  pkgs-stable.vlc  # Stable version
+];
+```
+
+See [Package Management](docs/PACKAGES.md) for details.
 
 ## Adding a New Host
 
-The flake automatically discovers all hosts in the `hosts/` directory (except `template`).
+### Option 1: Use Bootstrap (Recommended)
 
-### Automated Method
+On the new machine, run the bootstrap command. It will:
+- Auto-detect hostname and username
+- Create configuration from templates
+- Apply the configuration
 
-Use the setup script:
+### Option 2: Pre-Configure
+
+Before installing NixOS:
 
 ```bash
-./scripts/setup-host.sh <hostname> <username> <fullname> <timezone> <locale>
+cd ~/.dotfiles
+./scripts/setup-host.sh laptop alice "Alice Smith" "America/New_York" "en_US.UTF-8"
+git add . && git commit -m "Add laptop config" && git push
 ```
 
-### Manual Method
+Then bootstrap the laptop - it will find and use the config.
 
-1. Create host directory: `mkdir -p hosts/newhostname`
-2. Copy generated hardware config: `sudo cp /etc/nixos/hardware-configuration.nix hosts/newhostname/`
-3. Create `hosts/newhostname/configuration.nix` (use `hosts/template/configuration.nix` as template)
-4. Create `hosts/newhostname/settings.nix` with your settings
-5. Rebuild: `sudo nixos-rebuild switch --flake .#newhostname`
+See [Bootstrap Guide](docs/BOOTSTRAP.md) for all scenarios.
 
-Note: The flake will automatically pick up the new host configuration.
+## Contributing
+
+This is a personal configuration, but you're welcome to fork and adapt it for your own use.
+
+## License
+
+This configuration is provided as-is for personal use.
+
+## Acknowledgments
+
+Built with:
+- [NixOS](https://nixos.org/)
+- [Home Manager](https://github.com/nix-community/home-manager)
+- [Nix Flakes](https://nixos.wiki/wiki/Flakes)
