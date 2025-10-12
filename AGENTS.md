@@ -256,6 +256,7 @@ Edit `hosts/template/configuration.nix` or `home/template/default.nix` to change
 ### scripts/setup-host.sh
 - Creates host/user configs from templates
 - Handles hardware config with backup
+- Accepts `--force` flag to skip prompts (used by bootstrap)
 - Used by bootstrap or manually
 
 ### common/default.nix
@@ -293,6 +294,13 @@ When helping users, refer them to appropriate docs.
 2. Each user gets own directory in `home/`
 3. Use `template/` as base for new configs
 4. Never edit `template/` unless changing defaults for all new hosts/users
+5. LUKS configuration belongs in hardware-configuration.nix, NOT configuration.nix
+
+### Bootstrap Best Practices
+- Bootstrap always uses `--force` flag with setup-host.sh
+- This ensures hardware config is always updated on fresh/reinstalls
+- Manual use of setup-host.sh prompts for hardware config overwrite
+- Hardware config must be regenerated on any fresh install (LUKS UUIDs change)
 
 ### Git Workflow
 1. Make configuration changes

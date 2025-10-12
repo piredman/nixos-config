@@ -67,7 +67,7 @@ cd "$TARGET_DIR"
 echo ""
 echo "⚙️  Setting up host configuration..."
 chmod +x ./scripts/setup-host.sh
-./scripts/setup-host.sh "$HOSTNAME" "$USERNAME" "$FULLNAME" "$TIMEZONE" "$LOCALE"
+./scripts/setup-host.sh "$HOSTNAME" "$USERNAME" "$FULLNAME" "$TIMEZONE" "$LOCALE" --force
 
 echo ""
 echo "🔧 Ensuring flakes are enabled..."

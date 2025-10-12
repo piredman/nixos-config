@@ -62,7 +62,7 @@ You'll be prompted for:
 
 ---
 
-### Scenario 2: Bootstrap Existing Host
+### Scenario 2: Bootstrap Existing Host (Reinstall)
 
 **When:** Reinstalling NixOS on a machine that already has configuration in the git repository.
 
@@ -71,14 +71,20 @@ You'll be prompted for:
 1. Bootstrap clones the repository to `~/.dotfiles`
 2. Finds existing `hosts/<hostname>/` configuration in git
 3. Skips host configuration creation (already exists)
-4. Checks if `hardware-configuration.nix` exists:
-   - If exists: Prompts whether to overwrite with current `/etc/nixos/hardware-configuration.nix`
-   - If yes: Creates timestamped backup before overwriting
-   - If no: Keeps existing hardware configuration from git
+4. **Automatically overwrites `hardware-configuration.nix`** with current system:
+   - Creates timestamped backup of existing file
+   - Copies new hardware config from `/etc/nixos/`
+   - No prompt (uses `--force` flag)
 5. Prompts to apply system configuration
 6. Prompts to apply Home Manager configuration
 
-**Result:** Your previously-configured setup is restored.
+**Result:** Your software configuration is restored with updated hardware config.
+
+**Why hardware config is overwritten:**
+- Fresh install generates new disk UUIDs
+- LUKS encryption creates new keys/UUIDs
+- Partition layout may have changed
+- Old hardware config would prevent system from booting
 
 **Use Case:**
 - Fresh reinstall of NixOS

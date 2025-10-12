@@ -5,8 +5,6 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-78b6ad84-a02d-4115-908f-330e744e43b3".device =
-    "/dev/disk/by-uuid/78b6ad84-a02d-4115-908f-330e744e43b3";
 
   environment.shells = with pkgs; [ zsh ];
 
@@ -16,7 +14,7 @@
 
   time.timeZone = systemSettings.timezone;
 
-  i18n.defaultLocale = systemSettings.local;
+  i18n.defaultLocale = systemSettings.locale;
 
   services.xserver.xkb = {
     layout = "us";
@@ -43,7 +41,14 @@
 
   services.getty.autologinUser = userSettings.username;
 
-  environment.systemPackages = with pkgs; [ neovim wget kitty rofi git ];
+  environment.systemPackages = with pkgs; [
+    neovim
+    wget
+    kitty
+    rofi
+    git
+    home-manager
+  ];
 
   services.openssh = {
     enable = true;

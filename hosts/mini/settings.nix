@@ -1,5 +1,5 @@
 {
   hostname = "mini";
   timezone = "America/Edmonton";
-  local = "en_GB.UTF-8";
+  locale = "en_GB.UTF-8";
 }

@@ -14,7 +14,7 @@
 
   time.timeZone = systemSettings.timezone;
 
-  i18n.defaultLocale = systemSettings.local;
+  i18n.defaultLocale = systemSettings.locale;
 
   services.xserver.xkb = {
     layout = "us";
@@ -41,7 +41,14 @@
 
   services.getty.autologinUser = userSettings.username;
 
-  environment.systemPackages = with pkgs; [ neovim wget kitty rofi git ];
+  environment.systemPackages = with pkgs; [
+    neovim
+    wget
+    kitty
+    rofi
+    git
+    home-manager
+  ];
 
   services.openssh = {
     enable = true;

@@ -23,7 +23,7 @@ Automates the creation of configuration files for a new host and user by:
 ### Usage
 
 ```bash
-./scripts/setup-host.sh <hostname> <username> <fullname> <timezone> <locale>
+./scripts/setup-host.sh <hostname> <username> <fullname> <timezone> <locale> [--force]
 ```
 
 ### Parameters
@@ -35,6 +35,7 @@ Automates the creation of configuration files for a new host and user by:
 | `fullname` | User's full name (quoted if spaces) | `"Alice Smith"` |
 | `timezone` | System timezone | `America/New_York` |
 | `locale` | System locale | `en_US.UTF-8` |
+| `--force` | Skip hardware config prompt, always overwrite | `--force` |
 
 ### Examples
 
@@ -89,15 +90,23 @@ Creates `hosts/<hostname>/settings.nix`:
   - Prints: `✅ Copied hardware configuration`
 
 - **If `hosts/<hostname>/hardware-configuration.nix` exists:**
-  - Prompts: `Overwrite with /etc/nixos/hardware-configuration.nix? (y/N)`
-  - **If yes:**
+  - **With `--force` flag (bootstrap mode):**
+    - Automatically overwrites without prompting
     - Creates timestamped backup: `hardware-configuration.nix.backup.YYYYMMDD-HHMMSS`
     - Copies new hardware config
     - Prints: `✅ Backed up existing hardware configuration`
-    - Prints: `✅ Copied new hardware configuration`
-  - **If no:**
-    - Keeps existing configuration
-    - Prints: `ℹ️  Keeping existing hardware configuration`
+    - Prints: `✅ Copied new hardware configuration (forced)`
+  
+  - **Without `--force` flag (manual mode):**
+    - Prompts: `Overwrite with /etc/nixos/hardware-configuration.nix? (y/N)`
+    - **If yes:**
+      - Creates timestamped backup: `hardware-configuration.nix.backup.YYYYMMDD-HHMMSS`
+      - Copies new hardware config
+      - Prints: `✅ Backed up existing hardware configuration`
+      - Prints: `✅ Copied new hardware configuration`
+    - **If no:**
+      - Keeps existing configuration
+      - Prints: `ℹ️  Keeping existing hardware configuration`
 
 **If `/etc/nixos/hardware-configuration.nix` doesn't exist:**
 - Prints warning with instructions to generate one
@@ -134,12 +143,14 @@ Prints: `✅ Setup complete!`
 
 #### Automatically (by Bootstrap)
 
-The bootstrap script automatically calls `setup-host.sh` when setting up a new system:
+The bootstrap script automatically calls `setup-host.sh` with the `--force` flag when setting up a new system:
 
 ```bash
 # In bootstrap script (line 70)
-./scripts/setup-host.sh "$HOSTNAME" "$USERNAME" "$FULLNAME" "$TIMEZONE" "$LOCALE"
+./scripts/setup-host.sh "$HOSTNAME" "$USERNAME" "$FULLNAME" "$TIMEZONE" "$LOCALE" --force
 ```
+
+The `--force` flag ensures hardware configuration is always updated on fresh/reinstalls without prompting.
 
 You don't need to run it manually in this case.
 
@@ -303,6 +314,29 @@ git push
 ```
 
 ### Advanced Usage
+
+#### The --force Flag
+
+**What it does:**
+- Skips interactive prompt for hardware configuration
+- Always overwrites existing hardware-configuration.nix
+- Creates timestamped backup before overwriting
+- Used automatically by bootstrap script
+
+**When to use:**
+- Automated/scripted setups
+- Fresh installs where hardware config must be updated
+- Bootstrap scenarios (automatically added)
+
+**When NOT to use:**
+- Manual host configuration on existing systems
+- When you want to keep existing hardware config
+- When you want to be prompted
+
+**Example with --force:**
+```bash
+./scripts/setup-host.sh laptop alice "Alice Smith" "America/New_York" "en_US.UTF-8" --force
+```
 
 #### Dry Run
 
