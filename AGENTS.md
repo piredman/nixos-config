@@ -414,3 +414,4 @@ User configurations are modular:
 - Use `programs.<app>` options when available rather than raw config files
 - Keep system packages minimal, put user-specific packages in home-manager
 - XDG portals: both hyprland and gtk portals are configured for compatibility
+- **IMPORTANT: NEVER run nixos-rebuild, home-manager, sudo, or nix commands** - you are not running on the target NixOS system and these commands are not available. Only edit configuration files and let the user apply changes manually

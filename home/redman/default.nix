@@ -14,6 +14,7 @@
     ./dolphin.nix
     ./walker.nix
     ./polkit.nix
+    ./theme.nix
   ];
 
   home.username = userSettings.username;

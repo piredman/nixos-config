@@ -10,7 +10,6 @@
     hyprland-protocols
     xdg-desktop-portal-hyprland
     wl-clipboard
-    qt6ct
   ];
 
   wayland.windowManager.hyprland = {
@@ -22,11 +21,7 @@
 
       monitor = ",preferred,auto,auto";
 
-      env = [
-        "QT_QPA_PLATFORM,wayland"
-        "QT_QPA_PLATFORMTHEME,qt6ct"
-        "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
-      ];
+      env = [ ];
 
       general = {
         gaps_in = 5;
