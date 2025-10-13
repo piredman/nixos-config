@@ -1,7 +1,18 @@
-{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-stable,
+  systemSettings,
+  userSettings,
+  ...
+}:
 
 {
-  imports = [ ./hardware-configuration.nix ../../common/default.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    ../../common/default.nix
+  ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -34,7 +45,10 @@
       shell = pkgs.zsh;
       isNormalUser = true;
       description = userSettings.name;
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = [
+        "networkmanager"
+        "wheel"
+      ];
       packages = with pkgs; [ ];
     };
   };
@@ -42,13 +56,14 @@
   services.getty.autologinUser = userSettings.username;
 
   environment.systemPackages = with pkgs; [
-    neovim
-    wget
-    kitty
-    rofi
-    git
     home-manager
+    curl
+    git
+    wget
+    neovim
   ];
+
+  security.polkit.enable = true;
 
   services.openssh = {
     enable = true;

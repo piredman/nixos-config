@@ -4,7 +4,8 @@ let
     la = "ls -la";
     ".." = "cd ..";
   };
-in {
+in
+{
 
   programs.bash = {
     enable = true;

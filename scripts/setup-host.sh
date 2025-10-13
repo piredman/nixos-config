@@ -31,20 +31,6 @@ parse_arguments() {
     HOME_DIR="$REPO_ROOT/home/$USERNAME"
 }
 
-backup_and_copy_file() {
-    local source_file=$1
-    local target_file=$2
-    local description=$3
-
-    local backup_file="${target_file}.backup.$(date +%Y%m%d-%H%M%S)"
-
-    cp "$target_file" "$backup_file"
-    echo "✅ Backed up existing $description to: $(basename "$backup_file")"
-
-    cp "$source_file" "$target_file"
-    echo "✅ Copied new $description"
-}
-
 prompt_user_overwrite() {
     local description=$1
 
@@ -57,6 +43,17 @@ prompt_user_overwrite() {
         echo "ℹ️  Keeping existing $description"
         return 1
     fi
+}
+
+copy_hardware_configuration() {
+    local source_file=$1
+    local target_file=$2
+
+    cp "$source_file" "$target_file"
+    echo "✅ Copied: $source_file -> $target_file"
+
+    git add -A
+    echo "✅ All files staged in git"
 }
 
 create_host_directory() {
@@ -90,19 +87,15 @@ handle_hardware_configuration() {
         exit 1
     fi
 
-    if [ ! -f "$target_hw_config" ]; then
-        cp "$source_hw_config" "$target_hw_config"
+    if [ ! -f "$target_hw_config" ] || [ "$FORCE_OVERWRITE" = true ]; then
+        copy_hardware_configuration "$source_hw_config" "$target_hw_config"
         echo "✅ Copied hardware configuration"
         return 0
     fi
 
-    if [ "$FORCE_OVERWRITE" = true ]; then
-        backup_and_copy_file "$source_hw_config" "$target_hw_config" "hardware configuration (forced)"
-        return 0
-    fi
-
     if prompt_user_overwrite "Hardware configuration in $HOST_DIR"; then
-        backup_and_copy_file "$source_hw_config" "$target_hw_config" "hardware configuration"
+        copy_hardware_configuration "$source_hw_config" "$target_hw_config"
+        echo "✅ Copied hardware configuration"
     fi
 }
 

@@ -7,9 +7,24 @@
     nixpkgs-stable.url = "nixpkgs/nixos-25.05";
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    elephant.url = "github:abenz1267/elephant";
+    walker = {
+      url = "github:abenz1267/walker";
+      inputs.elephant.follows = "elephant";
+    };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, ... }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nixpkgs-stable,
+      home-manager,
+      elephant,
+      walker,
+      ...
+    }:
     let
       lib = nixpkgs.lib;
       system = "x86_64-linux";
@@ -25,33 +40,41 @@
       homeDirs = builtins.attrNames (builtins.readDir ./home);
       validUsers = builtins.filter (name: name != "template") homeDirs;
 
-    in {
+    in
+    {
 
-      nixosConfigurations = builtins.listToAttrs (map (hostname: {
-        name = hostname;
-        value = lib.nixosSystem {
-          inherit system;
-          modules = [ ./hosts/${hostname}/configuration.nix ];
-          specialArgs = {
-            inherit pkgs-stable;
-            systemSettings = mkSystemSettings hostname;
-            userSettings = mkUserSettings (builtins.head validUsers);
+      nixosConfigurations = builtins.listToAttrs (
+        map (hostname: {
+          name = hostname;
+          value = lib.nixosSystem {
+            inherit system;
+            modules = [ ./hosts/${hostname}/configuration.nix ];
+            specialArgs = {
+              inherit pkgs-stable;
+              systemSettings = mkSystemSettings hostname;
+              userSettings = mkUserSettings (builtins.head validUsers);
+            };
           };
-        };
-      }) validHosts);
+        }) validHosts
+      );
 
-      homeConfigurations = builtins.listToAttrs (map (username: {
-        name = username;
-        value = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          modules = [ ./home/${username}/default.nix ];
-          extraSpecialArgs = {
-            inherit pkgs-stable;
-            systemSettings = mkSystemSettings (builtins.head validHosts);
-            userSettings = mkUserSettings username;
+      homeConfigurations = builtins.listToAttrs (
+        map (username: {
+          name = username;
+          value = home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            modules = [
+              ./home/${username}/default.nix
+              walker.homeManagerModules.default
+            ];
+            extraSpecialArgs = {
+              inherit pkgs-stable;
+              systemSettings = mkSystemSettings (builtins.head validHosts);
+              userSettings = mkUserSettings username;
+            };
           };
-        };
-      }) validUsers);
+        }) validUsers
+      );
 
     };
 }

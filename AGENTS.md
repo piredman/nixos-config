@@ -8,6 +8,8 @@ This is a modular NixOS configuration with:
 - Bootstrap script for new system setup
 - Template-based host/user creation
 - Home Manager integration
+- Hyprland wayland compositor
+- Modular user configurations (ghostty, dolphin, walker, polkit)
 
 ## Repository Structure
 
@@ -223,17 +225,36 @@ environment.systemPackages = with pkgs; [
 ];
 ```
 
-**User-specific:**
-Edit `home/username/default.nix`:
+**User-specific (preferred):**
+Create or edit a module in `home/username/`:
 ```nix
-home.packages = with pkgs; [
-    package-name
+{ config, lib, pkgs, ... }:
+
+{
+    home.packages = with pkgs; [
+        package-name
+    ];
+}
+```
+
+Then import it in `home/username/default.nix`:
+```nix
+imports = [
+    ./module-name.nix
 ];
 ```
 
 **Stable version:**
 ```nix
 pkgs-stable.package-name
+```
+
+**Using programs options (preferred when available):**
+```nix
+programs.ghostty = {
+    enable = true;
+    settings = { ... };
+};
 ```
 
 ### Modify Templates
@@ -295,6 +316,15 @@ When helping users, refer them to appropriate docs.
 3. Use `template/` as base for new configs
 4. Never edit `template/` unless changing defaults for all new hosts/users
 5. LUKS configuration belongs in hardware-configuration.nix, NOT configuration.nix
+6. Keep system packages minimal - prefer user-specific packages in home-manager
+7. Use modular configuration - separate concerns into individual .nix files
+
+### User Configuration Best Practices
+1. Create separate module files for different applications (e.g., ghostty.nix, dolphin.nix)
+2. Import all modules in `home/username/default.nix`
+3. Use `programs.<app>` options when available instead of raw config files
+4. Keep `home.packages` separate from program configurations
+5. Polkit agent runs in home-manager, but `security.polkit.enable` must be set at system level
 
 ### Bootstrap Best Practices
 - Bootstrap always uses `--force` flag with setup-host.sh
@@ -345,6 +375,32 @@ nix flake show
 journalctl -xe
 ```
 
+## Current Configuration
+
+### Active Host: mini
+- System: NixOS unstable
+- Desktop: Hyprland (wayland)
+- Shell: zsh
+- Browser: Firefox
+- Packages: home-manager, curl, git, wget, neovim, pciutils, usbutils, file
+
+### Active User: redman
+- Terminal: Ghostty (with catppuccin-mocha theme)
+- File Manager: Dolphin (KDE)
+- App Launcher: Walker
+- Polkit Agent: KDE polkit-kde-agent-1
+- Font: CaskaydiaCove Nerd Font
+- Shell aliases: la, ..
+
+### Module Structure
+User configurations are modular:
+- `sh.nix` - Shell configuration (bash/zsh aliases)
+- `hyprland.nix` - Window manager configuration
+- `ghostty.nix` - Terminal emulator
+- `dolphin.nix` - File manager
+- `walker.nix` - Application launcher
+- `polkit.nix` - Authentication agent
+
 ## Notes for AI Assistants
 
 - This configuration uses auto-discovery - don't manually edit flake.nix for new hosts/users
@@ -354,3 +410,7 @@ journalctl -xe
 - Documentation is comprehensive - refer users to `docs/` for detailed info
 - Always test changes before committing
 - Repository location is `~/.dotfiles` (not `/etc/nixos`)
+- Prefer modular configurations - one application per .nix file in home/username/
+- Use `programs.<app>` options when available rather than raw config files
+- Keep system packages minimal, put user-specific packages in home-manager
+- XDG portals: both hyprland and gtk portals are configured for compatibility

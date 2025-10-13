@@ -1,4 +1,10 @@
-{ config, pkgs, pkgs-stable, userSettings, ... }:
+{
+  config,
+  pkgs,
+  pkgs-stable,
+  userSettings,
+  ...
+}:
 
 {
   imports = [ ];

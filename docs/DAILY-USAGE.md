@@ -2,6 +2,16 @@
 
 Common commands and workflows for managing your NixOS configuration.
 
+## Current Setup
+
+- **Host:** mini (NixOS unstable)
+- **User:** redman
+- **Desktop:** Hyprland (wayland)
+- **Terminal:** Ghostty
+- **File Manager:** Dolphin
+- **App Launcher:** Walker
+- **Shell:** zsh
+
 ## System Configuration
 
 ### Rebuild Current System

@@ -226,7 +226,79 @@ home.packages = with pkgs; [
 ];
 ```
 
-## Custom Modules
+## Modular User Configurations
+
+### Best Practices
+
+Split user configurations into focused modules:
+
+```
+home/username/
+├── default.nix       # Main config, imports all modules
+├── settings.nix      # User settings (username, name)
+├── sh.nix           # Shell configuration
+├── hyprland.nix     # Window manager
+├── ghostty.nix      # Terminal emulator
+├── dolphin.nix      # File manager
+├── walker.nix       # Application launcher
+└── polkit.nix       # Authentication agent
+```
+
+### Creating a User Module
+
+Create `home/username/myapp.nix`:
+
+```nix
+{ config, lib, pkgs, ... }:
+
+{
+    home.packages = with pkgs; [
+        myapp
+    ];
+
+    xdg.configFile."myapp/config.yaml".text = ''
+        setting1: value1
+        setting2: value2
+    '';
+}
+```
+
+Import in `home/username/default.nix`:
+
+```nix
+{
+    imports = [
+        ./myapp.nix
+    ];
+}
+```
+
+### Using Programs Options
+
+Prefer `programs.<app>` when available:
+
+```nix
+{ config, lib, pkgs, ... }:
+
+{
+    programs.ghostty = {
+        enable = true;
+        settings = {
+            theme = "catppuccin-mocha";
+            font-family = "CaskaydiaCove Nerd Font";
+            font-size = 12;
+        };
+    };
+}
+```
+
+This is better than manual config files because:
+- Type checking
+- Option documentation
+- Proper dependency management
+- Automatic package installation
+
+## Custom System Modules
 
 ### Creating a Module
 

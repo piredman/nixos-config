@@ -1,7 +1,20 @@
-{ config, pkgs, pkgs-stable, userSettings, ... }:
+{
+  config,
+  pkgs,
+  pkgs-stable,
+  userSettings,
+  ...
+}:
 
 {
-  imports = [ ./sh.nix ./hyprland.nix ];
+  imports = [
+    ./sh.nix
+    ./hyprland.nix
+    ./ghostty.nix
+    ./dolphin.nix
+    ./walker.nix
+    ./polkit.nix
+  ];
 
   home.username = userSettings.username;
   home.homeDirectory = "/home/" + userSettings.username;

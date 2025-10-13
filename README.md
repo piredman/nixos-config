@@ -49,7 +49,11 @@ nixos-config/
 │   │   ├── default.nix
 │   │   ├── settings.nix
 │   │   ├── sh.nix
-│   │   └── hyprland.nix
+│   │   ├── hyprland.nix
+│   │   ├── ghostty.nix
+│   │   ├── dolphin.nix
+│   │   ├── walker.nix
+│   │   └── polkit.nix
 │   └── template/            # Template for new users
 │       ├── default.nix
 │       └── settings.nix
