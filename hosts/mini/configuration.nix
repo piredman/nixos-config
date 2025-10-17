@@ -36,6 +36,7 @@
     zsh.enable = true;
     hyprland.enable = true;
     firefox.enable = true;
+    ssh.startAgent = true;
   };
 
   users = {
@@ -57,10 +58,6 @@
 
   environment.systemPackages = with pkgs; [
     home-manager
-    curl
-    git
-    wget
-    neovim
   ];
 
   security.polkit.enable = true;
@@ -71,6 +68,12 @@
     settings.PermitRootLogin = "no";
     settings.PasswordAuthentication = true;
   };
+
+  environment.loginShellInit = ''
+    if [ "$(tty)" = "/dev/tty1" ]; then
+      hyprland
+    fi
+  '';
 
   system.stateVersion = "25.05";
 }
