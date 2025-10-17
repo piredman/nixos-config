@@ -8,10 +8,19 @@
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     elephant.url = "github:abenz1267/elephant";
     walker = {
       url = "github:abenz1267/walker";
       inputs.elephant.follows = "elephant";
+    };
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
   };
 
@@ -21,8 +30,10 @@
       nixpkgs,
       nixpkgs-stable,
       home-manager,
+      stylix,
       elephant,
       walker,
+      zen-browser,
       ...
     }:
     let
@@ -39,7 +50,6 @@
 
       homeDirs = builtins.attrNames (builtins.readDir ./home);
       validUsers = builtins.filter (name: name != "template") homeDirs;
-
     in
     {
 
@@ -48,7 +58,9 @@
           name = hostname;
           value = lib.nixosSystem {
             inherit system;
-            modules = [ ./hosts/${hostname}/configuration.nix ];
+            modules = [
+              ./hosts/${hostname}/configuration.nix
+            ];
             specialArgs = {
               inherit pkgs-stable;
               systemSettings = mkSystemSettings hostname;
@@ -65,10 +77,12 @@
             inherit pkgs;
             modules = [
               ./home/${username}/default.nix
+              stylix.homeModules.default
               walker.homeManagerModules.default
+              zen-browser.homeModules.default
             ];
             extraSpecialArgs = {
-              inherit pkgs-stable;
+              inherit pkgs-stable zen-browser;
               systemSettings = mkSystemSettings (builtins.head validHosts);
               userSettings = mkUserSettings username;
             };

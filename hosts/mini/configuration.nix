@@ -14,22 +14,45 @@
     ../../common/default.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot = {
+    loader.systemd-boot.enable = true;
+    loader.efi.canTouchEfiVariables = true;
+  };
 
-  environment.shells = with pkgs; [ zsh ];
+  environment = {
+    shells = with pkgs; [ zsh ];
+    systemPackages = with pkgs; [
+      home-manager
+    ];
+    loginShellInit = ''
+      if [ "$(tty)" = "/dev/tty1" ]; then
+        hyprland
+      fi
+    '';
+  };
 
-  networking.hostName = systemSettings.hostname;
-
-  networking.networkmanager.enable = true;
+  networking = {
+    hostName = systemSettings.hostname;
+    enableIPv6 = false;
+    networkmanager.enable = true;
+  };
 
   time.timeZone = systemSettings.timezone;
 
   i18n.defaultLocale = systemSettings.locale;
 
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
+  services = {
+    xserver.xkb = {
+      layout = "us";
+      variant = "";
+    };
+    getty.autologinUser = userSettings.username;
+    openssh = {
+      enable = true;
+
+      settings.PermitRootLogin = "no";
+      settings.PasswordAuthentication = true;
+    };
   };
 
   programs = {
@@ -53,24 +76,7 @@
     };
   };
 
-  services.getty.autologinUser = userSettings.username;
-
-  environment.systemPackages = with pkgs; [
-    home-manager
-    curl
-    git
-    wget
-    neovim
-  ];
-
   security.polkit.enable = true;
-
-  services.openssh = {
-    enable = true;
-
-    settings.PermitRootLogin = "no";
-    settings.PasswordAuthentication = true;
-  };
 
   system.stateVersion = "25.05";
 }
