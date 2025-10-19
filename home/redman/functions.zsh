@@ -11,6 +11,12 @@ nixos-rebuild-user() {
   popd
 }
 
+nixos-flake-update() {
+  pushd ~/.dotfiles
+  git add -A && clear && nix flake update
+  popd
+}
+
 
 # ~~~ git ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

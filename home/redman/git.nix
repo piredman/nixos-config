@@ -5,12 +5,16 @@
     git = {
       enable = true;
 
-      userName = userSettings.name;
-      userEmail = "piredman@users.noreply.github.com";
-      extraConfig = {
+      settings = {
         init.defaultBranch = "main";
         safe.directory = "/home/" + userSettings.username + "/.dotfiles";
+
+        user = {
+          name = userSettings.name;
+          email = "piredman@users.noreply.github.com";
+        };
       };
+
     };
 
     lazygit.enable = true;

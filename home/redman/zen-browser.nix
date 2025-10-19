@@ -11,30 +11,24 @@
         "zen.view.compact.animate-sidebar" = false;
         "zen.welcome-screen.seen" = true;
       };
-      # extensions = with inputs.firefox-addons.packages.${pkgs.system}; [
-      #   ublock-origin
-      #   kagi-search-for-firefox
-      #   proton-pass
-      #   consent-o-matic
-      # ];
     };
 
     policies = {
-      ExtensionSettings = with builtins;
-        let extension = shortId: uuid: {
-          name = uuid;
-          value = {
-            install_url = "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
-            installation_mode = "normal_installed";
-          };
+      SearchEngines.Default = "Kagi";
+      ExtensionSettings = with builtins; let extension = shortId: uuid: {
+        name = uuid;
+        value = {
+          install_url = "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
+          installation_mode = "normal_installed";
         };
-        in listToAttrs [
-          (extension "ublock-origin" "uBlock0@raymondhill.net")
-          (extension "consent-o-matic" "gdpr@cavi.au.dk")
-          (extension "darkreader" "addon@darkreader.org")
-          (extension "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
-          (extension "kagi-search-for-firefox" "search@kagi.com")
-        ];
+      };
+      in listToAttrs [
+        (extension "ublock-origin" "uBlock0@raymondhill.net")
+        (extension "consent-o-matic" "gdpr@cavi.au.dk")
+        (extension "darkreader" "addon@darkreader.org")
+        (extension "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
+        (extension "kagi-search-for-firefox" "search@kagi.com")
+      ];
     };
   };
 

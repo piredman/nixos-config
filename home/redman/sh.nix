@@ -8,6 +8,7 @@ let
   commonAliases = {
     nrh="nixos-rebuild-host";
     nru="nixos-rebuild-user";
+    nfu="nixos-flake-update";
 
     cd="z";
     ".." = "cd ..";

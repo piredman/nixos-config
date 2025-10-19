@@ -70,6 +70,7 @@
         }) validHosts
       );
 
+      home-manager.backupFileExtension = "backup";
       homeConfigurations = builtins.listToAttrs (
         map (username: {
           name = username;
