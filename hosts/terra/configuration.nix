@@ -16,7 +16,11 @@
 
   boot = {
     loader = {
-      systemd-boot.enable = true;
+      systemd-boot = {
+        enable = true;
+        configurationLimit = 10;
+      };
+
       efi.canTouchEfiVariables = true;
     };
 
@@ -36,6 +40,17 @@
     '';
   };
 
+  nix = {
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 1w";
+    };
+
+    optimise.automatic = true;
+    settings.auto-optimise-store = true;
+  };
+
   networking = {
     hostName = systemSettings.hostname;
     enableIPv6 = false;
@@ -47,6 +62,8 @@
   i18n.defaultLocale = systemSettings.locale;
 
   services = {
+    fwupd.enable = true;
+    fstrim.enable = true;
     getty.autologinUser = userSettings.username;
 
     xserver.xkb = {
@@ -65,6 +82,11 @@
   programs = {
     zsh.enable = true;
     hyprland.enable = true;
+
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
   };
 
   users = {

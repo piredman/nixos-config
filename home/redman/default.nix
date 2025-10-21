@@ -26,13 +26,18 @@
     ./syncthing.nix
   ];
 
-  home.username = userSettings.username;
-  home.homeDirectory = "/home/" + userSettings.username;
-  home.stateVersion = "25.05";
+  xdg.enable = true;
+  fonts.fontconfig.enable = true;
 
-  home.packages = [ ];
-  home.file = { };
-  home.sessionVariables = { };
+  home = {
+    username = userSettings.username;
+    homeDirectory = "/home/" + userSettings.username;
+    stateVersion = "25.05";
+
+    packages = [ ];
+    file = { };
+    sessionVariables = { };
+  };
 
   programs.home-manager.enable = true;
 }
