@@ -22,6 +22,8 @@
     ./neovim.nix
     ./opencode.nix
     ./starship.nix
+    ./obsidian.nix
+    ./syncthing.nix
   ];
 
   home.username = userSettings.username;

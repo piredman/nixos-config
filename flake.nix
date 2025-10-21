@@ -39,8 +39,15 @@
     let
       lib = nixpkgs.lib;
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-      pkgs-stable = nixpkgs-stable.legacyPackages.${system};
+
+      pkgs = import nixpkgs {
+        inherit system;
+        config = { allowUnfree = true; };
+      };
+      pkgs-stable = import {
+        inherit system;
+        config = { allowUnfree = true; };
+      };
 
       mkSystemSettings = hostname: import ./hosts/${hostname}/settings.nix;
       mkUserSettings = username: import ./home/${username}/settings.nix;
@@ -70,7 +77,12 @@
         }) validHosts
       );
 
-      home-manager.backupFileExtension = "backup";
+      home-manager = {
+        useGlobalPkgs = true;
+        backupFileExtension = "backup";
+        nixpkgs.allowUnfreePredicate = _: true;
+      };
+
       homeConfigurations = builtins.listToAttrs (
         map (username: {
           name = username;

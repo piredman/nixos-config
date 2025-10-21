@@ -15,8 +15,13 @@
   ];
 
   boot = {
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+
+    kernelPackages = pkgs.linuxPackages_latest;
+    initrd.luks.devices."luks-81f8df11-1123-4a89-850d-63d7fc772781".device = "/dev/disk/by-uuid/81f8df11-1123-4a89-850d-63d7fc772781";
   };
 
   environment = {
@@ -42,11 +47,13 @@
   i18n.defaultLocale = systemSettings.locale;
 
   services = {
+    getty.autologinUser = userSettings.username;
+
     xserver.xkb = {
       layout = "us";
       variant = "";
     };
-    getty.autologinUser = userSettings.username;
+
     openssh = {
       enable = true;
 
