@@ -19,11 +19,12 @@
     ./zen-browser.nix
     ./terminal.nix
     ./git.nix
-    ./neovim.nix
+    ./nvf.nix
     ./opencode.nix
     ./starship.nix
     ./obsidian.nix
     ./syncthing.nix
+    ./yazi.nix
   ];
 
   xdg.enable = true;

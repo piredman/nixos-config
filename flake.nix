@@ -5,18 +5,24 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "nixpkgs/nixos-25.05";
+
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    nvf.url = "github:notashelf/nvf";
+    nvf.inputs.nixpkgs.follows = "nixpkgs";
 
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     elephant.url = "github:abenz1267/elephant";
     walker = {
       url = "github:abenz1267/walker";
       inputs.elephant.follows = "elephant";
     };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,6 +40,7 @@
       elephant,
       walker,
       zen-browser,
+      nvf,
       ...
     }:
     let
@@ -89,10 +96,11 @@
           value = home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
             modules = [
-              ./home/${username}/default.nix
               stylix.homeModules.default
               walker.homeManagerModules.default
               zen-browser.homeModules.default
+              nvf.homeManagerModules.default
+              ./home/${username}/default.nix
             ];
             extraSpecialArgs = {
               inherit pkgs-stable zen-browser;

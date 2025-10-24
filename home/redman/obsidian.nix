@@ -1,8 +1,8 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 {
 
-  programs = {
-    obsidian.enable = true;
-  };
+  # Install obsidian but do not manage it's configuration ffileSystems
+  # Using syncthing
+  home.packages = [ pkgs.obsidian ];
 
 }

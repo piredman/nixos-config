@@ -32,9 +32,11 @@
     shells = with pkgs; [ zsh ];
     systemPackages = with pkgs; [
       home-manager
+      godot
     ];
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then
+        sleep 1s
         hyprland
       fi
     '';

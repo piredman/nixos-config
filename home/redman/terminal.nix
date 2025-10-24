@@ -8,7 +8,6 @@
     fzf.enable = true;
     jq.enable = true;
     ripgrep.enable = true;
-    yazi.enable = true;
     zoxide.enable = true;
   };
 

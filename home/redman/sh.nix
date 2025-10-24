@@ -8,7 +8,7 @@ let
   commonAliases = {
     nrh="nixos-rebuild-host";
     nru="nixos-rebuild-user";
-    nfu="nixos-flake-update";
+    nup="nixos-flake-update";
 
     cd="z";
     ".." = "cd ..";
@@ -45,6 +45,9 @@ in
   programs.bash = {
     enable = true;
     shellAliases = commonAliases;
+    sessionVariables = {
+      EDITOR = "nvim";
+    };
   };
 
   programs.zsh = {
@@ -58,6 +61,9 @@ in
         src = pkgs.zsh-vi-mode;
         file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
     }];
+    sessionVariables = {
+      EDITOR = "nvim";
+    };
   };
 
 }
