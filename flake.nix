@@ -49,11 +49,15 @@
 
       pkgs = import nixpkgs {
         inherit system;
-        config = { allowUnfree = true; };
+        config = {
+          allowUnfree = true;
+        };
       };
       pkgs-stable = import {
         inherit system;
-        config = { allowUnfree = true; };
+        config = {
+          allowUnfree = true;
+        };
       };
 
       mkSystemSettings = hostname: import ./hosts/${hostname}/settings.nix;
@@ -86,6 +90,7 @@
 
       home-manager = {
         useGlobalPkgs = true;
+        useUserPackages = true;
         backupFileExtension = "backup";
         nixpkgs.allowUnfreePredicate = _: true;
       };

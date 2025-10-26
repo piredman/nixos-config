@@ -1,0 +1,5 @@
+require('redman.options')
+require('redman.keymaps')
+require('redman.autocmds')
+require('redman.lsp')
+require('redman.plugins')

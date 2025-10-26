@@ -19,7 +19,8 @@
     ./zen-browser.nix
     ./terminal.nix
     ./git.nix
-    ./nvf.nix
+    ./tmux.nix
+    ./neovim.nix
     ./opencode.nix
     ./starship.nix
     ./obsidian.nix
