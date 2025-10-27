@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 {
 
-  programs = {
-    opencode.enable = true;
+  programs.opencode = {
+    enable = true;
   };
 
 }

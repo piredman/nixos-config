@@ -25,12 +25,16 @@
     };
 
     kernelPackages = pkgs.linuxPackages_latest;
-    initrd.luks.devices."luks-81f8df11-1123-4a89-850d-63d7fc772781".device = "/dev/disk/by-uuid/81f8df11-1123-4a89-850d-63d7fc772781";
+    kernelParams = [ "ipv6.disable=1" ];
+
+    initrd.luks.devices."luks-81f8df11-1123-4a89-850d-63d7fc772781".device =
+      "/dev/disk/by-uuid/81f8df11-1123-4a89-850d-63d7fc772781";
   };
 
   environment = {
     shells = with pkgs; [ zsh ];
     systemPackages = with pkgs; [
+      bind
       home-manager
       godot
     ];
@@ -56,7 +60,14 @@
   networking = {
     hostName = systemSettings.hostname;
     enableIPv6 = false;
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      settings = {
+        connection = {
+          "ipv6.method" = "disabled";
+        };
+      };
+    };
   };
 
   time.timeZone = systemSettings.timezone;

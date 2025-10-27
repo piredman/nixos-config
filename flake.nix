@@ -9,9 +9,6 @@
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    nvf.url = "github:notashelf/nvf";
-    nvf.inputs.nixpkgs.follows = "nixpkgs";
-
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -40,7 +37,6 @@
       elephant,
       walker,
       zen-browser,
-      nvf,
       ...
     }:
     let
@@ -104,11 +100,9 @@
               stylix.homeModules.default
               walker.homeManagerModules.default
               zen-browser.homeModules.default
-              nvf.homeManagerModules.default
               ./home/${username}/default.nix
             ];
             extraSpecialArgs = {
-              inherit pkgs-stable zen-browser;
               systemSettings = mkSystemSettings (builtins.head validHosts);
               userSettings = mkUserSettings username;
             };

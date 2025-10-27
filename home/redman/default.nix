@@ -21,11 +21,12 @@
     ./git.nix
     ./tmux.nix
     ./neovim.nix
-    ./opencode.nix
     ./starship.nix
     ./obsidian.nix
     ./syncthing.nix
     ./yazi.nix
+    ./vesktop.nix
+    ./opencode.nix
   ];
 
   xdg.enable = true;
