@@ -1,0 +1,135 @@
+* {
+  border: none;
+  border-radius: 0;
+  font-size: 16px;
+  font-weight: bold;
+  min-height: 0;
+}
+
+#window {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 100px 20px 100px 20px;
+  margin: 4px;
+  padding: 0px 15px;
+  color: @base05;
+}
+
+window#waybar {
+  background: transparent;
+  color: @base03;
+  transition-property: background-color;
+  transition-duration: 0.1s;
+}
+
+window#waybar.empty #window {
+  background: none;
+}
+
+#custom-os {
+  background-color: @base01;
+  color: @base0E;
+  border: 3px solid @base01;
+  border-radius: 0px 20px 100px 0px;
+  margin: 4px 4px 4px 6px;
+  padding: 0px 15px 0px 8px;
+}
+
+#custom-exit {
+  background-color: @base01;
+  color: @base0E;
+  border: 3px solid @base0E;
+  border-radius: 20px 0px 0px 100px;
+  margin: 4px 6px 4px 4px;
+  padding: 0px 8px 0px 12px;
+}
+
+#workspaces button {
+  background: transparent;
+  border: 2px solid @base01;
+  border-radius: 100px;
+  color: @base01;
+  margin: 5px;
+  padding: 0px 5px;
+  box-shadow: inherit;
+  text-shadow: inherit;
+}
+
+#workspaces button.active {
+  border: 2px solid @base0D;
+  color: @base0D;
+}
+
+#workspaces button:hover {
+  border: 2px solid @base0F;
+  color: @base0F;
+}
+
+#workspaces button.urgent {
+  border: 2px solid @base08;
+  color: @base08;
+}
+
+#pulseaudio,
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#wireplumber,
+#tray,
+#network,
+#mode,
+#idle_inhibitor,
+#scratchpad,
+#custom-notification {
+  margin: 4px 2px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+#clock {
+  color: @base0F;
+  border: 3px solid @base0E;
+  border-radius: 20px 100px 20px 100px;
+  background-color: @base01;
+}
+
+#clock.date {
+  color: @base0E;
+}
+
+#pulseaudio {
+  color: @base0D;
+  border: 3px solid @base0E;
+  border-radius: 20px 100px 20px 100px;
+  background-color: @base01;
+}
+
+#network {
+  color: @base0A;
+  border: 3px solid @base0E;
+  border-radius: 20px 100px 20px 100px;
+  background-color: @base01;
+}
+
+#idle_inhibitor {
+  color: @base0B;
+  border: 3px solid @base0E;
+  border-radius: 20px 100px 20px 100px;
+  background-color: @base01;
+}
+
+#idle_inhibitor.activated {
+  color: @base08;
+}
+
+#custom-notification {
+  color: @base0E;
+  border: 3px solid @base0E;
+  border-radius: 20px 100px 20px 100px;
+  background-color: @base01;
+}

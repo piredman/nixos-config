@@ -34,8 +34,9 @@
   environment = {
     shells = with pkgs; [ zsh ];
     systemPackages = with pkgs; [
-      bind
       home-manager
+      psmisc
+      bind
       godot
     ];
     loginShellInit = ''

@@ -27,6 +27,7 @@
     ./yazi.nix
     ./vesktop.nix
     ./opencode.nix
+    ./waybar.nix
   ];
 
   xdg.enable = true;
