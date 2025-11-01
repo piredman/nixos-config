@@ -18,6 +18,8 @@
     tldr
     curl
     wget
+    wiremix
+    pamixer
   ];
 
 }

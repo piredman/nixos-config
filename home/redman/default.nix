@@ -28,6 +28,7 @@
     ./vesktop.nix
     ./opencode.nix
     ./waybar.nix
+    ./hyprshot.nix
   ];
 
   xdg.enable = true;

@@ -38,6 +38,7 @@
       psmisc
       bind
       godot
+      mako
     ];
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then

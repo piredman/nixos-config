@@ -1,72 +1,67 @@
+@define-color mocha-base @base00;
+@define-color mocha-mantle @base01;
+@define-color mocha-surface0 @base02;
+@define-color mocha-surface1 @base03;
+@define-color mocha-surface2 @base04;
+@define-color mocha-text @base05;
+
+@define-color mocha-rosewater @base06;
+@define-color mocha-lavender @base07;
+@define-color mocha-red @base08;
+@define-color mocha-peach @base09;
+@define-color mocha-yellow @base0A;
+@define-color mocha-green @base0B;
+@define-color mocha-teal @base0C;
+@define-color mocha-blue @base0D;
+@define-color mocha-mauve @base0E;
+@define-color mocha-flamingo @base0F;
+
+/* https://github.com/Alexays/Waybar/wiki/Styling */
+
+/* Padding cheat sheet */
+/* top and bottom | left and right */
+/* top | left and right | bottom */
+/* top | right | bottom | left */
+
 * {
   border: none;
   border-radius: 0;
-  font-size: 16px;
+  font-size: 11px;
   font-weight: bold;
   min-height: 0;
 }
 
-#window {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 100px 20px 100px 20px;
-  margin: 4px;
-  padding: 0px 15px;
-  color: @base05;
-}
-
-window#waybar {
-  background: transparent;
-  color: @base03;
-  transition-property: background-color;
-  transition-duration: 0.1s;
-}
-
-window#waybar.empty #window {
-  background: none;
-}
-
 #custom-os {
-  background-color: @base01;
-  color: @base0E;
-  border: 3px solid @base01;
-  border-radius: 0px 20px 100px 0px;
-  margin: 4px 4px 4px 6px;
-  padding: 0px 15px 0px 8px;
-}
-
-#custom-exit {
-  background-color: @base01;
-  color: @base0E;
-  border: 3px solid @base0E;
-  border-radius: 20px 0px 0px 100px;
-  margin: 4px 6px 4px 4px;
-  padding: 0px 8px 0px 12px;
+  color: @mocha-lavender;
+  font-size: 16px;
+  margin: 5px;
+  padding: 0px 10px;
 }
 
 #workspaces button {
   background: transparent;
-  border: 2px solid @base01;
+  border: 2px solid;
+  border: 2px solid @mocha-lavender;
+  color: @mocha-lavender;
   border-radius: 100px;
-  color: @base01;
   margin: 5px;
   padding: 0px 5px;
-  box-shadow: inherit;
-  text-shadow: inherit;
 }
 
 #workspaces button.active {
-  border: 2px solid @base0D;
-  color: @base0D;
+  border: 2px solid @mocha-rosewater;
+  color: @mocha-rosewater;
 }
 
 #workspaces button:hover {
-  border: 2px solid @base0F;
-  color: @base0F;
+  border: 2px solid @mocha-rosewater;
+  color: @mocha-rosewater;
 }
 
 #workspaces button.urgent {
-  border: 2px solid @base08;
-  color: @base08;
+  border: 2px solid;
+  /* border: 2px solid @base08; */
+  /* color: @base08; */
 }
 
 #pulseaudio,
@@ -91,45 +86,109 @@ window#waybar.empty #window {
   padding-left: 15px;
 }
 
-#clock {
-  color: @base0F;
-  border: 3px solid @base0E;
-  border-radius: 20px 100px 20px 100px;
-  background-color: @base01;
+/* #custom-exit { */
+/*   background-color: @base01; */
+/*   color: @base0E; */
+/*   border: 3px solid; */
+/*   border: 3px solid @base0E; */
+/*   border-radius: 20px 0px 0px 100px; */
+/*   margin: 4px 6px 4px 4px; */
+/*   padding: 0px 8px 0px 12px; */
+/* } */
+
+/* #clock { */
+/*   color: @base0F; */
+/*   border: 3px solid @base0E; */
+/*   border-radius: 20px 100px 20px 100px; */
+/*   background-color: @base01; */
+/* } */
+
+/* #clock.date { */
+/*   color: @base0E; */
+/* } */
+
+/* #pulseaudio { */
+/*   color: @base0D; */
+/*   border: 3px solid @base0E; */
+/*   border-radius: 20px 100px 20px 100px; */
+/*   background-color: @base01; */
+/* } */
+
+/* #network { */
+/*   color: @base0A; */
+/*   border: 3px solid @base0E; */
+/*   border-radius: 20px 100px 20px 100px; */
+/*   background-color: @base01; */
+/* } */
+
+/* #idle_inhibitor { */
+/*   color: @base0B; */
+/*   border: 3px solid @base0E; */
+/*   border-radius: 20px 100px 20px 100px; */
+/*   background-color: @base01; */
+/* } */
+
+/* #idle_inhibitor.activated { */
+/*   color: @base08; */
+/* } */
+
+/* #custom-notification { */
+/*   color: @base0E; */
+/*   border: 3px solid @base0E; */
+/*   border-radius: 20px 100px 20px 100px; */
+/*   background-color: @base01; */
+/* } */
+
+/* Testing colours */
+#custom-base00 {
+  color: @base00;
+}
+#custom-base01 {
+  color: @base01;
+}
+#custom-base02 {
+  color: @base02;
+}
+#custom-base03 {
+  color: @base03;
+}
+#custom-base04 {
+  color: @base04;
+  border: 1px solid @base05;
+  border-radius: 100px;
 }
 
-#clock.date {
-  color: @base0E;
+#custom-base05 {
+  color: @base05;
 }
-
-#pulseaudio {
-  color: @base0D;
-  border: 3px solid @base0E;
-  border-radius: 20px 100px 20px 100px;
-  background-color: @base01;
+#custom-base06 {
+  color: @base06;
 }
-
-#network {
-  color: @base0A;
-  border: 3px solid @base0E;
-  border-radius: 20px 100px 20px 100px;
-  background-color: @base01;
+#custom-base07 {
+  color: @base07;
 }
-
-#idle_inhibitor {
-  color: @base0B;
-  border: 3px solid @base0E;
-  border-radius: 20px 100px 20px 100px;
-  background-color: @base01;
-}
-
-#idle_inhibitor.activated {
+#custom-base08 {
   color: @base08;
 }
+#custom-base09 {
+  color: @base09;
+}
 
-#custom-notification {
+#custom-base0A {
+  color: @base0A;
+}
+#custom-base0B {
+  color: @base0B;
+}
+#custom-base0C {
+  color: @base0C;
+}
+#custom-base0D {
+  color: @base0D;
+}
+#custom-base0E {
   color: @base0E;
-  border: 3px solid @base0E;
-  border-radius: 20px 100px 20px 100px;
-  background-color: @base01;
+}
+#custom-base0F {
+  color: @base0F;
 }

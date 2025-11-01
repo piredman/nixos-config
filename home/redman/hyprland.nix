@@ -92,6 +92,7 @@
 
       exec-once = [
         "waybar"
+        "mako"
       ];
 
       input = {
@@ -133,6 +134,10 @@
         "$mod SHIFT, K, movewindow, u"
         "$mod SHIFT, L, movewindow, r"
 
+        # screenshots
+        "$mod, F6, exec, hyprshot -z -m output"
+        "$mod CTRL, F6, exec, hyprshot -m window"
+
         # waybar
         "$mod CTRL, F7, exec, waybar"
         "$mod SHIFT, F7, exec, pkill -f waybar"
@@ -163,6 +168,19 @@
         # Move/resize windows with mainMod + LMB/RMB and dragging
         "$mod, mouse:272, movewindow"
         "$mod, mouse:273, resizewindow"
+      ];
+
+      windowrulev2 = [
+        # Floating TUIs
+        "float, tag:floating-window"
+        "center, tag:floating-window"
+        "size 800 600, tag:floating-window"
+
+        "tag +floating-window, class:(pulseaudio.wiremix)"
+
+        # Godot
+        "tile,class:^(Godot)$"
+        "float,class:^(prototype_alpha)$"
       ];
     };
   };
