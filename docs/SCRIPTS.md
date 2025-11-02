@@ -14,10 +14,11 @@ Creates a new host and user configuration from templates.
 
 Automates the creation of configuration files for a new host and user by:
 - Creating host directory structure
-- Copying template configuration files
+- Generating host configuration files
 - Generating settings files with provided values
 - Copying hardware configuration
 - Creating home directory structure
+- Generating user configuration files
 - Generating user settings files
 
 ### Usage
@@ -65,9 +66,9 @@ Creates `hosts/<hostname>/` if it doesn't exist.
 - Skips host creation
 - Proceeds to user creation
 
-#### 2. Copies Template Configuration
+#### 2. Creates Host Configuration
 
-Copies `hosts/template/configuration.nix` to `hosts/<hostname>/configuration.nix`.
+Creates a new `hosts/<hostname>/configuration.nix` configuration file.
 
 #### 3. Creates Host Settings
 
@@ -120,9 +121,9 @@ Creates `home/<username>/` if it doesn't exist.
 - Prints warning: `⚠️  Home configuration already exists`
 - Skips user creation
 
-#### 6. Copies User Template
+#### 6. Creates User Configuration
 
-Copies `home/template/default.nix` to `home/<username>/default.nix`.
+Creates a new `home/<username>/default.nix` configuration file.
 
 #### 7. Creates User Settings
 
@@ -338,16 +339,16 @@ git push
 ./scripts/setup-host.sh laptop alice "Alice Smith" "America/New_York" "en_US.UTF-8" --force
 ```
 
-#### Dry Run
+#### Review Before Running
 
-To see what would be created without actually creating it, you can inspect the template files:
+To understand what will be created, review existing configurations:
 
 ```bash
-# View host template
-cat hosts/template/configuration.nix
+# View existing host configuration
+cat hosts/mini/configuration.nix
 
-# View user template
-cat home/template/default.nix
+# View existing user configuration
+cat home/redman/default.nix
 ```
 
 #### Batch Creation

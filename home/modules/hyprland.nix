@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  userSettings,
   ...
 }:
 
@@ -29,15 +30,9 @@
       "$fileManager" = "dolphin";
       "$menu" = "walker";
 
-      # monitor = ",preferred,auto,auto";
-      monitor = [
-        "DP-1,2560x1440@59.95,0x0,1"
-        "DP-2,1920x1080@60,auto-right,1"
-        "HDMI-A-1, 2560x1440, 0x0, 1, mirror, DP-1"
-      ];
-
-      "$primary_monitor" = "DP-1";
-      "$secondary_monitor" = "DP-2";
+      monitor = userSettings.monitors.setup;
+      "$primary_monitor" = userSettings.monitors.primary;
+      "$secondary_monitor" = userSettings.monitors.secondary;
 
       workspace = [
         "1, monitor:$primary_monitor"

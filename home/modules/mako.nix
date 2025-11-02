@@ -12,7 +12,6 @@
       padding = "10,15";
       border-size = 2;
       max-icon-size = 32;
-      font = "sans-serif 14px";
     };
   };
 

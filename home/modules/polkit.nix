@@ -4,8 +4,8 @@
   pkgs,
   ...
 }:
-
 {
+
   systemd.user.services.polkit-kde-authentication-agent-1 = {
     Unit = {
       Description = "polkit-kde-authentication-agent-1";
@@ -25,4 +25,5 @@
       WantedBy = [ "graphical-session.target" ];
     };
   };
+
 }

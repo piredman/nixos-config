@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  userSettings,
+  ...
+}:
 
 {
   programs.neovim = {
@@ -48,7 +53,7 @@
   };
 
   home.file.".config/nvim" = {
-    source = ./nvim;
+    source = ../${userSettings.username}/nvim;
     recursive = true;
   };
 

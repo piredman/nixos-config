@@ -2,7 +2,6 @@
 {
 
   programs = {
-    git.enable = true;
     fastfetch.enable = true;
     fd.enable = true;
     fzf.enable = true;

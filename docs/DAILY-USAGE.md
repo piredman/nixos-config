@@ -4,7 +4,7 @@ Common commands and workflows for managing your NixOS configuration.
 
 ## Current Setup
 
-- **Host:** mini (NixOS unstable)
+- **Host:** terra (NixOS unstable)
 - **User:** redman
 - **Desktop:** Hyprland (wayland)
 - **Terminal:** Ghostty
@@ -20,10 +20,10 @@ Apply system configuration changes:
 
 ```bash
 cd ~/.dotfiles
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 ```
 
-Replace `mini` with your hostname.
+Replace `terra` with your hostname.
 
 ### Rebuild Different Host
 
@@ -38,7 +38,7 @@ sudo nixos-rebuild switch --flake .#hostname
 Test configuration before making it the default:
 
 ```bash
-sudo nixos-rebuild test --flake .#mini
+sudo nixos-rebuild test --flake .#terra
 ```
 
 Changes apply immediately but won't persist after reboot.
@@ -48,7 +48,7 @@ Changes apply immediately but won't persist after reboot.
 Build the configuration to check for errors:
 
 ```bash
-sudo nixos-rebuild build --flake .#mini
+sudo nixos-rebuild build --flake .#terra
 ```
 
 ## Home Manager Configuration
@@ -89,7 +89,7 @@ Update packages and apply immediately:
 
 ```bash
 nix flake update
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 home-manager switch --flake .#redman
 ```
 
@@ -205,17 +205,17 @@ df -h /nix
 1. Edit configuration files:
    ```bash
    cd ~/.dotfiles
-   vim hosts/mini/configuration.nix
+   vim hosts/terra/configuration.nix
    ```
 
 2. Test the change:
    ```bash
-   sudo nixos-rebuild test --flake .#mini
+   sudo nixos-rebuild test --flake .#terra
    ```
 
 3. If good, make it permanent:
    ```bash
-   sudo nixos-rebuild switch --flake .#mini
+   sudo nixos-rebuild switch --flake .#terra
    ```
 
 4. Commit to git:
@@ -229,9 +229,10 @@ df -h /nix
 
 #### System Package
 
-Edit `hosts/<hostname>/configuration.nix`:
+Modify the appropriate module in `hosts/modules/` (typically `environment.nix`), or create a custom module and import it in your host's `configuration.nix`:
 
 ```nix
+# hosts/modules/environment.nix or custom module
 environment.systemPackages = with pkgs; [
   neovim
   git
@@ -241,7 +242,7 @@ environment.systemPackages = with pkgs; [
 
 Apply:
 ```bash
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 ```
 
 #### User Package
@@ -266,10 +267,10 @@ Remove from configuration file and rebuild:
 
 ```bash
 # Edit the file to remove package
-vim hosts/mini/configuration.nix
+vim hosts/terra/configuration.nix
 
 # Rebuild
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 ```
 
 ### Update a Single Package
@@ -278,7 +279,7 @@ NixOS doesn't support updating individual packages. You update all packages toge
 
 ```bash
 nix flake update
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 ```
 
 If you need different versions, see [Package Management](PACKAGES.md) for using stable alongside unstable.
@@ -323,7 +324,7 @@ nix-store --verify --check-contents
 
 ### Managing Multiple Hosts
 
-If you manage configurations for multiple machines:
+If you manage configurations for multiple machines (e.g., `terra` and `mini`):
 
 ```bash
 cd ~/.dotfiles
@@ -338,6 +339,26 @@ git push
 git pull
 sudo nixos-rebuild switch --flake .#hostname
 ```
+
+### Host-Specific Configuration
+
+Each host has its own directory with separate settings:
+
+```bash
+# terra host (primary)
+hosts/terra/
+├── configuration.nix        # Imports modules from hosts/modules/
+├── hardware-configuration.nix
+└── settings.nix             # Hostname, timezone, locale
+
+# mini host
+hosts/mini/
+├── configuration.nix        # Imports modules from hosts/modules/
+├── hardware-configuration.nix
+└── settings.nix
+```
+
+The `configuration.nix` imports shared modules from `hosts/modules/`. Customize modules or create new ones in `hosts/modules/` and import them in your host's `configuration.nix`. See [Host Modules Pattern](ADVANCED.md#host-modules-pattern) for details.
 
 ### Remote Rebuilds
 
@@ -356,7 +377,7 @@ Requires SSH access to the remote host.
 Check the error message and fix configuration:
 
 ```bash
-sudo nixos-rebuild switch --flake .#mini --show-trace
+sudo nixos-rebuild switch --flake .#terra --show-trace
 ```
 
 The `--show-trace` flag shows more detailed error information.
@@ -417,10 +438,10 @@ sudo nixos-rebuild switch --flake .#mini --option substitute false
 
 ```bash
 # Update and rebuild everything
-nix flake update && sudo nixos-rebuild switch --flake .#mini && home-manager switch --flake .#redman
+nix flake update && sudo nixos-rebuild switch --flake .#terra && home-manager switch --flake .#redman
 
 # Quick system rebuild
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 
 # Quick home rebuild  
 home-manager switch --flake .#redman

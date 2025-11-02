@@ -1,10 +1,16 @@
-{ config, pkgs, userSettings,... }:
+{
+  config,
+  pkgs,
+  userSettings,
+  ...
+}:
 {
 
   programs = {
     git = {
       enable = true;
-      signing.key = "002C241D7D4F044C";
+
+      signing.key = userSettings.git.signingKey;
 
       settings = {
         init.defaultBranch = "main";
@@ -12,13 +18,12 @@
 
         user = {
           name = userSettings.name;
-          email = "piredman@users.noreply.github.com";
+          email = userSettings.git.email;
         };
 
         commit.gpgsign = true;
         credential.helper = "libsecret";
       };
-
     };
 
     lazygit.enable = true;

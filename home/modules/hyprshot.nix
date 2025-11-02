@@ -3,7 +3,7 @@
 
   programs.hyprshot = {
     enable = true;
-    saveLocation = "~/screenshots";
+    saveLocation = "${config.home.homeDirectory}/screenshots";
   };
 
 }

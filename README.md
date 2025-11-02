@@ -41,22 +41,38 @@ nixos-config/
 │   │   ├── configuration.nix
 │   │   ├── hardware-configuration.nix
 │   │   └── settings.nix
-│   └── template/            # Template for new hosts
-│       ├── configuration.nix
-│       └── settings.nix
+│   ├── terra/
+│   │   ├── configuration.nix
+│   │   ├── hardware-configuration.nix
+│   │   └── settings.nix
+│   └── modules/             # Shared system modules (imported by all hosts)
+│       ├── boot.nix
+│       ├── environment.nix
+│       ├── locale.nix
+│       ├── networking.nix
+│       ├── nix.nix
+│       ├── programs.nix
+│       ├── security.nix
+│       ├── services.nix
+│       └── users.nix
 ├── home/                    # Home Manager user configurations
 │   ├── redman/
 │   │   ├── default.nix
 │   │   ├── settings.nix
-│   │   ├── sh.nix
-│   │   ├── hyprland.nix
-│   │   ├── ghostty.nix
-│   │   ├── dolphin.nix
-│   │   ├── walker.nix
-│   │   └── polkit.nix
-│   └── template/            # Template for new users
-│       ├── default.nix
-│       └── settings.nix
+│   │   └── nvim/            # Neovim configuration
+│   │       ├── init.lua
+│   │       ├── lsp/
+│   │       └── lua/
+│   └── modules/             # Shared user modules (imported by all users)
+│       ├── shell/
+│       ├── waybar/
+│       ├── dolphin.nix
+│       ├── ghostty.nix
+│       ├── git.nix
+│       ├── hyprland.nix
+│       ├── polkit.nix
+│       ├── starship.nix
+│       └── ... (other modules)
 ├── common/                  # Shared configuration (unfree, flakes)
 │   └── default.nix
 ├── docs/                    # Documentation
@@ -70,7 +86,7 @@ nixos-config/
 ```bash
 cd ~/.dotfiles
 nix flake update
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 home-manager switch --flake .#redman
 ```
 
@@ -103,11 +119,12 @@ See [Daily Usage](docs/DAILY-USAGE.md) for more commands.
 
 ## Current Hosts
 
-- **mini** - Primary workstation (x86_64-linux)
+- **terra** - Primary workstation (x86_64-linux, Hyprland desktop)
+- **mini** - Secondary system (x86_64-linux)
 
 ## Current Users
 
-- **redman** - Paul Redman
+- **redman** - Paul Redman (uses shared `home/modules/`)
 
 ## How It Works
 
@@ -117,15 +134,13 @@ The flake automatically discovers all hosts and users:
 
 ```nix
 # All directories in hosts/ become available configurations
+hosts/terra/     -> nixosConfigurations.terra
 hosts/mini/      -> nixosConfigurations.mini
-hosts/laptop/    -> nixosConfigurations.laptop
 
 # All directories in home/ become available configurations  
 home/redman/     -> homeConfigurations.redman
 home/alice/      -> homeConfigurations.alice
 ```
-
-The `template` directories are excluded from discovery.
 
 ### Package Management
 
@@ -155,7 +170,7 @@ See [Package Management](docs/PACKAGES.md) for details.
 
 On the new machine, run the bootstrap command. It will:
 - Auto-detect hostname and username
-- Create configuration from templates
+- Create new host and user configurations
 - Apply the configuration
 
 ### Option 2: Pre-Configure

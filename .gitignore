@@ -1,0 +1,24 @@
+# Nix build results
+result
+result-*
+
+# Nix garbage collection roots
+.gcroots
+
+# Nix profile links
+.nix-profile
+
+# Home-Manager generations
+.hm-gcroots/
+
+# Local development overrides
+local.nix
+override.nix
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Cache directories
+.cache/

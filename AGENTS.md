@@ -23,13 +23,29 @@ nixos-config/
 │   │   ├── configuration.nix
 │   │   ├── hardware-configuration.nix
 │   │   └── settings.nix
-│   └── template/            # Template for new hosts
+│   ├── template/            # Template for new hosts
+│   └── modules/             # Shared system modules (imported by all hosts)
+│       ├── boot.nix
+│       ├── environment.nix
+│       ├── locale.nix
+│       ├── networking.nix
+│       ├── nix.nix
+│       ├── programs.nix
+│       ├── security.nix
+│       ├── services.nix
+│       └── users.nix
 ├── home/                    # User configurations  
 │   ├── <username>/
 │   │   ├── default.nix
 │   │   ├── settings.nix
 │   │   └── *.nix           # User-specific modules
-│   └── template/            # Template for new users
+│   ├── template/            # Template for new users
+│   └── modules/             # Shared user modules (imported by all users)
+│       ├── shell/
+│       ├── waybar/
+│       ├── ghostty.nix
+│       ├── git.nix
+│       └── ... (other modules)
 ├── common/
 │   └── default.nix         # Shared config (unfree, flakes)
 ├── docs/                    # Documentation
@@ -141,9 +157,21 @@ sudo nix-store --optimize
 { config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
 
 {
-    imports = [ ./hardware-configuration.nix ../../common/default.nix ];
-    
-    # Configuration here
+    imports = [
+        ./hardware-configuration.nix
+        ../modules/boot.nix
+        ../modules/environment.nix
+        ../modules/locale.nix
+        ../modules/networking.nix
+        ../modules/nix.nix
+        ../modules/programs.nix
+        ../modules/security.nix
+        ../modules/services.nix
+        ../modules/users.nix
+        ../../common/default.nix
+    ];
+
+    system.stateVersion = "25.05";
 }
 ```
 
@@ -204,10 +232,12 @@ Validation done via rebuild commands.
 
 **Manual:**
 1. Create `hosts/hostname/` directory
-2. Copy `hosts/template/configuration.nix`
+2. Create `hosts/hostname/configuration.nix` with imports from `../modules/`
 3. Create `hosts/hostname/settings.nix`
 4. Copy hardware config: `sudo cp /etc/nixos/hardware-configuration.nix hosts/hostname/`
 5. Flake auto-discovers on next rebuild
+
+See [Host Modules Pattern](docs/ADVANCED.md#host-modules-pattern) for detailed examples.
 
 ### Add New User
 Created automatically by `setup-host.sh` or manually:
@@ -217,12 +247,17 @@ Created automatically by `setup-host.sh` or manually:
 4. Flake auto-discovers on next rebuild
 
 ### Add Package
-**System-wide:**
-Edit `hosts/hostname/configuration.nix`:
+**System-wide (via modules):**
+Edit or create a module in `hosts/modules/`:
 ```nix
-environment.systemPackages = with pkgs; [
-    package-name
-];
+# hosts/modules/environment.nix (or create custom module)
+{ config, lib, pkgs, ... }:
+
+{
+    environment.systemPackages = with pkgs; [
+        package-name
+    ];
+}
 ```
 
 **User-specific (preferred):**
@@ -317,7 +352,9 @@ When helping users, refer them to appropriate docs.
 4. Never edit `template/` unless changing defaults for all new hosts/users
 5. LUKS configuration belongs in hardware-configuration.nix, NOT configuration.nix
 6. Keep system packages minimal - prefer user-specific packages in home-manager
-7. Use modular configuration - separate concerns into individual .nix files
+7. Use modular configuration - separate concerns into individual modules in `hosts/modules/`
+8. Each host's `configuration.nix` imports necessary modules from `hosts/modules/`
+9. Create custom system modules in `hosts/modules/` for reusable system-level configuration
 
 ### User Configuration Best Practices
 1. Create separate module files for different applications (e.g., ghostty.nix, dolphin.nix)

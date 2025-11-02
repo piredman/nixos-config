@@ -17,7 +17,7 @@ The bootstrap script:
 1. Auto-detects your hostname and username (with interactive prompts)
 2. Clones this repository to `~/.dotfiles`
 3. Determines if a configuration exists for your hostname
-4. Creates new configuration from templates (if needed) or uses existing
+4. Creates new host and user configurations (if needed) or uses existing
 5. Copies hardware configuration from `/etc/nixos/`
 6. Applies the NixOS system configuration
 7. Optionally applies Home Manager configuration
@@ -41,13 +41,13 @@ You'll be prompted for:
 **What Happens:**
 
 1. Bootstrap clones the repository to `~/.dotfiles`
-2. Runs `setup-host.sh` to create new configuration from templates
+2. Runs `setup-host.sh` to create new configurations
 3. Creates `hosts/<hostname>/` directory with:
-   - `configuration.nix` (from template)
+   - `configuration.nix` (new configuration)
    - `settings.nix` (with your provided values)
    - `hardware-configuration.nix` (copied from `/etc/nixos/`)
 4. Creates `home/<username>/` directory with:
-   - `default.nix` (from template)
+   - `default.nix` (new configuration)
    - `settings.nix` (with your provided values)
 5. Prompts to apply system configuration
 6. Prompts to apply Home Manager configuration
@@ -127,8 +127,7 @@ git push
 
 **Benefits:**
 - Prepare configurations in advance
-- Test and refine before physical installation
-- Review configurations as a team before deployment
+- Refine before physical installation
 - Track all machine configs in git before deployment
 - No need for hardware config until actual install
 
@@ -148,6 +147,7 @@ cd ~/.dotfiles
 
 # Customize the configuration
 vim hosts/desktop/configuration.nix
+vim home/redman/default.nix  # If user needs customization
 
 # Commit and push
 git add .

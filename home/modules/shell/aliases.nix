@@ -1,10 +1,4 @@
 {
-  config,
-  lib,
-  pkgs,
-  ...
-}:
-let
   commonAliases = {
     nrh = "nixos-rebuild-host";
     nru = "nixos-rebuild-user";
@@ -36,41 +30,4 @@ let
     gtd = "git worktree delete";
     lg = "lazygit";
   };
-  zshAliases = {
-    reload = "source ~/.zshrc";
-  };
-in
-{
-
-  programs.bash = {
-    enable = true;
-    shellAliases = commonAliases;
-    sessionVariables = {
-      EDITOR = "nvim";
-      TERMINAL = "ghostty";
-    };
-  };
-
-  programs.zsh = {
-    enable = true;
-    shellAliases = lib.mkMerge [
-      commonAliases
-      zshAliases
-    ];
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
-    initContent = "source ${./functions.zsh}";
-    plugins = [
-      {
-        name = "vi-mode";
-        src = pkgs.zsh-vi-mode;
-        file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
-      }
-    ];
-    sessionVariables = {
-      EDITOR = "nvim";
-      TERMINAL = "ghostty";
-    };
-  };
-
 }

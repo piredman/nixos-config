@@ -2,6 +2,146 @@
 
 Advanced configuration techniques and customization for power users.
 
+## Host Modules Pattern
+
+The host configuration uses a modular pattern similar to `home/modules/`. System-wide configuration is split into focused modules that are imported by each host's `configuration.nix`.
+
+### Available Host Modules
+
+```
+hosts/modules/
+├── boot.nix           # Boot loader and kernel configuration
+├── environment.nix    # System-wide environment (PATH, variables, packages)
+├── locale.nix         # Language and locale settings
+├── networking.nix     # Network configuration
+├── nix.nix           # Nix settings and flake configuration
+├── programs.nix      # System programs and services
+├── security.nix      # Security policies (sudo, PAM, etc.)
+├── services.nix      # System services (SSH, timers, etc.)
+└── users.nix         # User accounts and groups
+```
+
+### Host Configuration Structure
+
+Each host imports only the modules it needs:
+
+```nix
+# hosts/hostname/configuration.nix
+{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
+
+{
+    imports = [
+        ./hardware-configuration.nix
+        ../modules/boot.nix
+        ../modules/environment.nix
+        ../modules/locale.nix
+        ../modules/networking.nix
+        ../modules/nix.nix
+        ../modules/programs.nix
+        ../modules/services.nix
+        ../modules/security.nix
+        ../modules/users.nix
+        ../../common/default.nix
+    ];
+
+    system.stateVersion = "25.05";
+}
+```
+
+### Creating a New Host
+
+To add a new host, create a directory and import the necessary modules:
+
+```bash
+mkdir hosts/newhost
+```
+
+Create `hosts/newhost/configuration.nix`:
+
+```nix
+{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
+
+{
+    imports = [
+        ./hardware-configuration.nix
+        ../modules/boot.nix
+        ../modules/environment.nix
+        ../modules/locale.nix
+        ../modules/networking.nix
+        ../modules/nix.nix
+        ../modules/programs.nix
+        ../modules/services.nix
+        ../modules/security.nix
+        ../modules/users.nix
+        ../../common/default.nix
+    ];
+
+    system.stateVersion = "25.05";
+}
+```
+
+Create `hosts/newhost/settings.nix`:
+
+```nix
+{
+    hostname = "newhost";
+    timezone = "America/Edmonton";
+    local = "en_GB.UTF-8";
+}
+```
+
+Generate hardware configuration:
+
+```bash
+sudo nixos-generate-config --show-hardware-config > hosts/newhost/hardware-configuration.nix
+```
+
+### Customizing Host Modules
+
+Modules can be customized per-host by using `lib.mkForce` to override settings:
+
+```nix
+# hosts/hostname/configuration.nix
+{ config, lib, pkgs, ... }:
+
+{
+    imports = [ /* ... modules ... */ ];
+
+    # Override settings from modules
+    services.openssh.enable = lib.mkForce false;
+    environment.systemPackages = lib.mkForce (with pkgs; [ vim git ]);
+}
+```
+
+### Creating Custom Host Modules
+
+Create a new module in `hosts/modules/mymodule.nix`:
+
+```nix
+{ config, lib, pkgs, ... }:
+
+{
+    services.myservice = {
+        enable = true;
+        port = 8080;
+    };
+
+    environment.systemPackages = with pkgs; [
+        myapp
+    ];
+}
+```
+
+Then import it in any host's `configuration.nix`:
+
+```nix
+{
+    imports = [
+        ../modules/mymodule.nix
+    ];
+}
+```
+
 ## Manual Host Configuration
 
 If you prefer not to use the `setup-host.sh` script, you can create configurations manually.
@@ -26,11 +166,34 @@ sudo cp /etc/nixos/hardware-configuration.nix hosts/newhostname/
 
 ### Create Configuration File
 
-Copy and customize the template:
+Create `hosts/newhostname/configuration.nix`. Start with an existing host as reference:
 
 ```bash
-cp hosts/template/configuration.nix hosts/newhostname/configuration.nix
 vim hosts/newhostname/configuration.nix
+```
+
+Minimal example:
+
+```nix
+{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
+
+{
+    imports = [
+        ./hardware-configuration.nix
+        ../modules/boot.nix
+        ../modules/environment.nix
+        ../modules/locale.nix
+        ../modules/networking.nix
+        ../modules/nix.nix
+        ../modules/programs.nix
+        ../modules/security.nix
+        ../modules/services.nix
+        ../modules/users.nix
+        ../../common/default.nix
+    ];
+
+    system.stateVersion = "25.05";
+}
 ```
 
 ### Create Settings File
@@ -47,9 +210,24 @@ Create `hosts/newhostname/settings.nix`:
 
 ### Create Home Configuration
 
-```bash
-mkdir -p home/newuser
-cp home/template/default.nix home/newuser/default.nix
+Create `home/newuser/default.nix`. Start with an existing user as reference. Minimal example:
+
+```nix
+{ config, lib, pkgs, pkgs-stable, userSettings, ... }:
+
+{
+    imports = [ ../modules/shell/shell.nix ];
+
+    home.username = userSettings.username;
+    home.homeDirectory = "/home/" + userSettings.username;
+    home.stateVersion = "25.05";
+
+    home.packages = with pkgs; [
+        firefox
+    ];
+
+    programs.home-manager.enable = true;
+}
 ```
 
 Create `home/newuser/settings.nix`:
@@ -77,15 +255,13 @@ The flake uses Nix builtins to discover configurations:
 ```nix
 # From flake.nix
 hosts = builtins.attrNames (builtins.readDir ./hosts);
-validHosts = builtins.filter (name: name != "template") hosts;
-
 homeDirs = builtins.attrNames (builtins.readDir ./home);
-validUsers = builtins.filter (name: name != "template") homeDirs;
+validUsers = builtins.filter (name: name != "modules") homeDirs;
 ```
 
 **What this does:**
-1. Reads all directories in `hosts/` and `home/`
-2. Filters out `template` directories
+1. Reads all directories in `hosts/` - all become configurations
+2. Reads all directories in `home/` - filters out `modules` directory
 3. Creates configurations for each remaining directory
 
 ### Adding a Host Without Rebuilding Flake
@@ -101,74 +277,90 @@ The flake automatically discovers it on next rebuild. No flake.nix editing neede
 
 ### Excluding a Host Temporarily
 
-Rename directory to include `template` or start with `.`:
+Rename directory to start with `.`:
 
 ```bash
 mv hosts/oldhost hosts/.oldhost  # Hidden, won't be discovered
-mv hosts/oldhost hosts/oldhost-template  # Contains 'template', excluded
 ```
 
-## Customizing Templates
+## Shared Modules Pattern
 
-### Modify Host Template
+The configuration uses a centralized `home/modules/` directory containing shared modules imported by all users:
 
-Edit `hosts/template/configuration.nix` to change defaults for all new hosts:
+```
+home/modules/
+├── shell/
+├── waybar/
+├── dolphin.nix
+├── ghostty.nix
+├── git.nix
+├── hyprland.nix
+├── polkit.nix
+├── starship.nix
+└── ... (other modules)
+```
+
+### User Configuration Structure
+
+Each user imports these shared modules:
 
 ```nix
-{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
-
+# home/username/default.nix
 {
-    imports = [ ./hardware-configuration.nix ../../common/default.nix ];
-
-    # Your default packages for all new hosts
-    environment.systemPackages = with pkgs; [
-        neovim
-        git
-        htop
-        curl
-        wget
-        # Add more defaults...
+    imports = [
+        ../modules/shell/shell.nix
+        ../modules/ghostty.nix
+        ../modules/git.nix
+        # ... other shared modules
     ];
-
-    # Your default services
-    services.openssh.enable = true;
-    
-    # etc...
-}
-```
-
-### Modify User Template
-
-Edit `home/template/default.nix`:
-
-```nix
-{ config, pkgs, pkgs-stable, userSettings, ... }:
-
-{
-    imports = [ ];
 
     home.username = userSettings.username;
     home.homeDirectory = "/home/" + userSettings.username;
     home.stateVersion = "25.05";
 
-    # Your default packages for all new users
-    home.packages = with pkgs; [
-        firefox
-        discord
-        # Add more defaults...
-    ];
-
-    programs.git = {
-        enable = true;
-        userName = userSettings.name;
-        userEmail = "user@example.com";  # Change default email
-        extraConfig = {
-            init.defaultBranch = "main";
-            safe.directory = "/home/" + userSettings.username + "/.dotfiles";
-        };
-    };
+    # User-specific packages or overrides
+    home.packages = with pkgs; [ ];
 
     programs.home-manager.enable = true;
+}
+```
+
+### Creating a New User
+
+To add a new user, create a directory and import desired shared modules:
+
+```bash
+mkdir home/newuser
+```
+
+Create `home/newuser/default.nix`:
+
+```nix
+{ config, lib, pkgs, pkgs-stable, userSettings, ... }:
+
+{
+    imports = [
+        ../modules/shell/shell.nix
+        ../modules/git.nix
+        # Include other modules your user needs
+    ];
+
+    home.username = userSettings.username;
+    home.homeDirectory = "/home/" + userSettings.username;
+    home.stateVersion = "25.05";
+
+    home.packages = with pkgs; [ ];
+
+    programs.home-manager.enable = true;
+}
+```
+
+Create `home/newuser/settings.nix`:
+
+```nix
+{
+    username = "newuser";
+    name = "Full Name";
 }
 ```
 
@@ -183,14 +375,40 @@ mkdir home/alice
 mkdir home/bob
 ```
 
-Each user can have different configurations:
+Each user imports shared modules but can customize:
 
 ```nix
 # home/alice/default.nix
-home.packages = with pkgs; [ vscode python3 ];
+{
+    imports = [
+        ../modules/shell/shell.nix
+        ../modules/git.nix
+    ];
+
+    home.username = userSettings.username;
+    home.homeDirectory = "/home/" + userSettings.username;
+    home.stateVersion = "25.05";
+
+    home.packages = with pkgs; [ vscode python3 ];
+
+    programs.home-manager.enable = true;
+}
 
 # home/bob/default.nix  
-home.packages = with pkgs; [ vim rust ];
+{
+    imports = [
+        ../modules/shell/shell.nix
+        ../modules/git.nix
+    ];
+
+    home.username = userSettings.username;
+    home.homeDirectory = "/home/" + userSettings.username;
+    home.stateVersion = "25.05";
+
+    home.packages = with pkgs; [ vim rust ];
+
+    programs.home-manager.enable = true;
+}
 ```
 
 Apply per user:
@@ -226,27 +444,11 @@ home.packages = with pkgs; [
 ];
 ```
 
-## Modular User Configurations
+## Adding Modules to home/modules/
 
-### Best Practices
+### Creating a Shared Module
 
-Split user configurations into focused modules:
-
-```
-home/username/
-├── default.nix       # Main config, imports all modules
-├── settings.nix      # User settings (username, name)
-├── sh.nix           # Shell configuration
-├── hyprland.nix     # Window manager
-├── ghostty.nix      # Terminal emulator
-├── dolphin.nix      # File manager
-├── walker.nix       # Application launcher
-└── polkit.nix       # Authentication agent
-```
-
-### Creating a User Module
-
-Create `home/username/myapp.nix`:
+Create a new module in `home/modules/myapp.nix`:
 
 ```nix
 { config, lib, pkgs, ... }:
@@ -263,12 +465,12 @@ Create `home/username/myapp.nix`:
 }
 ```
 
-Import in `home/username/default.nix`:
+Then import it in any user's `default.nix`:
 
 ```nix
 {
     imports = [
-        ./myapp.nix
+        ../modules/myapp.nix
     ];
 }
 ```
@@ -298,31 +500,34 @@ This is better than manual config files because:
 - Proper dependency management
 - Automatic package installation
 
+### Module Examples
+
+Look at existing modules for patterns:
+- `home/modules/shell/shell.nix` - Shell configuration
+- `home/modules/ghostty.nix` - Terminal emulator
+- `home/modules/git.nix` - Git configuration
+- `home/modules/hyprland.nix` - Window manager
+
 ## Custom System Modules
 
-### Creating a Module
+System modules in `hosts/modules/` provide reusable configuration across all hosts. You can create new modules or modify existing ones.
 
-Create `modules/my-service.nix`:
+### Creating a Custom Module
+
+Create `hosts/modules/my-service.nix`:
 
 ```nix
 { config, lib, pkgs, ... }:
 
-with lib;
-
 {
-    options.services.myService = {
-        enable = mkEnableOption "My custom service";
-        
-        port = mkOption {
-            type = types.int;
-            default = 8080;
-            description = "Port to listen on";
-        };
+    services.myservice = {
+        enable = true;
+        port = 8080;
     };
 
-    config = mkIf config.services.myService.enable {
-        # Service configuration here
-    };
+    environment.systemPackages = with pkgs; [
+        myapp
+    ];
 }
 ```
 
@@ -335,16 +540,26 @@ Import in host configuration:
 {
     imports = [
         ./hardware-configuration.nix
+        ../modules/my-service.nix
         ../../common/default.nix
-        ../../modules/my-service.nix
     ];
 
-    services.myService = {
-        enable = true;
-        port = 9000;
-    };
+    system.stateVersion = "25.05";
 }
 ```
+
+### Existing Host Modules
+
+Reference the existing modules for patterns:
+- `hosts/modules/boot.nix` - Boot loader configuration
+- `hosts/modules/environment.nix` - System packages and environment
+- `hosts/modules/locale.nix` - Locale and timezone
+- `hosts/modules/networking.nix` - Network configuration
+- `hosts/modules/nix.nix` - Nix settings
+- `hosts/modules/programs.nix` - System programs
+- `hosts/modules/security.nix` - Security settings
+- `hosts/modules/services.nix` - System services
+- `hosts/modules/users.nix` - User accounts
 
 ## Overlays and Overrides
 
