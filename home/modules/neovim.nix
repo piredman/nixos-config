@@ -30,6 +30,7 @@
       which-key-nvim
       lualine-nvim
       vim-tmux-navigator
+      harpoon2
 
       alpha-nvim
       catppuccin-nvim
