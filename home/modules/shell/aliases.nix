@@ -29,5 +29,7 @@
     gta = "git worktree add";
     gtd = "git worktree delete";
     lg = "lazygit";
+
+    oc = "opencode";
   };
 }

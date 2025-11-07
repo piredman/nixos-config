@@ -88,6 +88,7 @@
       exec-once = [
         "waybar"
         "mako"
+        "hyprctl dispatch workspace 1"
       ];
 
       input = {

@@ -31,6 +31,7 @@
       lualine-nvim
       vim-tmux-navigator
       harpoon2
+      lazygit-nvim
 
       alpha-nvim
       catppuccin-nvim
