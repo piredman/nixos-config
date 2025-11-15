@@ -18,6 +18,7 @@
       bind
       godot
       mako
+      cifs-utils
     ];
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then

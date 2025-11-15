@@ -13,6 +13,7 @@
     ./hardware-configuration.nix
     ../modules/boot.nix
     ../modules/environment.nix
+    ../modules/fileSystems.nix
     ../modules/locale.nix
     ../modules/networking.nix
     ../modules/nix.nix
