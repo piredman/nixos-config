@@ -34,7 +34,27 @@
     }@inputs:
 
     let
-      hosts = import ./config/hosts.nix;
+      lib = inputs.nixpkgs.lib;
+
+      hostDirs = builtins.attrNames (
+        lib.filterAttrs (name: type: type == "directory" && !lib.hasPrefix "_" name) (
+          builtins.readDir ./hosts
+        )
+      );
+
+      mkHostConfig =
+        hostDir:
+        let
+          settings = import ./hosts/${hostDir}/settings.nix;
+        in
+        {
+          name = settings.hostname;
+          value = mkNixOSConfigurations {
+            host = settings;
+            nixpkgs = inputs.nixpkgs;
+            home-manager = inputs.home-manager;
+          };
+        };
 
       mkNixOSConfigurations =
         {
@@ -43,12 +63,13 @@
           home-manager,
         }:
         let
-          systemSettings = import ./hosts/${host.dir}/settings.nix;
+          systemSettings = host;
+          hostDir = host.hostname;
         in
         inputs.nixpkgs.lib.nixosSystem {
           system = host.arch;
           modules = [
-            ./hosts/${host.dir}/configuration.nix
+            ./hosts/${hostDir}/configuration.nix
             inputs.stylix.nixosModules.default
             inputs.home-manager.nixosModules.home-manager
             {
@@ -62,8 +83,9 @@
               ];
               home-manager.extraSpecialArgs = {
                 userSettings = import ./home/${host.user}/settings.nix;
+                systemSettings = systemSettings;
               };
-              home-manager.users."${host.user}" = import ./hosts/${host.dir}/home.nix;
+              home-manager.users."${host.user}" = import ./hosts/${hostDir}/home.nix;
             }
           ];
           specialArgs = {
@@ -77,22 +99,6 @@
         };
     in
     {
-
-      nixosConfigurations."${hosts.luna.hostname}" = mkNixOSConfigurations {
-        host = hosts.luna;
-        nixpkgs = inputs.nixpkgs;
-        home-manager = inputs.home-manager;
-      };
-      nixosConfigurations."${hosts.mini.hostname}" = mkNixOSConfigurations {
-        host = hosts.mini;
-        nixpkgs = inputs.nixpkgs;
-        home-manager = inputs.home-manager;
-      };
-      nixosConfigurations."${hosts.terra.hostname}" = mkNixOSConfigurations {
-        host = hosts.terra;
-        nixpkgs = inputs.nixpkgs;
-        home-manager = inputs.home-manager;
-      };
-
+      nixosConfigurations = builtins.listToAttrs (map mkHostConfig hostDirs);
     };
 }

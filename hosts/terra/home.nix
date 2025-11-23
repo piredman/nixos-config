@@ -1,16 +1,12 @@
-{ config, pkgs, ... }:
-let
-  users = import ../../config/users.nix;
-  userSettings = import ../../home/${users.default}/settings.nix;
-in
+{ config, pkgs, userSettings, ... }:
 {
   imports = [
-    ../../home/${users.default}/default.nix
+    ../../home/${userSettings.username}/default.nix
   ];
 
   home = {
-    username = users.default;
-    homeDirectory = "/home/${users.default}";
+    username = userSettings.username;
+    homeDirectory = "/home/${userSettings.username}";
     stateVersion = "25.05";
     packages = with pkgs; [
       starship
