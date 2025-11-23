@@ -13,7 +13,6 @@
     ./hardware-configuration.nix
     ../_modules/core.nix
     ../_modules/fileSystems.nix
-    ../_modules/hyprland.nix
     ../_modules/networking.nix
     ../_modules/programs.nix
     ../_modules/services.nix

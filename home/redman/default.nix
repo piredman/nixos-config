@@ -12,6 +12,7 @@
     # ../_modules/dolphin.nix
     ../_modules/ghostty.nix
     ../_modules/git.nix
+    ../_modules/godot.nix
     ../_modules/hyprland.nix
     ../_modules/hyprshot.nix
     ../_modules/libreoffice.nix

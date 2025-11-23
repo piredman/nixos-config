@@ -18,7 +18,7 @@ in
         output = "DP-1";
         layer = "top";
         position = "right";
-        width = 30;
+        width = 40;
         spacing = 5;
 
         modules-left = [
@@ -29,7 +29,7 @@ in
           "hyprland/workspaces"
         ];
         modules-right = [
-          "system-tray"
+          "tray"
         ];
 
         "hyprland/workspaces" = {
@@ -47,7 +47,7 @@ in
         output = "DP-2";
         layer = "top";
         position = "left";
-        width = 30;
+        width = 40;
         spacing = 5;
 
         modules-left = [
@@ -60,6 +60,7 @@ in
         modules-right = [
           "pulseaudio"
           "network"
+          "custom/notifications"
         ];
 
         "hyprland/workspaces" = {
