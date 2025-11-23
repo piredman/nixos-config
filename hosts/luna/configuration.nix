@@ -14,7 +14,6 @@
     ../modules/boot.nix
     ../modules/environment.nix
     ../modules/fileSystems.nix
-    ../modules/godot.nix
     ../modules/locale.nix
     ../modules/networking.nix
     ../modules/nix.nix

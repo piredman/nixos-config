@@ -1,0 +1,6 @@
+{
+  hostname = "luna";
+  timezone = "America/Edmonton";
+  locale = "en_GB.UTF-8";
+  luks.device = "";
+}
