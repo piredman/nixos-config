@@ -23,6 +23,7 @@
     ../_modules/obsidian.nix
     ../_modules/opencode.nix
     ../_modules/polkit.nix
+    ../_modules/sparrow.nix
     ../_modules/shell/shell.nix
     ../_modules/starship.nix
     ../_modules/stylix.nix

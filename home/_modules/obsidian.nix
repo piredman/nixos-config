@@ -8,6 +8,8 @@
 
   # Install obsidian but do not manage it's configuration fileSystems
   # Using syncthing
-  home.packages = [ pkgs.obsidian ];
+  home.packages = with pkgs; [
+    obsidian
+  ];
 
 }
