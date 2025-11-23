@@ -63,7 +63,7 @@
       validHosts = builtins.filter (name: name != "template") hosts;
 
       homeDirs = builtins.attrNames (builtins.readDir ./home);
-      validUsers = builtins.filter (name: name != "template" && name != "modules") homeDirs;
+      validUsers = builtins.filter (name: name != "template" && name != "_modules") homeDirs;
     in
     {
 

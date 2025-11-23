@@ -9,31 +9,31 @@
 
 {
   imports = [
-    # ../modules/dolphin.nix
-    ../modules/ghostty.nix
-    ../modules/git.nix
-    ../modules/hyprland.nix
-    ../modules/hyprshot.nix
-    ../modules/libreoffice.nix
-    ../modules/logseq.nix
-    ../modules/mako.nix
-    ../modules/nautilus.nix
-    ../modules/neovim.nix
-    ../modules/obsidian.nix
-    ../modules/opencode.nix
-    ../modules/polkit.nix
-    ../modules/shell/shell.nix
-    ../modules/starship.nix
-    ../modules/stylix.nix
-    ../modules/syncthing.nix
-    ../modules/terminal.nix
-    ../modules/tmux.nix
-    ../modules/vesktop.nix
-    ../modules/walker.nix
-    ../modules/xdg.nix
-    ../modules/waybar/waybar.nix
-    ../modules/yazi.nix
-    ../modules/zen-browser.nix
+    # ../_modules/dolphin.nix
+    ../_modules/ghostty.nix
+    ../_modules/git.nix
+    ../_modules/hyprland.nix
+    ../_modules/hyprshot.nix
+    ../_modules/libreoffice.nix
+    ../_modules/logseq.nix
+    ../_modules/mako.nix
+    ../_modules/nautilus.nix
+    ../_modules/neovim.nix
+    ../_modules/obsidian.nix
+    ../_modules/opencode.nix
+    ../_modules/polkit.nix
+    ../_modules/shell/shell.nix
+    ../_modules/starship.nix
+    ../_modules/stylix.nix
+    ../_modules/syncthing.nix
+    ../_modules/terminal.nix
+    ../_modules/tmux.nix
+    ../_modules/vesktop.nix
+    ../_modules/walker.nix
+    ../_modules/xdg.nix
+    ../_modules/waybar/waybar.nix
+    ../_modules/yazi.nix
+    ../_modules/zen-browser.nix
   ];
   _module.args = { inherit userSettings; };
 

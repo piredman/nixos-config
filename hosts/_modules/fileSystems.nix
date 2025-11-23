@@ -9,7 +9,7 @@
 }:
 let
   mkNasMount = shareName: {
-    device = "//192.168.1.12/${shareName}";
+    device = "//${systemSettings.nas.ip}/${shareName}";
     fsType = "cifs";
     options = [
       "credentials=/home/${userSettings.username}/.dotfiles/secrets/smb-secrets"
@@ -23,10 +23,10 @@ let
   };
 in
 {
-  fileSystems."/mnt/apps" = mkNasMount "apps";
-  fileSystems."/mnt/backups" = mkNasMount "backups";
-  fileSystems."/mnt/docker" = mkNasMount "docker";
-  fileSystems."/mnt/documents" = mkNasMount "documents";
-  fileSystems."/mnt/scans" = mkNasMount "scans";
-  fileSystems."/mnt/syncthing" = mkNasMount "syncthing";
+  fileSystems = builtins.listToAttrs (
+    map (share: {
+      name = "/mnt/${share}";
+      value = mkNasMount share;
+    }) systemSettings.nas.mounts
+  );
 }
