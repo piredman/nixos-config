@@ -283,9 +283,200 @@ Rename directory to start with `.`:
 mv hosts/oldhost hosts/.oldhost  # Hidden, won't be discovered
 ```
 
-## Shared Modules Pattern
+## Dynamic Module Groups System
 
-The configuration uses a centralized `home/modules/` directory containing shared modules imported by all users:
+The configuration uses a dynamic module group system that allows each host to specify which categories of modules to load. This provides flexibility while maintaining organization.
+
+### Module Group Structure
+
+```
+home/_modules/
+├── default.nix        # Dynamic import helper functions
+├── core/             # Essential modules (loaded by all hosts)
+│   ├── shell/
+│   ├── waybar/
+│   ├── ghostty.nix
+│   ├── git.nix
+│   ├── hyprland.nix
+│   └── ... (core functionality)
+├── comms/            # Communication tools (optional)
+│   └── vesktop.nix
+├── dev/              # Development tools (optional)
+│   └── opencode.nix
+├── gamedev/          # Game development (optional)
+│   └── godot.nix
+├── notes/            # Note-taking apps (optional)
+│   ├── logseq.nix
+│   └── obsidian.nix
+└── office/           # Office applications (optional)
+    ├── libreoffice.nix
+    └── sparrow.nix
+```
+
+### Host Module Group Configuration
+
+Each host specifies which module groups to load in its `hosts/hostname/home.nix`:
+
+```nix
+# hosts/hostname/home.nix
+{ config, pkgs, userSettings, lib, ... }:
+
+let
+  # Specify module groups for this host
+  moduleGroups = [ "core" "dev" "notes" ];  # Customize per host
+  
+  # Import helper function and generate module list
+  moduleHelper = import ../../home/_modules/default.nix { inherit lib; };
+  moduleImports = moduleHelper.importModuleGroups moduleGroups;
+in
+{
+  imports = [
+    ../../home/${userSettings.username}/default.nix
+  ] ++ moduleImports;
+
+  home = {
+    username = userSettings.username;
+    homeDirectory = "/home/${userSettings.username}";
+    stateVersion = "25.05";
+    packages = with pkgs; [ starship ];
+  };
+}
+```
+
+### Per-Host Module Customization Examples
+
+**Minimal Host (mini):**
+```nix
+moduleGroups = [ "core" ];  # Only essential functionality
+```
+
+**Development Host (luna):**
+```nix
+moduleGroups = [ "core" "dev" "gamedev" ];  # Core + development tools
+```
+
+**Full Workstation (terra):**
+```nix
+moduleGroups = [ "core" "dev" "notes" "office" "comms" "gamedev" ];  # Everything
+```
+
+### User Configuration Structure
+
+User configurations remain clean and focused on user-specific settings:
+
+```nix
+# home/username/default.nix
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-stable,
+  userSettings,
+  ...
+}:
+
+{
+  # Module imports are handled by the host configuration
+  # This keeps user config clean and focused on user-specific settings
+
+  fonts.fontconfig.enable = true;
+
+  home = {
+    username = userSettings.username;
+    homeDirectory = "/home/" + userSettings.username;
+    stateVersion = "25.05";
+
+    packages = [ ];
+    file = { };
+    sessionVariables = { };
+  };
+
+  programs.home-manager.enable = true;
+}
+```
+
+### Adding New Module Groups
+
+1. **Create the group directory:**
+   ```bash
+   mkdir home/_modules/mygroup
+   ```
+
+2. **Add modules to the group:**
+   ```bash
+   # Create module files in the group
+   touch home/_modules/mygroup/myapp.nix
+   ```
+
+3. **Use in host configurations:**
+   ```nix
+   moduleGroups = [ "core" "mygroup" ];
+   ```
+
+### Adding Modules to Existing Groups
+
+Simply add `.nix` files to the appropriate group directory:
+
+```bash
+# Add new core module
+vim home/_modules/core/newapp.nix
+
+# Add new development tool
+vim home/_modules/dev/newtool.nix
+```
+
+The dynamic import system will automatically discover and include them.
+
+### Underscore Naming Convention
+
+The system uses an underscore prefix convention to distinguish between modules and support files:
+
+**Module Files** (imported automatically):
+- `myapp.nix` - Proper modules that configure applications
+- `shell.nix` - Main shell module
+- `waybar.nix` - Main waybar module
+
+**Support Files** (excluded from import, prefixed with `_`):
+- `_aliases.nix` - Alias definitions imported by shell modules
+- `_bash.nix` - Bash-specific configuration imported by shell.nix
+- `_zsh.nix` - Zsh-specific configuration imported by shell.nix
+- `_functions.zsh` - Shell functions sourced by zsh
+- `_waybar.css` - Stylesheet read by waybar module
+
+**Benefits of This Convention:**
+1. **Self-Documenting:** Immediately clear which files are modules vs support files
+2. **Maintainable:** No hardcoded exclusion lists to maintain
+3. **Automatic:** The helper function automatically excludes `_*` files
+4. **Flexible:** Easy to add new support files without code changes
+
+**Example Structure:**
+```
+home/_modules/core/
+├── shell/
+│   ├── shell.nix       # Main module (imported)
+│   ├── _bash.nix       # Support file (imported by shell.nix)
+│   ├── _zsh.nix        # Support file (imported by shell.nix)
+│   ├── _aliases.nix    # Data file (imported by _bash.nix and _zsh.nix)
+│   └── _functions.zsh  # Script file (sourced by _zsh.nix)
+├── waybar/
+│   ├── waybar.nix      # Main module (imported)
+│   └── _waybar.css     # Stylesheet (read by waybar.nix)
+└── myapp.nix           # Simple module (imported)
+```
+
+### Benefits of Module Groups
+
+1. **Host-Specific Functionality:** Each host loads only what it needs
+2. **Automatic Discovery:** No manual import lists to maintain
+3. **Organized by Purpose:** Modules grouped by functionality
+4. **Scalable:** Easy to add new modules and groups
+5. **Clean User Configs:** User configs focus on user-specific settings
+
+## Legacy Shared Modules Pattern
+
+**Note:** The dynamic module groups system has replaced the previous shared modules pattern. The old documentation is preserved below for reference.
+
+The previous configuration used a centralized `home/modules/` directory containing shared modules imported by all users:
 
 ```
 home/modules/
@@ -300,12 +491,12 @@ home/modules/
 └── ... (other modules)
 ```
 
-### User Configuration Structure
+### Legacy User Configuration Structure
 
-Each user imports these shared modules:
+Each user previously imported these shared modules:
 
 ```nix
-# home/username/default.nix
+# home/username/default.nix (old pattern)
 {
     imports = [
         ../modules/shell/shell.nix

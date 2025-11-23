@@ -6,9 +6,10 @@
   ...
 }:
 {
+
   imports = [
-    ./bash.nix
-    ./zsh.nix
+    ./_bash.nix
+    ./_zsh.nix
   ];
 
 }

@@ -1,8 +1,28 @@
-{ config, pkgs, userSettings, ... }:
+{
+  config,
+  pkgs,
+  userSettings,
+  lib,
+  ...
+}:
+
+let
+  moduleGroups = [
+    "core"
+    "comms"
+    "dev"
+    "gamedev"
+    "notes"
+    "office"
+  ];
+  moduleHelper = import ../../home/_modules/default.nix { inherit lib; };
+  moduleImports = moduleHelper.importModuleGroups moduleGroups;
+in
 {
   imports = [
     ../../home/${userSettings.username}/default.nix
-  ];
+  ]
+  ++ moduleImports;
 
   home = {
     username = userSettings.username;

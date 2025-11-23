@@ -8,33 +8,8 @@
 }:
 
 {
-  imports = [
-    ../_modules/ghostty.nix
-    ../_modules/git.nix
-    ../_modules/godot.nix
-    ../_modules/hyprland.nix
-    ../_modules/hyprshot.nix
-    ../_modules/libreoffice.nix
-    ../_modules/logseq.nix
-    ../_modules/mako.nix
-    ../_modules/nautilus.nix
-    ../_modules/neovim.nix
-    ../_modules/obsidian.nix
-    ../_modules/opencode.nix
-    ../_modules/polkit.nix
-    ../_modules/sparrow.nix
-    ../_modules/shell/shell.nix
-    ../_modules/starship.nix
-    ../_modules/syncthing.nix
-    ../_modules/terminal.nix
-    ../_modules/tmux.nix
-    ../_modules/vesktop.nix
-    ../_modules/walker.nix
-    ../_modules/xdg.nix
-    ../_modules/waybar/waybar.nix
-    ../_modules/yazi.nix
-    ../_modules/zen-browser.nix
-  ];
+  # Module imports are now handled by the host configuration
+  # This keeps user config clean and focused on user-specific settings
 
   fonts.fontconfig.enable = true;
 

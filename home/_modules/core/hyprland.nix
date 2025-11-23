@@ -3,6 +3,7 @@
   lib,
   pkgs,
   userSettings,
+  systemSettings,
   ...
 }:
 
@@ -30,9 +31,9 @@
       "$fileManager" = "dolphin";
       "$menu" = "walker";
 
-      monitor = userSettings.monitors.setup;
-      "$primary_monitor" = userSettings.monitors.primary;
-      "$secondary_monitor" = userSettings.monitors.secondary;
+      monitor = systemSettings.monitors.setup;
+      "$primary_monitor" = systemSettings.monitors.primary;
+      "$secondary_monitor" = systemSettings.monitors.secondary;
 
       workspace = [
         "1, monitor:$primary_monitor"

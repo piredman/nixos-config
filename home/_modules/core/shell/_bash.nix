@@ -5,7 +5,7 @@
   ...
 }:
 let
-  aliases = import ./aliases.nix;
+  aliases = import ./_aliases.nix;
   commonAliases = aliases.commonAliases;
 in
 {

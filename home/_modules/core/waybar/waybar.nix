@@ -102,7 +102,7 @@ in
       };
     };
 
-    style = builtins.readFile ./waybar.css;
+    style = builtins.readFile ./_waybar.css;
   };
 
   stylix.targets.waybar = {
