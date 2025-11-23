@@ -9,7 +9,6 @@
 
 {
   imports = [
-    # ../_modules/dolphin.nix
     ../_modules/ghostty.nix
     ../_modules/git.nix
     ../_modules/godot.nix
@@ -26,7 +25,6 @@
     ../_modules/sparrow.nix
     ../_modules/shell/shell.nix
     ../_modules/starship.nix
-    ../_modules/stylix.nix
     ../_modules/syncthing.nix
     ../_modules/terminal.nix
     ../_modules/tmux.nix
@@ -37,7 +35,6 @@
     ../_modules/yazi.nix
     ../_modules/zen-browser.nix
   ];
-  _module.args = { inherit userSettings; };
 
   fonts.fontconfig.enable = true;
 

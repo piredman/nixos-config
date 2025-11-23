@@ -16,6 +16,7 @@
     ../_modules/networking.nix
     ../_modules/programs.nix
     ../_modules/services.nix
+    ../_modules/stylix.nix
     ../_modules/users.nix
   ];
 

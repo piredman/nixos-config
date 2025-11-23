@@ -1,6 +1,6 @@
 {
 
-  description = "Flake that does the things";
+  description = "Nix Dotfilesx with flake";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
@@ -30,85 +30,69 @@
   outputs =
     {
       self,
-      nixpkgs,
-      nixpkgs-stable,
-      home-manager,
-      stylix,
-      elephant,
-      walker,
-      zen-browser,
       ...
-    }:
+    }@inputs:
+
     let
-      lib = nixpkgs.lib;
-      system = "x86_64-linux";
+      hosts = import ./config/hosts.nix;
 
-      pkgs = import nixpkgs {
-        inherit system;
-        config = {
-          allowUnfree = true;
+      mkNixOSConfigurations =
+        {
+          host,
+          nixpkgs,
+          home-manager,
+        }:
+        let
+          systemSettings = import ./hosts/${host.dir}/settings.nix;
+        in
+        inputs.nixpkgs.lib.nixosSystem {
+          system = host.arch;
+          modules = [
+            ./hosts/${host.dir}/configuration.nix
+            inputs.stylix.nixosModules.default
+            inputs.home-manager.nixosModules.home-manager
+            {
+              nixpkgs.config.allowUnfree = true;
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = false;
+              home-manager.backupFileExtension = "backup";
+              home-manager.sharedModules = [
+                inputs.walker.homeManagerModules.default
+                inputs.zen-browser.homeModules.default
+              ];
+              home-manager.extraSpecialArgs = {
+                userSettings = import ./home/${host.user}/settings.nix;
+              };
+              home-manager.users."${host.user}" = import ./hosts/${host.dir}/home.nix;
+            }
+          ];
+          specialArgs = {
+            inherit systemSettings;
+            pkgs-stable = import inputs.nixpkgs-stable {
+              system = host.arch;
+              config.allowUnfree = true;
+            };
+            userSettings = import ./home/${host.user}/settings.nix;
+          };
         };
-      };
-      pkgs-stable = import {
-        inherit system;
-        config = {
-          allowUnfree = true;
-        };
-      };
-
-      mkSystemSettings = hostname: import ./hosts/${hostname}/settings.nix;
-      mkUserSettings = username: import ./home/${username}/settings.nix;
-
-      hosts = builtins.attrNames (builtins.readDir ./hosts);
-      validHosts = builtins.filter (name: name != "template") hosts;
-
-      homeDirs = builtins.attrNames (builtins.readDir ./home);
-      validUsers = builtins.filter (name: name != "template" && name != "_modules") homeDirs;
     in
     {
 
-      nixosConfigurations = builtins.listToAttrs (
-        map (hostname: {
-          name = hostname;
-          value = lib.nixosSystem {
-            inherit system;
-            modules = [
-              ./hosts/${hostname}/configuration.nix
-            ];
-            specialArgs = {
-              inherit pkgs-stable;
-              systemSettings = mkSystemSettings hostname;
-              userSettings = mkUserSettings (builtins.head validUsers);
-            };
-          };
-        }) validHosts
-      );
-
-      home-manager = {
-        useGlobalPkgs = true;
-        useUserPackages = true;
-        backupFileExtension = "backup";
-        nixpkgs.allowUnfreePredicate = _: true;
+      nixosConfigurations."${hosts.luna.hostname}" = mkNixOSConfigurations {
+        host = hosts.luna;
+        nixpkgs = inputs.nixpkgs;
+        home-manager = inputs.home-manager;
       };
-
-      homeConfigurations = builtins.listToAttrs (
-        map (username: {
-          name = username;
-          value = home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [
-              stylix.homeModules.default
-              walker.homeManagerModules.default
-              zen-browser.homeModules.default
-              ./home/${username}/default.nix
-            ];
-            extraSpecialArgs = {
-              systemSettings = mkSystemSettings (builtins.head validHosts);
-              userSettings = mkUserSettings username;
-            };
-          };
-        }) validUsers
-      );
+      nixosConfigurations."${hosts.mini.hostname}" = mkNixOSConfigurations {
+        host = hosts.mini;
+        nixpkgs = inputs.nixpkgs;
+        home-manager = inputs.home-manager;
+      };
+      nixosConfigurations."${hosts.terra.hostname}" = mkNixOSConfigurations {
+        host = hosts.terra;
+        nixpkgs = inputs.nixpkgs;
+        home-manager = inputs.home-manager;
+      };
 
     };
 }

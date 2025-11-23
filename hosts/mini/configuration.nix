@@ -11,15 +11,13 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../modules/boot.nix
-    ../modules/environment.nix
-    ../modules/locale.nix
-    ../modules/networking.nix
-    ../modules/nix.nix
-    ../modules/programs.nix
-    ../modules/services.nix
-    ../modules/users.nix
-    ../modules/security.nix
+    ../_modules/core.nix
+    ../_modules/fileSystems.nix
+    ../_modules/networking.nix
+    ../_modules/programs.nix
+    ../_modules/services.nix
+    ../_modules/stylix.nix
+    ../_modules/users.nix
   ];
 
   system.stateVersion = "25.05";
