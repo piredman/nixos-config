@@ -2,6 +2,7 @@
 nixos-rebuild-host() {
   pushd ~/.dotfiles
   git add -A && clear && sudo nixos-rebuild switch --flake .#$HOST
+  restart-services
   popd
 }
 
@@ -15,6 +16,12 @@ nixos-flake-update() {
   pushd ~/.dotfiles
   git add -A && clear && nix flake update
   popd
+}
+
+restart-services() {
+  echo "Restarting walker..."
+  systemctl --user restart elephant.service
+  echo "done."
 }
 
 

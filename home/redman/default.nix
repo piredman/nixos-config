@@ -8,9 +8,6 @@
 }:
 
 {
-  # Module imports are now handled by the host configuration
-  # This keeps user config clean and focused on user-specific settings
-
   fonts.fontconfig.enable = true;
 
   home = {
