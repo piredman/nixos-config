@@ -10,14 +10,27 @@
 
 {
 
-  programs = {
-    zsh.enable = true;
-    hyprland.enable = true;
+  services = {
+    fwupd.enable = true;
+    fstrim.enable = true;
+    getty.autologinUser = userSettings.username;
 
-    gnupg.agent = {
-      enable = true;
-      enableSSHSupport = true;
+    xserver.xkb = {
+      layout = "us";
+      variant = "";
     };
+
+    openssh = {
+      enable = true;
+
+      settings.PermitRootLogin = "no";
+      settings.PasswordAuthentication = true;
+    };
+  };
+
+  services = {
+    printing.enable = true;
+    avahi.enable = true;
   };
 
 }

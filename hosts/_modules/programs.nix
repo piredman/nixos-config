@@ -10,21 +10,13 @@
 
 {
 
-  services = {
-    fwupd.enable = true;
-    fstrim.enable = true;
-    getty.autologinUser = userSettings.username;
+  programs = {
+    zsh.enable = true;
+    hyprland.enable = true;
 
-    xserver.xkb = {
-      layout = "us";
-      variant = "";
-    };
-
-    openssh = {
+    gnupg.agent = {
       enable = true;
-
-      settings.PermitRootLogin = "no";
-      settings.PasswordAuthentication = true;
+      enableSSHSupport = true;
     };
   };
 
