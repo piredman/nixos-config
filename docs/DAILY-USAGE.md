@@ -229,14 +229,14 @@ df -h /nix
 
 #### System Package
 
-Modify the appropriate module in `hosts/modules/` (typically `environment.nix`), or create a custom module and import it in your host's `configuration.nix`:
+Modify the appropriate module in `hosts/_modules/` (typically `core.nix`), or create a custom module and import it in your host's `configuration.nix`:
 
 ```nix
-# hosts/modules/environment.nix or custom module
+# hosts/_modules/core.nix or custom module
 environment.systemPackages = with pkgs; [
-  neovim
-  git
-  htop      # Add this
+    neovim
+    git
+    htop      # Add this
 ];
 ```
 
@@ -347,18 +347,20 @@ Each host has its own directory with separate settings:
 ```bash
 # terra host (primary)
 hosts/terra/
-├── configuration.nix        # Imports modules from hosts/modules/
+├── configuration.nix        # Imports modules from hosts/_modules/
 ├── hardware-configuration.nix
-└── settings.nix             # Hostname, timezone, locale
+├── home.nix                 # Home-manager integration
+└── settings.nix             # Hostname, arch, user, timezone, locale, etc.
 
 # mini host
 hosts/mini/
-├── configuration.nix        # Imports modules from hosts/modules/
+├── configuration.nix        # Imports modules from hosts/_modules/
 ├── hardware-configuration.nix
+├── home.nix
 └── settings.nix
 ```
 
-The `configuration.nix` imports shared modules from `hosts/modules/`. Customize modules or create new ones in `hosts/modules/` and import them in your host's `configuration.nix`. See [Host Modules Pattern](ADVANCED.md#host-modules-pattern) for details.
+The `configuration.nix` imports shared modules from `hosts/_modules/`. Customize modules or create new ones in `hosts/_modules/` and import them in your host's `configuration.nix`. The `home.nix` file controls which home-manager module groups are loaded. See [Host Modules Pattern](ADVANCED.md#host-modules-pattern) for details.
 
 ### Remote Rebuilds
 
@@ -460,5 +462,4 @@ du -sh /nix/store
 
 - [Bootstrap Guide](BOOTSTRAP.md) - Initial setup
 - [Package Management](PACKAGES.md) - Managing packages
-- [Scripts Reference](SCRIPTS.md) - Helper scripts
 - [Advanced Topics](ADVANCED.md) - Advanced configuration

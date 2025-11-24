@@ -15,44 +15,55 @@ This is a modular NixOS configuration with:
 
 ```
 nixos-config/
-├── bootstrap                # Bootstrap script (bash)
-├── scripts/
-│   └── setup-host.sh       # Create new host/user configs (bash)
+├── bootstrap                # Bootstrap script (clones repo, provides setup instructions)
 ├── hosts/                   # System configurations
 │   ├── <hostname>/
-│   │   ├── configuration.nix
+│   │   ├── configuration.nix        # Host system config
 │   │   ├── hardware-configuration.nix
-│   │   └── settings.nix
-│   ├── template/            # Template for new hosts
-│   └── modules/             # Shared system modules (imported by all hosts)
-│       ├── boot.nix
-│       ├── environment.nix
-│       ├── locale.nix
-│       ├── networking.nix
-│       ├── nix.nix
-│       ├── programs.nix
-│       ├── security.nix
-│       ├── services.nix
-│       └── users.nix
+│   │   ├── home.nix                 # Home-manager integration
+│   │   └── settings.nix             # Host settings
+│   ├── _modules/            # Shared system modules
+│   │   ├── core.nix         # Boot, environment, locale, nix
+│   │   ├── fileSystems.nix
+│   │   ├── networking.nix
+│   │   ├── nvidia.nix
+│   │   ├── programs.nix
+│   │   ├── services.nix
+│   │   ├── stylix.nix       # Theme system
+│   │   └── users.nix
+│   └── _settings/           # Shared settings
+│       └── nas.nix          # NAS mount configuration
 ├── home/                    # User configurations  
 │   ├── <username>/
-│   │   ├── default.nix
-│   │   ├── settings.nix
-│   │   └── *.nix           # User-specific modules
-│   ├── template/            # Template for new users
-│   └── modules/             # Shared user modules (imported by all users)
-│       ├── shell/
-│       ├── waybar/
-│       ├── ghostty.nix
-│       ├── git.nix
-│       └── ... (other modules)
-├── common/
-│   └── default.nix         # Shared config (unfree, flakes)
+│   │   ├── default.nix      # User-specific config
+│   │   ├── settings.nix     # User settings
+│   │   └── nvim/            # Neovim config (optional)
+│   └── _modules/            # Dynamic module groups
+│       ├── default.nix      # Module group helper
+│       ├── core/            # Essential modules (always loaded)
+│       │   ├── shell/
+│       │   ├── waybar/
+│       │   ├── ghostty.nix
+│       │   ├── git.nix
+│       │   └── ... (other core modules)
+│       ├── comms/           # Communication tools
+│       │   └── vesktop.nix
+│       ├── dev/             # Development tools
+│       │   └── opencode.nix
+│       ├── gamedev/         # Game development
+│       │   └── godot.nix
+│       ├── notes/           # Note-taking apps
+│       │   ├── logseq.nix
+│       │   └── obsidian.nix
+│       ├── office/          # Office applications
+│       │   ├── libreoffice.nix
+│       │   └── sparrow.nix
+│       └── streaming/       # Streaming tools
+│           └── obs-studio.nix
 ├── docs/                    # Documentation
 │   ├── BOOTSTRAP.md
 │   ├── PACKAGES.md
 │   ├── DAILY-USAGE.md
-│   ├── SCRIPTS.md
 │   └── ADVANCED.md
 └── flake.nix               # Auto-discovers hosts/users
 ```
@@ -61,13 +72,13 @@ nixos-config/
 
 ### Auto-Discovery
 - Flake automatically discovers all directories in `hosts/` and `home/`
-- `template` directories are filtered out
+- Directories starting with `_` are filtered out (used for shared modules)
 - No need to edit flake.nix when adding new hosts/users
 
 ### Settings Files
-- Each host has `settings.nix` with: hostname, timezone, local
+- Each host has `settings.nix` with: hostname, arch, user, timezone, locale, and optional fields (luks, nas, monitors)
 - Each user has `settings.nix` with: username, name
-- Settings imported automatically via `mkSystemSettings` and `mkUserSettings`
+- Settings imported automatically and passed via `specialArgs`/`extraSpecialArgs`
 
 ### Package Management
 - `pkgs` - nixos-unstable (default)
@@ -77,9 +88,9 @@ nixos-config/
 ### Bootstrap Workflow
 1. User runs bootstrap one-liner
 2. Bootstrap clones repo to `~/.dotfiles`
-3. Bootstrap calls `setup-host.sh` with detected values
-4. `setup-host.sh` creates host/user configs from templates
-5. Bootstrap applies configuration
+3. Bootstrap provides instructions for manual setup
+4. User copies existing host and customizes
+5. User applies configuration manually
 
 ## Build/Deploy Commands
 
@@ -159,16 +170,13 @@ sudo nix-store --optimize
 {
     imports = [
         ./hardware-configuration.nix
-        ../modules/boot.nix
-        ../modules/environment.nix
-        ../modules/locale.nix
-        ../modules/networking.nix
-        ../modules/nix.nix
-        ../modules/programs.nix
-        ../modules/security.nix
-        ../modules/services.nix
-        ../modules/users.nix
-        ../../common/default.nix
+        ../_modules/core.nix
+        ../_modules/fileSystems.nix
+        ../_modules/networking.nix
+        ../_modules/programs.nix
+        ../_modules/services.nix
+        ../_modules/stylix.nix
+        ../_modules/users.nix
     ];
 
     system.stateVersion = "25.05";
@@ -194,8 +202,20 @@ sudo nix-store --optimize
 # hosts/hostname/settings.nix
 {
     hostname = "hostname";
+    arch = "x86_64-linux";              # System architecture
+    user = "username";                   # Primary user
     timezone = "America/Edmonton";
-    local = "en_GB.UTF-8";
+    locale = "en_GB.UTF-8";
+    luks.device = "/dev/disk/by-uuid/...";  # LUKS encryption (optional)
+    nas = import ../_settings/nas.nix;       # NAS mounts (optional)
+    monitors = {                              # Monitor setup (optional)
+        primary = "DP-1";
+        secondary = "DP-2";
+        setup = [ 
+            "DP-1,2560x1440@60,0x0,1"
+            "DP-2,1920x1080@60,auto-right,1"
+        ];
+    };
 }
 
 # home/username/settings.nix
@@ -204,6 +224,45 @@ sudo nix-store --optimize
     name = "Full Name";
 }
 ```
+
+### Host's home.nix File
+
+Each host has a `home.nix` file that controls which home-manager module groups are loaded:
+
+**hosts/hostname/home.nix:**
+```nix
+{ config, pkgs, userSettings, lib, ... }:
+
+let
+  # Specify which module groups to load for this host
+  moduleGroups = [ 
+    "core"      # Essential (always include)
+    "dev"       # Development tools
+    "notes"     # Note-taking apps
+    # "comms"   # Communication tools
+    # "gamedev" # Game development
+    # "office"  # Office applications
+    # "streaming" # Streaming tools
+  ];
+  
+  moduleHelper = import ../../home/_modules/default.nix { inherit lib; };
+  moduleImports = moduleHelper.importModuleGroups moduleGroups;
+in
+{
+  imports = [
+    ../../home/${userSettings.username}/default.nix
+  ] ++ moduleImports;
+
+  home = {
+    username = userSettings.username;
+    homeDirectory = "/home/${userSettings.username}";
+    stateVersion = "25.05";
+    packages = with pkgs; [ ];
+  };
+}
+```
+
+This allows each host to customize which applications and tools are installed.
 
 ## Testing
 
@@ -225,32 +284,71 @@ Validation done via rebuild commands.
 ## Common Tasks
 
 ### Add New Host
-**Using script:**
+1. Copy an existing host as template:
 ```bash
-./scripts/setup-host.sh hostname username "Full Name" "Timezone" "Locale"
+cd ~/.dotfiles
+cp -r hosts/terra hosts/newhostname
 ```
 
-**Manual:**
-1. Create `hosts/hostname/` directory
-2. Create `hosts/hostname/configuration.nix` with imports from `../modules/`
-3. Create `hosts/hostname/settings.nix`
-4. Copy hardware config: `sudo cp /etc/nixos/hardware-configuration.nix hosts/hostname/`
-5. Flake auto-discovers on next rebuild
+2. Edit settings:
+```bash
+vim hosts/newhostname/settings.nix
+# Update: hostname, arch, user, timezone, locale, etc.
+```
 
-See [Host Modules Pattern](docs/ADVANCED.md#host-modules-pattern) for detailed examples.
+3. Copy hardware configuration:
+```bash
+sudo cp /etc/nixos/hardware-configuration.nix hosts/newhostname/
+```
+
+4. Configure module groups:
+```bash
+vim hosts/newhostname/home.nix
+# Choose which module groups to load
+```
+
+5. Apply:
+```bash
+sudo nixos-rebuild switch --flake .#newhostname
+```
+
+Flake auto-discovers the new host. No flake.nix editing needed.
+
+See [Creating a New Host](docs/ADVANCED.md#creating-a-new-host-configuration) for detailed examples.
 
 ### Add New User
-Created automatically by `setup-host.sh` or manually:
-1. Create `home/username/` directory
-2. Copy `home/template/default.nix`
-3. Create `home/username/settings.nix`
-4. Flake auto-discovers on next rebuild
+1. Create user directory:
+```bash
+mkdir -p home/newuser
+```
+
+2. Create settings:
+```bash
+cat > home/newuser/settings.nix <<EOF
+{
+    username = "newuser";
+    name = "Full Name";
+}
+EOF
+```
+
+3. Copy default.nix from existing user:
+```bash
+cp home/redman/default.nix home/newuser/default.nix
+```
+
+4. Edit as needed:
+```bash
+vim home/newuser/default.nix
+```
+
+Flake auto-discovers the new user on next rebuild.
 
 ### Add Package
 **System-wide (via modules):**
-Edit or create a module in `hosts/modules/`:
+Edit or create a module in `hosts/_modules/`:
 ```nix
-# hosts/modules/environment.nix (or create custom module)
+# hosts/_modules/core.nix (or create custom module)
 { config, lib, pkgs, ... }:
 
 {
@@ -292,8 +390,7 @@ programs.ghostty = {
 };
 ```
 
-### Modify Templates
-Edit `hosts/template/configuration.nix` or `home/template/default.nix` to change defaults for all new hosts/users created after modification.
+
 
 ## Important Files
 
@@ -305,20 +402,8 @@ Edit `hosts/template/configuration.nix` or `home/template/default.nix` to change
 
 ### bootstrap
 - Bash script for initial system setup
-- Calls `setup-host.sh` internally
 - Clones repo to `~/.dotfiles`
-- Applies configuration
-
-### scripts/setup-host.sh
-- Creates host/user configs from templates
-- Handles hardware config with backup
-- Accepts `--force` flag to skip prompts (used by bootstrap)
-- Used by bootstrap or manually
-
-### common/default.nix
-- Enables unfree packages
-- Enables flakes
-- Imported by all host configs
+- Provides instructions for manual configuration setup
 
 ## Documentation
 
@@ -326,7 +411,6 @@ All documentation is in `docs/`:
 - `BOOTSTRAP.md` - Bootstrap scenarios and workflows
 - `PACKAGES.md` - Package management (stable vs unstable)
 - `DAILY-USAGE.md` - Common commands and operations
-- `SCRIPTS.md` - Helper scripts reference
 - `ADVANCED.md` - Advanced configuration topics
 
 When helping users, refer them to appropriate docs.
@@ -348,13 +432,13 @@ When helping users, refer them to appropriate docs.
 ### Host Management
 1. Each host gets own directory in `hosts/`
 2. Each user gets own directory in `home/`
-3. Use `template/` as base for new configs
-4. Never edit `template/` unless changing defaults for all new hosts/users
-5. LUKS configuration belongs in hardware-configuration.nix, NOT configuration.nix
-6. Keep system packages minimal - prefer user-specific packages in home-manager
-7. Use modular configuration - separate concerns into individual modules in `hosts/modules/`
-8. Each host's `configuration.nix` imports necessary modules from `hosts/modules/`
-9. Create custom system modules in `hosts/modules/` for reusable system-level configuration
+3. Copy an existing host as base for new configs
+4. LUKS configuration belongs in hardware-configuration.nix, NOT configuration.nix
+5. Keep system packages minimal - prefer user-specific packages in home-manager
+6. Use modular configuration - separate concerns into individual modules in `hosts/_modules/`
+7. Each host's `configuration.nix` imports necessary modules from `hosts/_modules/`
+8. Create custom system modules in `hosts/_modules/` for reusable system-level configuration
+9. Each host's `home.nix` specifies which home module groups to load
 
 ### User Configuration Best Practices
 1. Create separate module files for different applications (e.g., ghostty.nix, dolphin.nix)
@@ -364,10 +448,10 @@ When helping users, refer them to appropriate docs.
 5. Polkit agent runs in home-manager, but `security.polkit.enable` must be set at system level
 
 ### Bootstrap Best Practices
-- Bootstrap always uses `--force` flag with setup-host.sh
-- This ensures hardware config is always updated on fresh/reinstalls
-- Manual use of setup-host.sh prompts for hardware config overwrite
+- Bootstrap provides setup instructions, does not automate configuration creation
+- Hardware config must be copied manually after cloning repository
 - Hardware config must be regenerated on any fresh install (LUKS UUIDs change)
+- Copy an existing host as template for new configurations
 
 ### Git Workflow
 1. Make configuration changes
@@ -430,20 +514,32 @@ journalctl -xe
 - Shell aliases: la, ..
 
 ### Module Structure
-User configurations are modular:
-- `sh.nix` - Shell configuration (bash/zsh aliases)
-- `hyprland.nix` - Window manager configuration
-- `ghostty.nix` - Terminal emulator
-- `dolphin.nix` - File manager
-- `walker.nix` - Application launcher
-- `polkit.nix` - Authentication agent
+
+System modules in hosts/_modules/:
+- `core.nix` - Boot loader, environment, locale, nix settings
+- `fileSystems.nix` - File system mounts (NAS, etc.)
+- `networking.nix` - Network configuration
+- `nvidia.nix` - NVIDIA GPU configuration
+- `programs.nix` - System-wide programs
+- `services.nix` - System services
+- `stylix.nix` - System-wide theming
+- `users.nix` - User account management
+
+Home module groups in home/_modules/:
+- `core/` - Essential (shell, waybar, ghostty, git, hyprland, neovim, etc.)
+- `comms/` - Communication (vesktop)
+- `dev/` - Development (opencode)
+- `gamedev/` - Game development (godot)
+- `notes/` - Note-taking (logseq, obsidian)
+- `office/` - Office (libreoffice, sparrow)
+- `streaming/` - Streaming (obs-studio)
 
 ## Notes for AI Assistants
 
 - This configuration uses auto-discovery - don't manually edit flake.nix for new hosts/users
 - Settings are in separate `settings.nix` files, not hardcoded in configs
 - `pkgs-stable` is available everywhere via specialArgs/extraSpecialArgs
-- Bootstrap is for new systems; `setup-host.sh` can be used standalone
+- Bootstrap provides setup instructions, does not automate configuration creation
 - Documentation is comprehensive - refer users to `docs/` for detailed info
 - Always test changes before committing
 - Repository location is `~/.dotfiles` (not `/etc/nixos`)

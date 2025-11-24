@@ -65,44 +65,29 @@ git clone "$REPO_URL" "$TARGET_DIR"
 cd "$TARGET_DIR"
 
 echo ""
-echo "⚙️  Setting up host configuration..."
-chmod +x ./scripts/setup-host.sh
-./scripts/setup-host.sh "$HOSTNAME" "$USERNAME" "$FULLNAME" "$TIMEZONE" "$LOCALE" --force
+echo "✅ Repository cloned to $TARGET_DIR"
+echo ""
+echo "📚 NEXT STEPS - Manual Configuration Required"
+echo "=============================================="
+echo ""
+echo "Your NixOS configuration repository is ready."
+echo "You now need to set up your host configuration."
+echo ""
+echo "See the complete guide: $TARGET_DIR/docs/BOOTSTRAP.md"
+echo ""
+echo "Quick overview:"
+echo "  1. cd $TARGET_DIR"
+echo "  2. Copy an existing host:"
+echo "     cp -r hosts/terra hosts/$HOSTNAME"
+echo "  3. Customize settings:"
+echo "     vim hosts/$HOSTNAME/settings.nix"
+echo "  4. Copy hardware config:"
+echo "     sudo cp /etc/nixos/hardware-configuration.nix hosts/$HOSTNAME/"
+echo "  5. Configure module groups:"
+echo "     vim hosts/$HOSTNAME/home.nix"
+echo "  6. Apply configuration:"
+echo "     sudo nixos-rebuild switch --flake .#$HOSTNAME"
+echo ""
+echo "For detailed step-by-step instructions, see docs/BOOTSTRAP.md"
 
-echo ""
-echo "🔧 Ensuring flakes are enabled..."
-if ! grep -q "experimental-features" /etc/nixos/configuration.nix 2>/dev/null; then
-    echo "⚠️  You may need to enable flakes manually if not already enabled"
-    echo "   Add to /etc/nixos/configuration.nix:"
-    echo "   nix.settings.experimental-features = [ \"nix-command\" \"flakes\" ];"
-    echo ""
-    read -p "Press Enter to continue..."
-fi
-
-echo ""
-echo "🚀 Applying NixOS configuration..."
-echo "   Running: sudo nixos-rebuild switch --flake .#$HOSTNAME"
-echo ""
-read -p "Apply now? (y/N): " APPLY
-if [[ "$APPLY" =~ ^[Yy]$ ]]; then
-    sudo nixos-rebuild switch --flake ".#$HOSTNAME"
-
-    echo ""
-    echo "✅ System configuration applied!"
-    echo ""
-    read -p "Apply Home Manager configuration? (y/N): " APPLY_HOME
-    if [[ "$APPLY_HOME" =~ ^[Yy]$ ]]; then
-        home-manager switch --flake ".#$USERNAME"
-        echo "✅ Home Manager configuration applied!"
-    fi
-fi
-
-echo ""
-echo "✨ Bootstrap complete!"
-echo ""
-echo "📚 Next steps:"
-echo "  1. Review configuration: cd $TARGET_DIR"
-echo "  2. Customize as needed"
-echo "  3. Rebuild: sudo nixos-rebuild switch --flake .#$HOSTNAME"
-echo "  4. Home Manager: home-manager switch --flake .#$USERNAME"
 echo ""

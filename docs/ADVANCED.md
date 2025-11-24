@@ -4,21 +4,20 @@ Advanced configuration techniques and customization for power users.
 
 ## Host Modules Pattern
 
-The host configuration uses a modular pattern similar to `home/modules/`. System-wide configuration is split into focused modules that are imported by each host's `configuration.nix`.
+The host configuration uses a modular pattern similar to `home/_modules/`. System-wide configuration is split into focused modules that are imported by each host's `configuration.nix`.
 
 ### Available Host Modules
 
 ```
-hosts/modules/
-├── boot.nix           # Boot loader and kernel configuration
-├── environment.nix    # System-wide environment (PATH, variables, packages)
-├── locale.nix         # Language and locale settings
+hosts/_modules/
+├── core.nix           # Boot, environment, locale, nix settings
+├── fileSystems.nix    # File system mounts
 ├── networking.nix     # Network configuration
-├── nix.nix           # Nix settings and flake configuration
-├── programs.nix      # System programs and services
-├── security.nix      # Security policies (sudo, PAM, etc.)
-├── services.nix      # System services (SSH, timers, etc.)
-└── users.nix         # User accounts and groups
+├── nvidia.nix         # NVIDIA GPU configuration
+├── programs.nix       # System programs
+├── services.nix       # System services
+├── stylix.nix         # System theming
+└── users.nix         # User accounts
 ```
 
 ### Host Configuration Structure
@@ -32,16 +31,13 @@ Each host imports only the modules it needs:
 {
     imports = [
         ./hardware-configuration.nix
-        ../modules/boot.nix
-        ../modules/environment.nix
-        ../modules/locale.nix
-        ../modules/networking.nix
-        ../modules/nix.nix
-        ../modules/programs.nix
-        ../modules/services.nix
-        ../modules/security.nix
-        ../modules/users.nix
-        ../../common/default.nix
+        ../_modules/core.nix
+        ../_modules/fileSystems.nix
+        ../_modules/networking.nix
+        ../_modules/programs.nix
+        ../_modules/services.nix
+        ../_modules/stylix.nix
+        ../_modules/users.nix
     ];
 
     system.stateVersion = "25.05";
@@ -50,50 +46,50 @@ Each host imports only the modules it needs:
 
 ### Creating a New Host
 
-To add a new host, create a directory and import the necessary modules:
+To add a new host, copy an existing host and customize it:
 
 ```bash
-mkdir hosts/newhost
+cd ~/.dotfiles
+
+# Copy an existing host as template
+cp -r hosts/terra hosts/newhost
 ```
 
-Create `hosts/newhost/configuration.nix`:
-
-```nix
-{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
-
-{
-    imports = [
-        ./hardware-configuration.nix
-        ../modules/boot.nix
-        ../modules/environment.nix
-        ../modules/locale.nix
-        ../modules/networking.nix
-        ../modules/nix.nix
-        ../modules/programs.nix
-        ../modules/services.nix
-        ../modules/security.nix
-        ../modules/users.nix
-        ../../common/default.nix
-    ];
-
-    system.stateVersion = "25.05";
-}
-```
-
-Create `hosts/newhost/settings.nix`:
+Edit `hosts/newhost/settings.nix`:
 
 ```nix
 {
     hostname = "newhost";
+    arch = "x86_64-linux";              # or "aarch64-linux"
+    user = "username";
     timezone = "America/Edmonton";
-    local = "en_GB.UTF-8";
+    locale = "en_GB.UTF-8";
+    luks.device = "/dev/disk/by-uuid/...";  # If using encryption
+    nas = import ../_settings/nas.nix;       # If using NAS
+    monitors = {                              # Monitor setup
+        primary = "DP-1";
+        secondary = "DP-2";
+        setup = [ "DP-1,2560x1440@60,0x0,1" ];
+    };
 }
 ```
 
-Generate hardware configuration:
+Copy hardware configuration:
 
 ```bash
-sudo nixos-generate-config --show-hardware-config > hosts/newhost/hardware-configuration.nix
+sudo cp /etc/nixos/hardware-configuration.nix hosts/newhost/
+```
+
+Configure module groups in `hosts/newhost/home.nix`:
+
+```nix
+let
+  moduleGroups = [ 
+    "core"      # Essential
+    "dev"       # Development tools
+    # Add other groups as needed
+  ];
+  # ... rest of file
 ```
 
 ### Customizing Host Modules
@@ -115,7 +111,7 @@ Modules can be customized per-host by using `lib.mkForce` to override settings:
 
 ### Creating Custom Host Modules
 
-Create a new module in `hosts/modules/mymodule.nix`:
+Create a new module in `hosts/_modules/mymodule.nix`:
 
 ```nix
 { config, lib, pkgs, ... }:
@@ -137,114 +133,113 @@ Then import it in any host's `configuration.nix`:
 ```nix
 {
     imports = [
-        ../modules/mymodule.nix
+        ../_modules/mymodule.nix
     ];
 }
 ```
 
-## Manual Host Configuration
+## Creating a New Host Configuration
 
-If you prefer not to use the `setup-host.sh` script, you can create configurations manually.
+The recommended way to create a new host is to copy an existing one and customize it.
 
-### Create Host Directory
+### Step 1: Choose a Template Host
 
-```bash
-mkdir -p hosts/newhostname
-```
-
-### Generate Hardware Configuration
+Pick an existing host similar to your new system:
 
 ```bash
-sudo nixos-generate-config --show-hardware-config > hosts/newhostname/hardware-configuration.nix
+cd ~/.dotfiles
+ls -la hosts/
+# terra  - Full workstation with GPU
+# mini   - Standard desktop
+# luna   - Minimal setup
 ```
 
-Or copy from existing:
+### Step 2: Copy Host Directory
+
+```bash
+cp -r hosts/terra hosts/newhostname
+```
+
+This copies:
+- configuration.nix
+- settings.nix  
+- home.nix
+- hardware-configuration.nix (will be replaced)
+
+### Step 3: Customize settings.nix
+
+Edit `hosts/newhostname/settings.nix`:
+
+```nix
+{
+    hostname = "newhostname";
+    arch = "x86_64-linux";              # System architecture
+    user = "username";                   # Primary user
+    timezone = "America/Edmonton";
+    locale = "en_GB.UTF-8";
+    luks.device = "/dev/disk/by-uuid/...";  # LUKS encryption (optional)
+    nas = import ../_settings/nas.nix;       # NAS mounts (optional)
+    monitors = {                              # Monitor setup (optional)
+        primary = "DP-1";
+        secondary = "DP-2";
+        setup = [ 
+            "DP-1,2560x1440@60,0x0,1"
+            "DP-2,1920x1080@60,auto-right,1"
+        ];
+    };
+}
+```
+
+### Step 4: Copy Hardware Configuration
 
 ```bash
 sudo cp /etc/nixos/hardware-configuration.nix hosts/newhostname/
 ```
 
-### Create Configuration File
+### Step 5: Configure Module Groups
 
-Create `hosts/newhostname/configuration.nix`. Start with an existing host as reference:
+Edit `hosts/newhostname/home.nix` to choose which applications to install:
+
+```nix
+let
+  moduleGroups = [ 
+    "core"      # Essential (always include)
+    "dev"       # Development tools
+    "notes"     # Note-taking apps
+    # "comms"   # Communication tools
+    # "gamedev" # Game development
+    # "office"  # Office applications
+    # "streaming" # Streaming tools
+  ];
+  # ... rest of file
+```
+
+### Step 6: Create User Configuration (if needed)
+
+If this is a new user, create their configuration:
 
 ```bash
-vim hosts/newhostname/configuration.nix
-```
+mkdir -p home/newuser
 
-Minimal example:
-
-```nix
-{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
-
-{
-    imports = [
-        ./hardware-configuration.nix
-        ../modules/boot.nix
-        ../modules/environment.nix
-        ../modules/locale.nix
-        ../modules/networking.nix
-        ../modules/nix.nix
-        ../modules/programs.nix
-        ../modules/security.nix
-        ../modules/services.nix
-        ../modules/users.nix
-        ../../common/default.nix
-    ];
-
-    system.stateVersion = "25.05";
-}
-```
-
-### Create Settings File
-
-Create `hosts/newhostname/settings.nix`:
-
-```nix
-{
-    hostname = "newhostname";
-    timezone = "America/Edmonton";
-    local = "en_GB.UTF-8";
-}
-```
-
-### Create Home Configuration
-
-Create `home/newuser/default.nix`. Start with an existing user as reference. Minimal example:
-
-```nix
-{ config, lib, pkgs, pkgs-stable, userSettings, ... }:
-
-{
-    imports = [ ../modules/shell/shell.nix ];
-
-    home.username = userSettings.username;
-    home.homeDirectory = "/home/" + userSettings.username;
-    home.stateVersion = "25.05";
-
-    home.packages = with pkgs; [
-        firefox
-    ];
-
-    programs.home-manager.enable = true;
-}
-```
-
-Create `home/newuser/settings.nix`:
-
-```nix
+# Create settings
+cat > home/newuser/settings.nix <<EOF
 {
     username = "newuser";
     name = "Full Name";
 }
+EOF
+
+# Copy default.nix from existing user
+cp home/redman/default.nix home/newuser/default.nix
 ```
 
-### Apply Configuration
+### Step 7: Apply Configuration
 
 ```bash
 sudo nixos-rebuild switch --flake .#newhostname
-home-manager switch --flake .#newuser
 ```
+
+The home-manager configuration is applied automatically as part of the system configuration.
 
 ## Understanding Flake Auto-Discovery
 
@@ -254,15 +249,18 @@ The flake uses Nix builtins to discover configurations:
 
 ```nix
 # From flake.nix
-hosts = builtins.attrNames (builtins.readDir ./hosts);
-homeDirs = builtins.attrNames (builtins.readDir ./home);
-validUsers = builtins.filter (name: name != "modules") homeDirs;
+hostDirs = builtins.attrNames (
+  lib.filterAttrs (name: type: type == "directory" && !lib.hasPrefix "_" name) (
+    builtins.readDir ./hosts
+  )
+);
 ```
 
 **What this does:**
-1. Reads all directories in `hosts/` - all become configurations
-2. Reads all directories in `home/` - filters out `modules` directory
-3. Creates configurations for each remaining directory
+1. Reads all directories in `hosts/`
+2. Filters out directories starting with `_` (like `_modules`, `_settings`)
+3. Creates a nixosConfiguration for each remaining directory
+4. Uses the hostname from `settings.nix` as the configuration name
 
 ### Adding a Host Without Rebuilding Flake
 
@@ -277,10 +275,10 @@ The flake automatically discovers it on next rebuild. No flake.nix editing neede
 
 ### Excluding a Host Temporarily
 
-Rename directory to start with `.`:
+Rename directory to start with `_`:
 
 ```bash
-mv hosts/oldhost hosts/.oldhost  # Hidden, won't be discovered
+mv hosts/oldhost hosts/_oldhost  # Excluded from auto-discovery
 ```
 
 ## Dynamic Module Groups System
@@ -476,10 +474,10 @@ home/_modules/core/
 
 **Note:** The dynamic module groups system has replaced the previous shared modules pattern. The old documentation is preserved below for reference.
 
-The previous configuration used a centralized `home/modules/` directory containing shared modules imported by all users:
+The previous configuration used a centralized `home/_modules/` directory containing shared modules imported by all users:
 
 ```
-home/modules/
+home/_modules/
 ├── shell/
 ├── waybar/
 ├── dolphin.nix
@@ -571,46 +569,42 @@ Each user imports shared modules but can customize:
 ```nix
 # home/alice/default.nix
 {
-    imports = [
-        ../modules/shell/shell.nix
-        ../modules/git.nix
-    ];
+    fonts.fontconfig.enable = true;
 
-    home.username = userSettings.username;
-    home.homeDirectory = "/home/" + userSettings.username;
-    home.stateVersion = "25.05";
+    home = {
+        username = userSettings.username;
+        homeDirectory = "/home/" + userSettings.username;
+        stateVersion = "25.05";
 
-    home.packages = with pkgs; [ vscode python3 ];
+        packages = with pkgs; [ vscode python3 ];
+        file = { };
+        sessionVariables = { };
+    };
 
     programs.home-manager.enable = true;
 }
 
 # home/bob/default.nix  
 {
-    imports = [
-        ../modules/shell/shell.nix
-        ../modules/git.nix
-    ];
+    fonts.fontconfig.enable = true;
 
-    home.username = userSettings.username;
-    home.homeDirectory = "/home/" + userSettings.username;
-    home.stateVersion = "25.05";
+    home = {
+        username = userSettings.username;
+        homeDirectory = "/home/" + userSettings.username;
+        stateVersion = "25.05";
 
-    home.packages = with pkgs; [ vim rust ];
+        packages = with pkgs; [ vim rust ];
+        file = { };
+        sessionVariables = { };
+    };
 
     programs.home-manager.enable = true;
 }
 ```
 
-Apply per user:
-
-```bash
-# Alice's configuration
-home-manager switch --flake .#alice
-
-# Bob's configuration
-home-manager switch --flake .#bob
-```
+Module loading is controlled per-host in `hosts/hostname/home.nix`, not per-user.
+Users get the modules specified by their host's configuration.
+User-specific packages and settings go in the user's `default.nix`.
 
 ### System-Wide vs User-Specific Packages
 
@@ -635,11 +629,11 @@ home.packages = with pkgs; [
 ];
 ```
 
-## Adding Modules to home/modules/
+## Adding Modules to home/_modules/
 
 ### Creating a Shared Module
 
-Create a new module in `home/modules/myapp.nix`:
+Create a new module in `home/_modules/core/myapp.nix` (or appropriate group):
 
 ```nix
 { config, lib, pkgs, ... }:
@@ -656,15 +650,7 @@ Create a new module in `home/modules/myapp.nix`:
 }
 ```
 
-Then import it in any user's `default.nix`:
-
-```nix
-{
-    imports = [
-        ../modules/myapp.nix
-    ];
-}
-```
+The module will be automatically discovered and loaded by any host that includes the `core` module group.
 
 ### Using Programs Options
 
@@ -694,18 +680,18 @@ This is better than manual config files because:
 ### Module Examples
 
 Look at existing modules for patterns:
-- `home/modules/shell/shell.nix` - Shell configuration
-- `home/modules/ghostty.nix` - Terminal emulator
-- `home/modules/git.nix` - Git configuration
-- `home/modules/hyprland.nix` - Window manager
+- `home/_modules/core/shell/shell.nix` - Shell configuration
+- `home/_modules/core/ghostty.nix` - Terminal emulator
+- `home/_modules/core/git.nix` - Git configuration
+- `home/_modules/core/hyprland.nix` - Window manager
 
 ## Custom System Modules
 
-System modules in `hosts/modules/` provide reusable configuration across all hosts. You can create new modules or modify existing ones.
+System modules in `hosts/_modules/` provide reusable configuration across all hosts. You can create new modules or modify existing ones.
 
 ### Creating a Custom Module
 
-Create `hosts/modules/my-service.nix`:
+Create `hosts/_modules/my-service.nix`:
 
 ```nix
 { config, lib, pkgs, ... }:
@@ -731,8 +717,7 @@ Import in host configuration:
 {
     imports = [
         ./hardware-configuration.nix
-        ../modules/my-service.nix
-        ../../common/default.nix
+        ../_modules/my-service.nix
     ];
 
     system.stateVersion = "25.05";
@@ -742,15 +727,14 @@ Import in host configuration:
 ### Existing Host Modules
 
 Reference the existing modules for patterns:
-- `hosts/modules/boot.nix` - Boot loader configuration
-- `hosts/modules/environment.nix` - System packages and environment
-- `hosts/modules/locale.nix` - Locale and timezone
-- `hosts/modules/networking.nix` - Network configuration
-- `hosts/modules/nix.nix` - Nix settings
-- `hosts/modules/programs.nix` - System programs
-- `hosts/modules/security.nix` - Security settings
-- `hosts/modules/services.nix` - System services
-- `hosts/modules/users.nix` - User accounts
+- `hosts/_modules/core.nix` - Boot, environment, locale, nix settings
+- `hosts/_modules/fileSystems.nix` - File system mounts
+- `hosts/_modules/networking.nix` - Network configuration
+- `hosts/_modules/nvidia.nix` - NVIDIA GPU configuration
+- `hosts/_modules/programs.nix` - System programs
+- `hosts/_modules/services.nix` - System services
+- `hosts/_modules/stylix.nix` - System theming
+- `hosts/_modules/users.nix` - User accounts
 
 ## Overlays and Overrides
 

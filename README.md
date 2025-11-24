@@ -26,35 +26,40 @@ See the [Bootstrap Guide](docs/BOOTSTRAP.md) for detailed scenarios and what hap
 - 📦 [Bootstrap Guide](docs/BOOTSTRAP.md) - Installation scenarios & workflows
 - 🎯 [Package Management](docs/PACKAGES.md) - Using stable vs unstable packages
 - 💻 [Daily Usage](docs/DAILY-USAGE.md) - Common commands & workflows
-- 🛠️ [Scripts Reference](docs/SCRIPTS.md) - Helper scripts documentation
 - ⚙️ [Advanced Topics](docs/ADVANCED.md) - Manual configuration & customization
 
 ## Repository Structure
 
 ```
 nixos-config/
-├── bootstrap                # Bootstrap script for new systems
-├── scripts/
-│   └── setup-host.sh       # Helper to create new host/user configs
+├── bootstrap                # Bootstrap script (clones repo, provides setup instructions)
 ├── hosts/                   # Per-host system configurations
 │   ├── mini/
 │   │   ├── configuration.nix
 │   │   ├── hardware-configuration.nix
+│   │   ├── home.nix                  # Home-manager integration
 │   │   └── settings.nix
 │   ├── terra/
 │   │   ├── configuration.nix
 │   │   ├── hardware-configuration.nix
+│   │   ├── home.nix
 │   │   └── settings.nix
-│   └── modules/             # Shared system modules (imported by all hosts)
-│       ├── boot.nix
-│       ├── environment.nix
-│       ├── locale.nix
-│       ├── networking.nix
-│       ├── nix.nix
-│       ├── programs.nix
-│       ├── security.nix
-│       ├── services.nix
-│       └── users.nix
+│   ├── luna/
+│   │   ├── configuration.nix
+│   │   ├── hardware-configuration.nix
+│   │   ├── home.nix
+│   │   └── settings.nix
+│   ├── _modules/            # Shared system modules
+│   │   ├── core.nix         # Boot, environment, locale, nix
+│   │   ├── fileSystems.nix
+│   │   ├── networking.nix
+│   │   ├── nvidia.nix
+│   │   ├── programs.nix
+│   │   ├── services.nix
+│   │   ├── stylix.nix
+│   │   └── users.nix
+│   └── _settings/           # Shared settings
+│       └── nas.nix
 ├── home/                    # Home Manager user configurations
 │   ├── redman/
 │   │   ├── default.nix
@@ -63,18 +68,21 @@ nixos-config/
 │   │       ├── init.lua
 │   │       ├── lsp/
 │   │       └── lua/
-│   └── modules/             # Shared user modules (imported by all users)
-│       ├── shell/
-│       ├── waybar/
-│       ├── dolphin.nix
-│       ├── ghostty.nix
-│       ├── git.nix
-│       ├── hyprland.nix
-│       ├── polkit.nix
-│       ├── starship.nix
-│       └── ... (other modules)
-├── common/                  # Shared configuration (unfree, flakes)
-│   └── default.nix
+│   └── _modules/            # Dynamic module groups
+│       ├── default.nix      # Module group helper
+│       ├── core/            # Essential modules
+│       │   ├── shell/
+│       │   ├── waybar/
+│       │   ├── ghostty.nix
+│       │   ├── git.nix
+│       │   ├── hyprland.nix
+│       │   └── ... (other modules)
+│       ├── comms/           # Communication tools
+│       ├── dev/             # Development tools
+│       ├── gamedev/         # Game development
+│       ├── notes/           # Note-taking apps
+│       ├── office/          # Office applications
+│       └── streaming/       # Streaming tools
 ├── docs/                    # Documentation
 └── flake.nix               # Flake with auto-discovery
 ```
@@ -124,7 +132,7 @@ See [Daily Usage](docs/DAILY-USAGE.md) for more commands.
 
 ## Current Users
 
-- **redman** - Paul Redman (uses shared `home/modules/`)
+- **redman** - Paul Redman (uses dynamic module groups)
 
 ## How It Works
 
@@ -166,26 +174,50 @@ See [Package Management](docs/PACKAGES.md) for details.
 
 ## Adding a New Host
 
-### Option 1: Use Bootstrap (Recommended)
-
-On the new machine, run the bootstrap command. It will:
-- Auto-detect hostname and username
-- Create new host and user configurations
-- Apply the configuration
-
-### Option 2: Pre-Configure
-
-Before installing NixOS:
+### On Your Development Machine
 
 ```bash
 cd ~/.dotfiles
-./scripts/setup-host.sh laptop alice "Alice Smith" "America/New_York" "en_US.UTF-8"
-git add . && git commit -m "Add laptop config" && git push
+
+# Copy an existing host as a template
+cp -r hosts/terra hosts/laptop
+
+# Edit settings for the new host
+vim hosts/laptop/settings.nix
+# Update: hostname, arch, user, timezone, locale, monitors, etc.
+
+# Configure which home module groups to load
+vim hosts/laptop/home.nix
+
+# If this is a new user, create their configuration
+mkdir -p home/alice
+vim home/alice/settings.nix
+# Add: username = "alice"; name = "Alice Smith";
+
+vim home/alice/default.nix
+# Copy structure from home/redman/default.nix
+
+# Commit and push
+git add .
+git commit -m "Add laptop configuration"
+git push
 ```
 
-Then bootstrap the laptop - it will find and use the config.
+### On The New Machine
 
-See [Bootstrap Guide](docs/BOOTSTRAP.md) for all scenarios.
+```bash
+# Clone the repository
+git clone https://github.com/piredman/nixos-config.git ~/.dotfiles
+cd ~/.dotfiles
+
+# Copy hardware configuration
+sudo cp /etc/nixos/hardware-configuration.nix hosts/laptop/
+
+# Apply the configuration
+sudo nixos-rebuild switch --flake .#laptop
+```
+
+See [Bootstrap Guide](docs/BOOTSTRAP.md) for detailed instructions and scenarios.
 
 ## Contributing
 
