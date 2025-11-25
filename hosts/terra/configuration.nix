@@ -15,6 +15,7 @@
     ../_modules/fileSystems.nix
     ../_modules/networking.nix
     ../_modules/nvidia.nix
+    ../_modules/printing.nix
     ../_modules/programs.nix
     ../_modules/services.nix
     ../_modules/stylix.nix

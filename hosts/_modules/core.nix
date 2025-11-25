@@ -40,7 +40,6 @@ in
       mako # hyprland notification daemon
       cifs-utils # common internet file system (smb): mount, ...
       file # File type identification utility
-      hplip # HP printer drivers
     ];
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then
