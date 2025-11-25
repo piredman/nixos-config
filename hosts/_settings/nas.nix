@@ -6,6 +6,8 @@
     "backups"
     "docker"
     "documents"
+    "media"
+    "recordings"
     "scans"
     "syncthing"
   ];
