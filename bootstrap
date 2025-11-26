@@ -17,17 +17,21 @@ HOSTNAME=${INPUT_HOSTNAME:-$DETECTED_HOSTNAME}
 read -p "Username [$DETECTED_USERNAME]: " INPUT_USERNAME
 USERNAME=${INPUT_USERNAME:-$DETECTED_USERNAME}
 
-read -p "Full name: " FULLNAME
-while [ -z "$FULLNAME" ]; do
-    echo "Full name is required"
-    read -p "Full name: " FULLNAME
-done
+read -p "Full name [$USERNAME]: " INPUT_FULLNAME
+FULLNAME=${INPUT_FULLNAME:-$USERNAME}
 
 read -p "Timezone [$DETECTED_TIMEZONE]: " INPUT_TIMEZONE
 TIMEZONE=${INPUT_TIMEZONE:-$DETECTED_TIMEZONE}
 
 read -p "Locale [$DETECTED_LOCALE]: " INPUT_LOCALE
 LOCALE=${INPUT_LOCALE:-$DETECTED_LOCALE}
+
+read -p "Was LUKS encryption enabled during NixOS installation? (y/N): " INPUT_LUKS
+if [[ "$INPUT_LUKS" =~ ^[Yy]$ ]]; then
+    LUKS_ENABLED="Yes"
+else
+    LUKS_ENABLED="No"
+fi
 
 REPO_URL="https://github.com/piredman/nixos-config.git"
 TARGET_DIR="/home/$USERNAME/.dotfiles"
@@ -39,6 +43,7 @@ echo "  Username: $USERNAME"
 echo "  Full name: $FULLNAME"
 echo "  Timezone: $TIMEZONE"
 echo "  Locale: $LOCALE"
+echo "  LUKS encryption: $LUKS_ENABLED"
 echo "  Target: $TARGET_DIR"
 echo ""
 
@@ -48,46 +53,216 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-echo ""
-echo "📦 Cloning repository..."
-if [ -d "$TARGET_DIR" ]; then
-    echo "⚠️  Directory $TARGET_DIR already exists!"
-    read -p "Remove and re-clone? (y/N): " RECLONE
-    if [[ "$RECLONE" =~ ^[Yy]$ ]]; then
-        rm -rf "$TARGET_DIR"
+output_manual_steps() {
+    echo ""
+    echo "📚 NEXT STEPS - Manual Configuration Required"
+    echo "=============================================="
+    echo ""
+    echo "Your NixOS configuration repository is ready."
+    echo "You now need to set up your host configuration."
+    echo ""
+    echo "See the complete guide: $TARGET_DIR/docs/BOOTSTRAP.md"
+    echo ""
+    echo "Quick overview:"
+    echo "  1. cd $TARGET_DIR"
+    echo "  2. Copy an existing host:"
+    echo "     cp -r hosts/terra hosts/$HOSTNAME"
+    echo "  3. Customize settings:"
+    echo "     vim hosts/$HOSTNAME/settings.nix"
+    echo "  4. Copy hardware config:"
+    echo "     sudo cp /etc/nixos/hardware-configuration.nix hosts/$HOSTNAME/"
+    echo "  5. Configure module groups:"
+    echo "     vim hosts/$HOSTNAME/home.nix"
+    echo "  6. Apply configuration:"
+    echo "     sudo nixos-rebuild switch --flake .#$HOSTNAME"
+    echo ""
+    echo "For detailed step-by-step instructions, see docs/BOOTSTRAP.md"
+    echo ""
+    exit 0
+}
+
+clone_repo() {
+    echo ""
+    echo "📦 Cloning repository..."
+    CLONE_REPO=true
+    if [ -d "$TARGET_DIR" ]; then
+        echo "⚠️  Directory $TARGET_DIR already exists!"
+        read -p "Remove and re-clone? (y/N): " RECLONE
+        if [[ "$RECLONE" =~ ^[Yy]$ ]]; then
+            rm -rf "$TARGET_DIR"
+        else
+            CLONE_REPO=false
+        fi
+    fi
+    if [ "$CLONE_REPO" = true ]; then
+        git clone "$REPO_URL" "$TARGET_DIR"
+    fi
+    cd "$TARGET_DIR"
+}
+
+update_host_settings() {
+    local hostname=$1
+    local username=$2
+    local fullname=$3
+    local timezone=$4
+    local locale=$5
+
+    echo "Host configuration found. Updating settings..."
+
+    sed -i "s#hostname = \".*\";#hostname = \"$hostname\";#g" hosts/$hostname/settings.nix
+    sed -i "s#user = \".*\";#user = \"$username\";#g" hosts/$hostname/settings.nix
+    sed -i "s#timezone = \".*\";#timezone = \"$timezone\";#g" hosts/$hostname/settings.nix
+    sed -i "s#locale = \".*\";#locale = \"$locale\";#g" hosts/$hostname/settings.nix
+
+    if [ -d "home/$username" ]; then
+        sed -i "s#^[[:space:]]*username[[:space:]]*=[[:space:]]*\"[^\"]*\"[[:space:]]*;#  username = \"$username\";#g" home/$username/settings.nix
+        sed -i "s#^[[:space:]]*name[[:space:]]*=[[:space:]]*\"[^\"]*\"[[:space:]]*;#  name = \"$fullname\";#g" home/$username/settings.nix
+    fi
+
+    echo "Settings updated."
+}
+
+copy_hardware_configuration() {
+    local hostname=$1
+
+    if [ ! -f "/etc/nixos/hardware-configuration.nix" ]; then
+        echo ""
+        echo "⚠️  Hardware configuration not found at /etc/nixos/hardware-configuration.nix"
+        echo ""
+        echo "Generating hardware configuration..."
+        if ! sudo nixos-generate-config --show-hardware-config >/tmp/hardware-configuration.nix 2>/dev/null; then
+            echo "❌ Failed to generate hardware configuration"
+            echo "Please run manually: sudo nixos-generate-config"
+            return 1
+        fi
+        echo "✅ Hardware configuration generated"
     else
-        echo "Aborted."
+        cp /etc/nixos/hardware-configuration.nix /tmp/hardware-configuration.nix
+    fi
+
+    echo "Copying hardware configuration to hosts/$hostname/..."
+    if sudo cp /tmp/hardware-configuration.nix "hosts/$hostname/hardware-configuration.nix"; then
+        echo "✅ Hardware configuration copied successfully"
+        rm -f /tmp/hardware-configuration.nix
+    else
+        echo "❌ Failed to copy hardware configuration"
+        echo "Please copy manually:"
+        echo "  sudo cp /etc/nixos/hardware-configuration.nix hosts/$hostname/"
+        return 1
+    fi
+}
+
+update_luks_settings() {
+    local hostname=$1
+    local luks_enabled=$2
+
+    if [[ "$luks_enabled" != "Yes" ]]; then
+        return 0
+    fi
+
+    echo "Looking for LUKS configuration in /etc/nixos/configuration.nix..."
+    if [ -f "/etc/nixos/configuration.nix" ]; then
+        LUKS_UUID=$(grep -A 20 "boot\.initrd\.luks\.devices" /etc/nixos/configuration.nix |
+            grep -o "/dev/disk/by-uuid/[a-f0-9-]*" |
+            head -n1 |
+            sed 's|/dev/disk/by-uuid/||')
+
+        if [ -n "$LUKS_UUID" ]; then
+            echo "✅ Found LUKS UUID in existing configuration: $LUKS_UUID"
+
+            LUKS_LINE="  luks.device = \"/dev/disk/by-uuid/$LUKS_UUID\";"
+            if grep -q "luks\.device" "hosts/$hostname/settings.nix" 2>/dev/null; then
+                sed -i "s#^[[:space:]]*luks\.device[[:space:]]*=[[:space:]]*\"[^\"]*\"[[:space:]]*;#$LUKS_LINE#g" "hosts/$hostname/settings.nix"
+                echo "✅ Updated existing LUKS device UUID in settings.nix"
+            else
+                sed -i "/locale = /a\\$LUKS_LINE" "hosts/$hostname/settings.nix"
+                echo "✅ Added LUKS device UUID to settings.nix"
+            fi
+        else
+            echo "⚠️  Could not find LUKS configuration in /etc/nixos/configuration.nix"
+            echo "   Please manually update hosts/$hostname/settings.nix with:"
+            echo "   luks.device = \"/dev/disk/by-uuid/YOUR_LUKS_UUID\";"
+        fi
+    else
+        echo "⚠️  /etc/nixos/configuration.nix not found"
+        echo "   Please manually update hosts/$hostname/settings.nix with:"
+        echo "   luks.device = \"/dev/disk/by-uuid/YOUR_LUKS_UUID\";"
+    fi
+}
+
+output_settings_files() {
+    local hostname=$1
+    local username=$2
+
+    echo ""
+    echo "📋 Host Configuration File: hosts/$hostname/settings.nix"
+    echo "────────────────────────────────────────────────────────────"
+    cat "hosts/$hostname/settings.nix"
+    echo ""
+    read -p "Do you approve this host configuration? (y/N): " HOST_CONFIRM
+    if [[ ! "$HOST_CONFIRM" =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "❌ Host configuration not approved. Exiting."
         exit 1
     fi
+
+    if [ -d "home/$username" ]; then
+        echo ""
+        echo "👤 User Configuration File: home/$username/settings.nix"
+        echo "────────────────────────────────────────────────────────────"
+        cat "home/$username/settings.nix"
+        echo ""
+        read -p "Do you approve this user configuration? (y/N): " USER_CONFIRM
+        if [[ ! "$USER_CONFIRM" =~ ^[Yy]$ ]]; then
+            echo ""
+            echo "❌ User configuration not approved. Exiting."
+            exit 1
+        fi
+    fi
+}
+
+apply_configuration() {
+    local hostname=$1
+
+    echo ""
+    read -p "Apply configuration now? (y/N): " APPLY_NOW
+    if [[ "$APPLY_NOW" =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "Applying NixOS configuration..."
+        if sudo nixos-rebuild switch --flake ".#$hostname"; then
+            echo ""
+            echo "🎉 Configuration applied successfully!"
+        else
+            echo ""
+            echo "❌ Configuration failed to apply"
+            echo ""
+            echo "Please check the error messages above and try:"
+            echo "  sudo nixos-rebuild switch --flake .#$hostname"
+            echo ""
+            echo "If you continue to have issues, see docs/BOOTSTRAP.md for troubleshooting."
+            return 1
+        fi
+    else
+        echo ""
+        echo "Configuration prepared but not applied."
+        echo ""
+        echo "To apply the configuration later, run:"
+        echo "  cd ~/.dotfiles"
+        echo "  sudo nixos-rebuild switch --flake .#$hostname"
+    fi
+}
+
+clone_repo
+
+if [ ! -d "hosts/$HOSTNAME" ]; then
+    output_manual_steps
+    exit 0
 fi
 
-git clone "$REPO_URL" "$TARGET_DIR"
-cd "$TARGET_DIR"
+update_host_settings "$HOSTNAME" "$USERNAME" "$FULLNAME" "$TIMEZONE" "$LOCALE"
+copy_hardware_configuration "$HOSTNAME"
+update_luks_settings "$HOSTNAME" "$LUKS_ENABLED"
 
-echo ""
-echo "✅ Repository cloned to $TARGET_DIR"
-echo ""
-echo "📚 NEXT STEPS - Manual Configuration Required"
-echo "=============================================="
-echo ""
-echo "Your NixOS configuration repository is ready."
-echo "You now need to set up your host configuration."
-echo ""
-echo "See the complete guide: $TARGET_DIR/docs/BOOTSTRAP.md"
-echo ""
-echo "Quick overview:"
-echo "  1. cd $TARGET_DIR"
-echo "  2. Copy an existing host:"
-echo "     cp -r hosts/terra hosts/$HOSTNAME"
-echo "  3. Customize settings:"
-echo "     vim hosts/$HOSTNAME/settings.nix"
-echo "  4. Copy hardware config:"
-echo "     sudo cp /etc/nixos/hardware-configuration.nix hosts/$HOSTNAME/"
-echo "  5. Configure module groups:"
-echo "     vim hosts/$HOSTNAME/home.nix"
-echo "  6. Apply configuration:"
-echo "     sudo nixos-rebuild switch --flake .#$HOSTNAME"
-echo ""
-echo "For detailed step-by-step instructions, see docs/BOOTSTRAP.md"
+output_settings_files "$HOSTNAME" "$USERNAME"
 
-echo ""
+apply_configuration "$HOSTNAME"
