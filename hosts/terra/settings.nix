@@ -16,4 +16,10 @@
       "HDMI-A-1, 2560x1440, 0x0, 1, mirror, DP-1"
     ];
   };
+
+  audioSinks = [
+    "main"
+    "chat"
+    "game"
+  ];
 }

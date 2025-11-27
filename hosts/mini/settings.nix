@@ -15,4 +15,6 @@
       "DP-2,1920x1080@60,auto-left,1"
     ];
   };
+
+  audioSinks = [ ];
 }
