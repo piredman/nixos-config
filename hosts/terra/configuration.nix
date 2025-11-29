@@ -8,20 +8,15 @@
   ...
 }:
 
+let
+  moduleGroups = [ "core" "printing" ] ++ lib.optionals (systemSettings.nvidia.enabled) [ "nvidia" ];
+  moduleHelper = import ../_modules/default.nix { inherit lib; };
+  moduleImports = moduleHelper.importModuleGroups moduleGroups;
+in
 {
   imports = [
     ./hardware-configuration.nix
-    ../_modules/audio.nix
-    ../_modules/core.nix
-    ../_modules/fileSystems.nix
-    ../_modules/networking.nix
-    ../_modules/nvidia.nix
-    ../_modules/printing.nix
-    ../_modules/programs.nix
-    ../_modules/services.nix
-    ../_modules/stylix.nix
-    ../_modules/users.nix
-  ];
+  ] ++ moduleImports;
 
   system.stateVersion = "25.05";
 }

@@ -10,6 +10,7 @@ let
   moduleGroups = [
     "core"
     "comms"
+    "dev"
     "streaming"
   ];
   moduleHelper = import ../../home/_modules/default.nix { inherit lib; };

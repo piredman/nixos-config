@@ -16,5 +16,9 @@
     ];
   };
 
-  audioSinks = [ ];
-}
+   audioSinks = [ ];
+
+   nvidia = {
+     enabled = false;
+   };
+ }
