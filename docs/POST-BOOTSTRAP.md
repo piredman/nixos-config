@@ -5,6 +5,7 @@ After running bootstrap and cloning the repo to ~/.dotfiles, complete these step
 ## Import GPG Signing Key
 
 On existing machine:
+
 ```
 gpg --export-secret-keys [fingerprint] > private-signing-key.asc
 ```
@@ -12,6 +13,7 @@ gpg --export-secret-keys [fingerprint] > private-signing-key.asc
 Transfer private-signing-key.asc to new machine securely.
 
 On new machine:
+
 ```
 gpg --import private-signing-key.asc
 gpg --list-secret-keys
@@ -33,4 +35,18 @@ git push
 ```
 git commit -m "test"
 ```
+
 Confirm signing works.
+
+## Create SMB Secrets File
+
+```
+mkdir -p ~/.dotfiles/secrets
+cat > ~/.dotfiles/secrets/smb-secrets <<EOF
+username=
+password=
+domain=WORKGROUP
+EOF
+```
+
+Find the Home NAS values for `username` and `password` in your password manager.
