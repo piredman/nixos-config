@@ -14,6 +14,7 @@
     fwupd.enable = true;
     fstrim.enable = true;
     getty.autologinUser = userSettings.username;
+    gvfs.enable = true; # needed for nautilus
 
     xserver.xkb = {
       layout = "us";

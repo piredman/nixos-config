@@ -14,11 +14,6 @@
     wl-clipboard
   ];
 
-  # xdg = {
-  #   portal.enable = true;
-  #   extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  # };
-
   home.sessionVariables = {
     WLR_NO_HARDWARE_CURSORS = "1";
   };
