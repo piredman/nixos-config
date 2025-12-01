@@ -9,14 +9,19 @@
 }:
 
 let
-  moduleGroups = [ "core" ] ++ lib.optionals (systemSettings.nvidia.enabled) [ "nvidia" ];
+  moduleGroups = [
+    "core"
+    "virtual_camera"
+  ]
+  ++ lib.optionals (systemSettings.nvidia.enabled) [ "nvidia" ];
   moduleHelper = import ../_modules/default.nix { inherit lib; };
   moduleImports = moduleHelper.importModuleGroups moduleGroups;
 in
 {
   imports = [
     ./hardware-configuration.nix
-  ] ++ moduleImports;
+  ]
+  ++ moduleImports;
 
   system.stateVersion = "25.05";
 }

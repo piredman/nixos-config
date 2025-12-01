@@ -17,14 +17,15 @@
     ];
   };
 
-   audioSinks = [
-     "main"
-     "chat"
-     "game"
-   ];
+  audioSinks = [
+    "main"
+    "chat"
+    "game"
+  ];
 
-   nvidia = {
-     enabled = true;
-     open = true;
-   };
- }
+  nvidia = {
+    enabled = true;
+    cuda = false;
+    open = true; # open must be false if cuda is true
+  };
+}

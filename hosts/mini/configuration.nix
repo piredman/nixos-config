@@ -16,7 +16,8 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-  ] ++ moduleImports;
+  ]
+  ++ moduleImports;
 
   system.stateVersion = "25.05";
 }
