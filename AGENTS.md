@@ -15,56 +15,22 @@ This is a modular NixOS configuration with:
 
 ```
 nixos-config/
-├── bootstrap                # Bootstrap script (clones repo, provides setup instructions)
+├── bootstrap                # Bootstrap script
 ├── hosts/                   # System configurations
-│   ├── <hostname>/
-│   │   ├── configuration.nix        # Host system config
-│   │   ├── hardware-configuration.nix
-│   │   ├── home.nix                 # Home-manager integration
-│   │   └── settings.nix             # Host settings
-│   ├── _modules/            # Shared system modules
-│   │   ├── core.nix         # Boot, environment, locale, nix
-│   │   ├── fileSystems.nix
-│   │   ├── networking.nix
-│   │   ├── nvidia.nix
-│   │   ├── programs.nix
-│   │   ├── services.nix
-│   │   ├── stylix.nix       # Theme system
-│   │   └── users.nix
-│   └── _settings/           # Shared settings
-│       └── nas.nix          # NAS mount configuration
-├── home/                    # User configurations  
-│   ├── <username>/
-│   │   ├── default.nix      # User-specific config
-│   │   ├── settings.nix     # User settings
-│   │   └── nvim/            # Neovim config (optional)
+│   ├── <hostname>/          # Per-host config
+│   └── _modules/            # Shared system modules
+├── home/                    # User configurations
+│   ├── <username>/          # Per-user config
 │   └── _modules/            # Dynamic module groups
-│       ├── default.nix      # Module group helper
-│       ├── core/            # Essential modules (always loaded)
-│       │   ├── shell/
-│       │   ├── waybar/
-│       │   ├── ghostty.nix
-│       │   ├── git.nix
-│       │   └── ... (other core modules)
+│       ├── core/            # Essential modules
 │       ├── comms/           # Communication tools
-│       │   └── vesktop.nix
 │       ├── dev/             # Development tools
-│       │   └── opencode.nix
 │       ├── gamedev/         # Game development
-│       │   └── godot.nix
 │       ├── notes/           # Note-taking apps
-│       │   ├── logseq.nix
-│       │   └── obsidian.nix
 │       ├── office/          # Office applications
-│       │   ├── libreoffice.nix
-│       │   └── sparrow.nix
 │       └── streaming/       # Streaming tools
-│           └── obs-studio.nix
+├── lib/                     # Nix utilities and tests
 ├── docs/                    # Documentation
-│   ├── BOOTSTRAP.md
-│   ├── PACKAGES.md
-│   ├── DAILY-USAGE.md
-│   └── ADVANCED.md
 └── flake.nix               # Auto-discovers hosts/users
 ```
 
@@ -97,7 +63,7 @@ nixos-config/
 ### System Configuration
 ```bash
 # Rebuild current system
-sudo nixos-rebuild switch --flake .#mini
+sudo nixos-rebuild switch --flake .#terra
 
 # Rebuild specific host
 sudo nixos-rebuild switch --flake .#hostname
@@ -109,14 +75,7 @@ sudo nixos-rebuild test --flake .#mini
 sudo nixos-rebuild build --flake .#mini
 ```
 
-### Home Manager Configuration
-```bash
-# Apply current user config
-home-manager switch --flake .#redman
 
-# Apply specific user config
-home-manager switch --flake .#username
-```
 
 ### Update Packages
 ```bash
@@ -128,7 +87,7 @@ nix flake lock --update-input nixpkgs
 nix flake lock --update-input nixpkgs-stable
 
 # Update and apply
-nix flake update && sudo nixos-rebuild switch --flake .#mini
+nix flake update && sudo nixos-rebuild switch --flake .#terra
 ```
 
 ### Maintenance
@@ -185,15 +144,25 @@ sudo nix-store --optimize
 
 **User Configuration** (`home/username/default.nix`):
 ```nix
-{ config, pkgs, pkgs-stable, userSettings, ... }:
+{ config, lib, pkgs, pkgs-stable, userSettings, ... }:
 
 {
-    imports = [ ./module1.nix ./module2.nix ];
-    
-    home.username = userSettings.username;
-    home.homeDirectory = "/home/" + userSettings.username;
-    
-    # Configuration here
+    # Module imports are handled by the host configuration via dynamic module groups
+    # This keeps user config clean and focused on user-specific settings
+
+    fonts.fontconfig.enable = true;
+
+    home = {
+        username = userSettings.username;
+        homeDirectory = "/home/" + userSettings.username;
+        stateVersion = "25.05";
+
+        packages = with pkgs; [ ];
+        file = { };
+        sessionVariables = { };
+    };
+
+    programs.home-manager.enable = true;
 }
 ```
 
@@ -266,22 +235,29 @@ This allows each host to customize which applications and tools are installed.
 
 ## Testing
 
-### No Automated Tests
+### Unit Tests
+Unit tests validate Nix logic without rebuilding systems:
+
+```bash
+# Run unit tests for module helper functions
+nix run github:nix-community/nix-unit -- lib/moduleHelper_test.nix
+```
+
+Tests cover:
+- Module file discovery and filtering
+- Path validation and recursion
+- Import group functionality
+
+### Integration Testing
 Validation done via rebuild commands.
 
 ### Test Workflow
-1. Make changes to configuration
-2. Test: `sudo nixos-rebuild test --flake .#hostname`
+1. **Unit tests**: `nix run github:nix-community/nix-unit -- lib/moduleHelper_test.nix`
+2. **Integration test**: `sudo nixos-rebuild test --flake .#hostname`
 3. If good: `sudo nixos-rebuild switch --flake .#hostname` (MANUAL STEP - never run automatically)
 4. If bad: `sudo nixos-rebuild switch --rollback`
 
-### Home Manager Testing
-1. Make changes to home config
-2. Apply: `home-manager switch --flake .#username` (MANUAL STEP - never run automatically)
-3. Check: Verify applications/settings work
-4. Rollback if needed: `home-manager generations` then activate old generation
-
-**IMPORTANT: Never run `sudo nixos-rebuild switch` or `home-manager switch` commands automatically. These must be executed manually by the user after verifying changes.**
+**IMPORTANT: Never run `sudo nixos-rebuild switch` commands automatically. These must be executed manually by the user after verifying changes.**
 
 ## Common Tasks
 
@@ -315,8 +291,6 @@ sudo nixos-rebuild switch --flake .#newhostname
 ```
 
 Flake auto-discovers the new host. No flake.nix editing needed.
-
-See [Creating a New Host](docs/ADVANCED.md#creating-a-new-host-configuration) for detailed examples.
 
 ### Add New User
 1. Create user directory:
@@ -500,20 +474,21 @@ journalctl -xe
 
 ## Current Configuration
 
-### Active Host: mini
+### Active Host: terra
 - System: NixOS unstable
 - Desktop: Hyprland (wayland)
 - Shell: zsh
-- Browser: Firefox
+- Browser: Zen Browser
 - Packages: home-manager, curl, git, wget, neovim, pciutils, usbutils, file
 
 ### Active User: redman
 - Terminal: Ghostty (with catppuccin-mocha theme)
-- File Manager: Dolphin (KDE)
+- File Manager: Nautilus
 - App Launcher: Walker
 - Polkit Agent: KDE polkit-kde-agent-1
 - Font: CaskaydiaCove Nerd Font
 - Shell aliases: la, ..
+- Additional tools: tmux, yazi, starship, syncthing
 
 ### Module Structure
 
@@ -528,10 +503,10 @@ System modules in hosts/_modules/:
 - `users.nix` - User account management
 
 Home module groups in home/_modules/:
-- `core/` - Essential (shell, waybar, ghostty, git, hyprland, neovim, etc.)
+- `core/` - Essential (shell, waybar, ghostty, git, hyprland, neovim, polkit, ssh, starship, syncthing, terminal, tmux, vlc, walker, xdg, yazi, zen-browser, etc.)
 - `comms/` - Communication (vesktop)
 - `dev/` - Development (opencode)
-- `gamedev/` - Game development (godot)
+- `gamedev/` - Game development (aseprite, godot, inkscape)
 - `notes/` - Note-taking (logseq, obsidian)
 - `office/` - Office (libreoffice, sparrow)
 - `streaming/` - Streaming (obs-studio)
@@ -549,4 +524,5 @@ Home module groups in home/_modules/:
 - Use `programs.<app>` options when available rather than raw config files
 - Keep system packages minimal, put user-specific packages in home-manager
 - XDG portals: both hyprland and gtk portals are configured for compatibility
-- **IMPORTANT: NEVER run nixos-rebuild, home-manager, sudo, or nix commands** - you are not running on the target NixOS system and these commands are not available. Only edit configuration files and let the user apply changes manually. `nixos-rebuild switch` and `home-manager switch` are always manual steps.
+- **Shell aliases available after bootstrap:** `nrh` (rebuild host), `nup` (update flake), `nru` (rebuild user - legacy)
+- **IMPORTANT: NEVER run nixos-rebuild, home-manager, sudo, or nix commands** - you are not running on the target NixOS system and these commands are not available. Only edit configuration files and let the user apply changes manually. `nixos-rebuild switch` is always a manual step.

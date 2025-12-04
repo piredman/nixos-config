@@ -9,7 +9,7 @@ A modular, declarative NixOS configuration with automatic host discovery and rol
 - 🔍 **Auto-discovery** - Automatically detects hosts and users
 - 📝 **Declarative** - Everything is reproducible and version-controlled
 - 🛠️ **Template-based** - Easy setup for new hosts
-- 🏠 **Home Manager** - User-level package and configuration management
+- 🏠 **Home Manager** - Integrated user-level package and configuration management
 
 ## Quick Start
 
@@ -19,70 +19,38 @@ On a fresh NixOS install, run this single command:
 nix-shell -p curl git --run "bash <(curl -fsSL https://raw.githubusercontent.com/piredman/nixos-config/master/bootstrap)"
 ```
 
-See the [Bootstrap Guide](docs/BOOTSTRAP.md) for detailed scenarios and what happens during bootstrap.
+See the [Bootstrap Guide](docs/BOOTSTRAP.md) for setup on machines with existing configuration.
 
 ## Documentation
 
-- 📦 [Bootstrap Guide](docs/BOOTSTRAP.md) - Installation scenarios & workflows
-- 🎯 [Package Management](docs/PACKAGES.md) - Using stable vs unstable packages
-- 💻 [Daily Usage](docs/DAILY-USAGE.md) - Common commands & workflows
-- ⚙️ [Advanced Topics](docs/ADVANCED.md) - Manual configuration & customization
+- 📦 [Bootstrap Guide](docs/BOOTSTRAP.md) - Installing on machines with existing config
+- 💻 [Useful Commands](docs/USEFUL-COMMANDS.md) - Common commands & workflows
+
+## Running Tests
+
+```bash
+nix run github:nix-community/nix-unit -- lib/moduleHelper_test.nix
+```
 
 ## Repository Structure
 
 ```
 nixos-config/
-├── bootstrap                # Bootstrap script (clones repo, provides setup instructions)
+├── bootstrap                # Bootstrap script
 ├── hosts/                   # Per-host system configurations
-│   ├── mini/
-│   │   ├── configuration.nix
-│   │   ├── hardware-configuration.nix
-│   │   ├── home.nix                  # Home-manager integration
-│   │   └── settings.nix
-│   ├── terra/
-│   │   ├── configuration.nix
-│   │   ├── hardware-configuration.nix
-│   │   ├── home.nix
-│   │   └── settings.nix
-│   ├── luna/
-│   │   ├── configuration.nix
-│   │   ├── hardware-configuration.nix
-│   │   ├── home.nix
-│   │   └── settings.nix
-│   ├── _modules/            # Shared system modules
-│   │   ├── core.nix         # Boot, environment, locale, nix
-│   │   ├── fileSystems.nix
-│   │   ├── networking.nix
-│   │   ├── nvidia.nix
-│   │   ├── programs.nix
-│   │   ├── services.nix
-│   │   ├── stylix.nix
-│   │   └── users.nix
-│   └── _settings/           # Shared settings
-│       └── nas.nix
-├── home/                    # Home Manager user configurations
-│   ├── redman/
-│   │   ├── default.nix
-│   │   ├── settings.nix
-│   │   └── nvim/            # Neovim configuration
-│   │       ├── init.lua
-│   │       ├── lsp/
-│   │       └── lua/
+│   ├── <hostname>/          # Host-specific config
+│   └── _modules/            # Shared system modules
+├── home/                    # User configurations
+│   ├── <username>/          # User-specific config
 │   └── _modules/            # Dynamic module groups
-│       ├── default.nix      # Module group helper
 │       ├── core/            # Essential modules
-│       │   ├── shell/
-│       │   ├── waybar/
-│       │   ├── ghostty.nix
-│       │   ├── git.nix
-│       │   ├── hyprland.nix
-│       │   └── ... (other modules)
 │       ├── comms/           # Communication tools
 │       ├── dev/             # Development tools
 │       ├── gamedev/         # Game development
 │       ├── notes/           # Note-taking apps
 │       ├── office/          # Office applications
 │       └── streaming/       # Streaming tools
+├── lib/                     # Nix utilities and tests
 ├── docs/                    # Documentation
 └── flake.nix               # Flake with auto-discovery
 ```
@@ -92,22 +60,27 @@ nixos-config/
 ### Update Everything
 
 ```bash
+nup && nrh  # Update flake + rebuild system (includes home-manager)
+```
+
+Or manually:
+
+```bash
 cd ~/.dotfiles
 nix flake update
 sudo nixos-rebuild switch --flake .#terra
-home-manager switch --flake .#redman
 ```
 
 ### Rebuild System
 
 ```bash
-sudo nixos-rebuild switch --flake .#hostname
+nrh  # Rebuild current host (includes home-manager)
 ```
 
-### Rebuild Home
+Or manually:
 
 ```bash
-home-manager switch --flake .#username
+sudo nixos-rebuild switch --flake .#hostname
 ```
 
 ### Rollback System
@@ -123,12 +96,34 @@ sudo nix-collect-garbage --delete-older-than 7d
 sudo nix-store --optimize
 ```
 
-See [Daily Usage](docs/DAILY-USAGE.md) for more commands.
+### Check Disk Usage
+
+```bash
+# Check disk usage
+df -h /nix
+
+# Nix store size
+du -sh /nix/store
+
+# Breakdown
+nix path-info -rsSh /run/current-system | sort -hk2
+```
+
+## Shell Aliases
+
+After bootstrap, these aliases are available for common operations:
+
+- `nrh` - Rebuild current host system (includes git add)
+- `nup` - Update flake inputs (includes git add)
+- `nru` - Rebuild user config (legacy - use nrh for integrated setup)
+
+See [Useful Commands](docs/USEFUL-COMMANDS.md) for more commands.
 
 ## Current Hosts
 
 - **terra** - Primary workstation (x86_64-linux, Hyprland desktop)
-- **mini** - Secondary system (x86_64-linux)
+- **luna** - Secondary system (x86_64-linux)
+- **mini** - Minimal setup (x86_64-linux)
 
 ## Current Users
 
@@ -138,39 +133,16 @@ See [Daily Usage](docs/DAILY-USAGE.md) for more commands.
 
 ### Auto-Discovery
 
-The flake automatically discovers all hosts and users:
+The flake automatically discovers all hosts:
 
 ```nix
-# All directories in hosts/ become available configurations
+# All directories in hosts/ become available system configurations
 hosts/terra/     -> nixosConfigurations.terra
+hosts/luna/      -> nixosConfigurations.luna
 hosts/mini/      -> nixosConfigurations.mini
-
-# All directories in home/ become available configurations  
-home/redman/     -> homeConfigurations.redman
-home/alice/      -> homeConfigurations.alice
 ```
 
-### Package Management
-
-Default: **nixos-unstable** (rolling release)
-
-```nix
-environment.systemPackages = with pkgs; [
-  firefox   # Latest from unstable
-];
-```
-
-Fallback: **nixos-stable** (25.05) when needed
-
-```nix
-environment.systemPackages = with pkgs; [
-  firefox
-] ++ [
-  pkgs-stable.vlc  # Stable version
-];
-```
-
-See [Package Management](docs/PACKAGES.md) for details.
+Home-manager is integrated as a NixOS module, so user configurations are applied automatically during system rebuilds.
 
 ## Adding a New Host
 
@@ -214,7 +186,7 @@ cd ~/.dotfiles
 sudo cp /etc/nixos/hardware-configuration.nix hosts/laptop/
 
 # Apply the configuration
-sudo nixos-rebuild switch --flake .#laptop
+nrh  # Uses alias: git add -A && sudo nixos-rebuild switch --flake .#$HOST
 ```
 
 See [Bootstrap Guide](docs/BOOTSTRAP.md) for detailed instructions and scenarios.
@@ -230,6 +202,7 @@ This configuration is provided as-is for personal use.
 ## Acknowledgments
 
 Built with:
+
 - [NixOS](https://nixos.org/)
 - [Home Manager](https://github.com/nix-community/home-manager)
 - [Nix Flakes](https://nixos.wiki/wiki/Flakes)
