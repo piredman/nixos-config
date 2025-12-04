@@ -2,12 +2,14 @@
   config,
   pkgs,
   userSettings,
+  zen-browser,
   ...
 }:
 
 {
   programs.zen-browser = {
     enable = true;
+    package = (pkgs.wrapFirefox zen-browser.packages.${pkgs.stdenv.hostPlatform.system}."beta-unwrapped" {});
 
     profiles.${userSettings.username} = rec {
       settings = {
@@ -44,5 +46,9 @@
   stylix.targets.zen-browser = {
     enable = true;
     profileNames = [ userSettings.username ];
+  };
+
+  home.sessionVariables = {
+    MOZ_ENABLE_WAYLAND = "1";
   };
 }

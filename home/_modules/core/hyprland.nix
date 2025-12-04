@@ -43,7 +43,13 @@
         "10, monitor:$secondary_monitor"
       ];
 
-      env = [ ];
+      env = [
+        "XDG_SESSION_TYPE,wayland"
+      ] ++ lib.optionals systemSettings.nvidia.enabled [
+        "LIBVA_DRIVER_NAME,nvidia"
+        "GBM_BACKEND,nvidia-drm"
+        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+      ];
 
       general = {
         gaps_in = 5;
@@ -84,6 +90,7 @@
       exec-once = [
         "waybar"
         "mako"
+        "systemctl --user import-environment"
         "hyprctl dispatch workspace 1"
       ];
 

@@ -272,14 +272,16 @@ Validation done via rebuild commands.
 ### Test Workflow
 1. Make changes to configuration
 2. Test: `sudo nixos-rebuild test --flake .#hostname`
-3. If good: `sudo nixos-rebuild switch --flake .#hostname`
+3. If good: `sudo nixos-rebuild switch --flake .#hostname` (MANUAL STEP - never run automatically)
 4. If bad: `sudo nixos-rebuild switch --rollback`
 
 ### Home Manager Testing
 1. Make changes to home config
-2. Apply: `home-manager switch --flake .#username`
+2. Apply: `home-manager switch --flake .#username` (MANUAL STEP - never run automatically)
 3. Check: Verify applications/settings work
 4. Rollback if needed: `home-manager generations` then activate old generation
+
+**IMPORTANT: Never run `sudo nixos-rebuild switch` or `home-manager switch` commands automatically. These must be executed manually by the user after verifying changes.**
 
 ## Common Tasks
 
@@ -547,4 +549,4 @@ Home module groups in home/_modules/:
 - Use `programs.<app>` options when available rather than raw config files
 - Keep system packages minimal, put user-specific packages in home-manager
 - XDG portals: both hyprland and gtk portals are configured for compatibility
-- **IMPORTANT: NEVER run nixos-rebuild, home-manager, sudo, or nix commands** - you are not running on the target NixOS system and these commands are not available. Only edit configuration files and let the user apply changes manually
+- **IMPORTANT: NEVER run nixos-rebuild, home-manager, sudo, or nix commands** - you are not running on the target NixOS system and these commands are not available. Only edit configuration files and let the user apply changes manually. `nixos-rebuild switch` and `home-manager switch` are always manual steps.

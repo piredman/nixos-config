@@ -81,10 +81,11 @@
                 inputs.walker.homeManagerModules.default
                 inputs.zen-browser.homeModules.default
               ];
-              home-manager.extraSpecialArgs = {
-                userSettings = import ./home/${host.user}/settings.nix;
-                systemSettings = systemSettings;
-              };
+               home-manager.extraSpecialArgs = {
+                 userSettings = import ./home/${host.user}/settings.nix;
+                 systemSettings = systemSettings;
+                 zen-browser = inputs.zen-browser;
+               };
               home-manager.users."${host.user}" = import ./hosts/${hostDir}/home.nix;
             }
           ];

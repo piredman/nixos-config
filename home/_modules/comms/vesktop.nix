@@ -4,10 +4,16 @@
   pkgs,
   ...
 }:
+
 {
 
   programs.vesktop = {
     enable = true;
+    package = (pkgs.vesktop.overrideAttrs (old: {
+      postFixup = old.postFixup + ''
+        wrapProgram $out/bin/vesktop --add-flags "--enable-features=WebRTCPipeWireCapturer"
+      '';
+    }));
 
     settings = {
       appBadge = false;
