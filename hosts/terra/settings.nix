@@ -26,6 +26,6 @@
   nvidia = {
     enabled = true;
     cuda = false;
-    open = true; # open must be false if cuda is true
+    open = false; # open must be false if cuda is true
   };
 }
