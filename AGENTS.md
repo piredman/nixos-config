@@ -18,7 +18,12 @@ nixos-config/
 ├── bootstrap                # Bootstrap script
 ├── hosts/                   # System configurations
 │   ├── <hostname>/          # Per-host config
-│   └── _modules/            # Shared system modules
+│   └── _modules/            # Shared system module groups
+│       ├── core/            # Essential modules
+│       ├── android/         # Android tools
+│       ├── nvidia/          # NVIDIA GPU
+│       ├── printing/        # Printing
+│       └── virtual_camera/  # Virtual camera
 ├── home/                    # User configurations
 │   ├── <username>/          # Per-user config
 │   └── _modules/            # Dynamic module groups
@@ -126,19 +131,23 @@ sudo nix-store --optimize
 ```nix
 { config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
 
+let
+  moduleGroups = [
+    "core"
+    # "android"  # Android tools (optional)
+    # "nvidia"   # NVIDIA GPU (optional)
+    # "printing" # Printing (optional)
+    # "virtual_camera" # Virtual camera (optional)
+  ];
+  moduleHelper = import ../_modules/default.nix { inherit lib; };
+  moduleImports = moduleHelper.importModuleGroups moduleGroups;
+in
 {
-    imports = [
-        ./hardware-configuration.nix
-        ../_modules/core.nix
-        ../_modules/fileSystems.nix
-        ../_modules/networking.nix
-        ../_modules/programs.nix
-        ../_modules/services.nix
-        ../_modules/stylix.nix
-        ../_modules/users.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+  ] ++ moduleImports;
 
-    system.stateVersion = "25.05";
+  system.stateVersion = "25.05";
 }
 ```
 
@@ -492,15 +501,12 @@ journalctl -xe
 
 ### Module Structure
 
-System modules in hosts/_modules/:
-- `core.nix` - Boot loader, environment, locale, nix settings
-- `fileSystems.nix` - File system mounts (NAS, etc.)
-- `networking.nix` - Network configuration
-- `nvidia.nix` - NVIDIA GPU configuration
-- `programs.nix` - System-wide programs
-- `services.nix` - System services
-- `stylix.nix` - System-wide theming
-- `users.nix` - User account management
+System module groups in hosts/_modules/:
+- `core/` - Essential modules (boot loader, environment, locale, nix settings, networking, programs, services, stylix, users, etc.)
+- `android/` - Android tools (udev rules, adb, fastboot)
+- `nvidia/` - NVIDIA GPU configuration
+- `printing/` - Printing support
+- `virtual_camera/` - Virtual camera (v4l2loopback)
 
 Home module groups in home/_modules/:
 - `core/` - Essential (shell, waybar, ghostty, git, hyprland, neovim, polkit, ssh, starship, syncthing, terminal, tmux, vlc, walker, xdg, yazi, zen-browser, etc.)

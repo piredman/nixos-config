@@ -39,7 +39,12 @@ nixos-config/
 ├── bootstrap                # Bootstrap script
 ├── hosts/                   # Per-host system configurations
 │   ├── <hostname>/          # Host-specific config
-│   └── _modules/            # Shared system modules
+│   └── _modules/            # Shared system module groups
+│       ├── core/            # Essential modules
+│       ├── android/         # Android tools
+│       ├── nvidia/          # NVIDIA GPU
+│       ├── printing/        # Printing
+│       └── virtual_camera/  # Virtual camera
 ├── home/                    # User configurations
 │   ├── <username>/          # User-specific config
 │   └── _modules/            # Dynamic module groups
