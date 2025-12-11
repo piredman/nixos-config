@@ -45,7 +45,8 @@
 
       env = [
         "XDG_SESSION_TYPE,wayland"
-      ] ++ lib.optionals systemSettings.nvidia.enabled [
+      ]
+      ++ lib.optionals systemSettings.nvidia.enabled [
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"
@@ -175,7 +176,7 @@
         "center, tag:floating-window"
         "size 800 600, tag:floating-window"
 
-        "tag +floating-window, class:(pulseaudio.wiremix)"
+        "tag +floating-window, class:(bluetooth.bluetui|pulseaudio.wiremix)"
 
         # Godot
         "tile,class:^(Godot)$"
