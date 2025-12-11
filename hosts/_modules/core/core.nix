@@ -41,6 +41,7 @@ in
       cifs-utils # common internet file system (smb): mount, ...
       file # File type identification utility
       usbutils # Tools for working with USB devices
+      parted # Create, destroy, resize, check, and copy partitions
     ];
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then
