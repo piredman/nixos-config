@@ -76,6 +76,8 @@
           (extension "darkreader" "addon@darkreader.org")
           (extension "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
           (extension "kagi-search-for-firefox" "search@kagi.com")
+          (extension "kagi-search-for-firefox" "search@kagi.com")
+          (extension "karakeep" "addon@karakeep.app")
         ];
 
       # Locked preferences for consistency
