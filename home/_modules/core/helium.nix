@@ -65,7 +65,12 @@ let
   };
 in
 {
-  home.packages = [
-    helium
-  ];
+  home = {
+    packages = [
+      helium
+    ];
+    sessionVariables = {
+      NIXOS_OZONE_WL = "1";
+    };
+  };
 }

@@ -1,5 +1,13 @@
-{ config, lib, pkgs, ... }:
 {
-  services.udev.packages = [ pkgs.android-tools ];
-  environment.systemPackages = [ pkgs.android-tools ];
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
+  services.udev.packages = with pkgs; [ android-tools ];
+  environment.systemPackages = with pkgs; [
+    android-tools
+    apksigner
+  ];
 }

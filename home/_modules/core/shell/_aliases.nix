@@ -3,6 +3,7 @@
     nrh = "nixos-rebuild-host";
     nru = "nixos-rebuild-user";
     nup = "nixos-flake-update";
+    ncheck = "nix flake check";
 
     cd = "z";
     ".." = "cd ..";
