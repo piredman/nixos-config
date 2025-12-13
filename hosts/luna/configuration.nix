@@ -23,5 +23,11 @@ in
   ]
   ++ moduleImports;
 
+  fileSystems."/mnt/data" = {
+    device = "LABEL=data";
+    fsType = "ext4";
+    options = [ "defaults" ];
+  };
+
   system.stateVersion = "25.05";
 }
