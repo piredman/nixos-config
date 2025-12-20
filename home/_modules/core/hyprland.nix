@@ -181,6 +181,8 @@
         # Godot
         "tile,class:^(Godot)$"
         "float,class:^(prototype_alpha)$"
+
+        "tile,class:^(Aseprite)$"
       ];
     };
   };
