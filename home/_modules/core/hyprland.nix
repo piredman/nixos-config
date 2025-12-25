@@ -180,7 +180,7 @@
 
         # Godot
         "tile,class:^(Godot)$"
-        "float,class:^(prototype_alpha)$"
+        "float,class:^(prototype_.*)$"
 
         "tile,class:^(Aseprite)$"
       ];
