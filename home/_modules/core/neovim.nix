@@ -21,6 +21,10 @@
       conform-nvim
       auto-session
 
+      nvim-dap
+      nvim-dap-virtual-text
+      nvim-dap-view
+
       nvim-cmp
       cmp-nvim-lsp
       cmp-buffer
