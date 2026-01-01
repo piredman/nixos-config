@@ -11,7 +11,7 @@
 let
   moduleGroups = [
     "core"
-    "virtual_camera"
+    "streaming"
   ]
   ++ lib.optionals (systemSettings.nvidia.enabled) [ "nvidia" ];
   moduleHelper = import ../_modules/default.nix { inherit lib; };
