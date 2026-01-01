@@ -171,18 +171,16 @@
       ];
 
       windowrulev2 = [
+        "suppressevent maximize, title:^(Picture-in-Picture)$"
+        "tile,class:^(Godot)$"
+        "float,class:^(prototype_.*)$"
+        "tile,class:^(Aseprite)$"
+
         # Floating TUIs
         "float, tag:floating-window"
         "center, tag:floating-window"
         "size 800 600, tag:floating-window"
-
         "tag +floating-window, class:(bluetooth.bluetui|pulseaudio.wiremix)"
-
-        # Godot
-        "tile,class:^(Godot)$"
-        "float,class:^(prototype_.*)$"
-
-        "tile,class:^(Aseprite)$"
       ];
     };
   };
