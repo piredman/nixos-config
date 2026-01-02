@@ -6,7 +6,7 @@
 }:
 {
 
-  # Install obsidian but do not manage it's configuration fileSystems
+  # Install logseq but do not manage it's configuration fileSystems
   # Using syncthing
   home.packages = with pkgs; [
     logseq
