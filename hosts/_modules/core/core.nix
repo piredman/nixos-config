@@ -47,7 +47,7 @@ in
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then
         sleep 1s
-        hyprland
+        start-hyprland
       fi
     '';
   };

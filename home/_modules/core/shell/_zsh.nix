@@ -16,6 +16,7 @@ in
 
   programs.zsh = {
     enable = true;
+    dotDir = config.home.homeDirectory;
     shellAliases = lib.mkMerge [
       commonAliases
       zshAliases
