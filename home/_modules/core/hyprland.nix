@@ -170,19 +170,20 @@
         "$mod, mouse:273, resizewindow"
       ];
 
-      windowrulev2 = [
-        "suppressevent maximize, title:^(Picture-in-Picture)$"
-        "tile,class:^(Godot)$"
-        "float,class:^(prototype_.*)$"
-        "tile,class:^(Aseprite)$"
+      windowrule = [
+        "suppress_event maximize, match:title ^(Picture-in-Picture)$"
+        "tile on, match:class ^(Godot)$"
+        "float on, match:class ^(prototype_.*)$"
+        "tile on, match:class ^(Aseprite)$"
 
         # Floating TUIs
-        "float, tag:floating-window"
-        "center, tag:floating-window"
-        "size 800 600, tag:floating-window"
-        "tag +floating-window, class:(bluetooth.bluetui|pulseaudio.wiremix)"
+        "float on, match:tag floating-window"
+        "center on, match:tag floating-window"
+        "size 800 600, match:tag floating-window"
+        "tag +floating-window, match:class (bluetooth.bluetui|pulseaudio.wiremix)"
       ]
-      ++ lib.optionals (systemSettings ? windowrulev2) systemSettings.windowrulev2;
+      ++ lib.optionals (systemSettings ? windowrule) systemSettings.windowrule;
+
     };
   };
 
