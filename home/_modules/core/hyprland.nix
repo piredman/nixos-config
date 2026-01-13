@@ -181,7 +181,8 @@
         "center, tag:floating-window"
         "size 800 600, tag:floating-window"
         "tag +floating-window, class:(bluetooth.bluetui|pulseaudio.wiremix)"
-      ];
+      ]
+      ++ lib.optionals (systemSettings ? windowrulev2) systemSettings.windowrulev2;
     };
   };
 

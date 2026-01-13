@@ -16,6 +16,17 @@
     ];
   };
 
+  windowrulev2 = [
+    "workspace 6,class:^zen-beta$"
+    "workspace 6,class:^chrome-dashboard.twitch.tv_.*$"
+    "workspace 7,class:^com.obsproject.Studio$"
+    "workspace 7,class:^chrome-vdo.ninja_.*$"
+    "workspace 8,class:^chrome-discord.com_.*$"
+    "workspace 9,class:^org.gnome.Nautilus$"
+    "workspace 9,class:^vlc$"
+    "workspace 10,class:^com.core447.StreamController$"
+  ];
+
   audioSinks = [
     "main"
     "chat"
