@@ -42,6 +42,7 @@ in
       file # File type identification utility
       usbutils # Tools for working with USB devices
       parted # Create, destroy, resize, check, and copy partitions
+      rsync # file sync and backup
     ];
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then
