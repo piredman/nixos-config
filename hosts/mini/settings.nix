@@ -4,7 +4,7 @@
   user = "redman";
   timezone = "America/Edmonton";
   locale = "en_GB.UTF-8";
-  luks.device = "/dev/disk/by-uuid/ca747922-a6c4-4af9-9317-5494af539502";
+  luks.device = "/dev/disk/by-uuid/a0e5f6f4-c917-4aef-bd0c-22cd0944256e";
   nas = import ../_settings/nas.nix;
 
   monitors = {

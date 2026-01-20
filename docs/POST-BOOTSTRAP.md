@@ -23,7 +23,7 @@ gpg --edit-key [fingerprint]  # then 'trust' if needed
 ## Setup SSH Key for GitHub
 
 ```
-nix-shell -p gh
+nix shell nixpkgs#gh
 gh auth login -p ssh
 git remote set-url origin git@github.com:piredman/nixos-config.git
 git remote update origin --prune && git rebase origin main
