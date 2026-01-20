@@ -137,6 +137,7 @@
         # screenshots
         "$mod, F6, exec, hyprshot -z -m output"
         "$mod CTRL, F6, exec, hyprshot -m window"
+        "$mod SHIFT, F6, exec, hyprshot -m region"
 
         # waybar
         "$mod CTRL, F7, exec, waybar"

@@ -26,7 +26,9 @@ dap.configurations.gdscript = {
   },
 }
 
-dap_virtual_text.setup()
+dap_virtual_text.setup({
+  enabled = true,
+})
 
 vim.keymap.set("n", "<leader>dv", "<cmd>DapViewToggle<cr>", { desc = "[D]ebug [V]iew" })
 vim.keymap.set("n", "<leader>db", "<cmd>DapToggleBreakpoint<cr>", { desc = "[D]ebug Toggle [B]reakpoint" })

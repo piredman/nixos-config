@@ -40,6 +40,7 @@
       alpha-nvim
       catppuccin-nvim
       nvim-web-devicons
+      colorizer
     ];
 
     # Packages needed by plugins
