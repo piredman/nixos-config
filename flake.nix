@@ -4,7 +4,7 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "nixpkgs/nixos-25.05";
+    nixpkgs-stable.url = "nixpkgs/nixos-25.11";
 
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -85,6 +85,10 @@
                 userSettings = import ./home/${host.user}/settings.nix;
                 systemSettings = systemSettings;
                 zen-browser = inputs.zen-browser;
+                pkgs-stable = import inputs.nixpkgs-stable {
+                  system = host.arch;
+                  config.allowUnfree = true;
+                };
               };
               home-manager.users."${host.user}" = import ./hosts/${hostDir}/home.nix;
             }

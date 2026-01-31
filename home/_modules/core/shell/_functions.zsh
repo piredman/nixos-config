@@ -1,4 +1,13 @@
 # ~~~ nix ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nixos-help() {
+  echo "NixOS Aliases:"
+  echo "  nrh  - nixos-rebuild-host: Rebuild and switch system configuration"
+  echo "  nrb  - nixos-rebuild-boot: Rebuild boot configuration only"
+  echo "  nrt  - nixos-rebuild-test: Test configuration without making permanent"
+  echo "  nup  - nixos-flake-update: Update flake inputs"
+  echo "  nfc  - nix flake check: Check flake configuration"
+}
+
 nixos-rebuild-host() {
   pushd ~/.dotfiles
   git add -A && clear && sudo nixos-rebuild switch --flake .#$HOST
@@ -6,9 +15,15 @@ nixos-rebuild-host() {
   popd
 }
 
-nixos-rebuild-user() {
+nixos-rebuild-boot() {
   pushd ~/.dotfiles
-  git add -A && clear && home-manager switch --flake .#$USER
+  git add -A && clear && sudo nixos-rebuild boot --flake .#$HOST
+  popd
+}
+
+nixos-rebuild-test() {
+  pushd ~/.dotfiles
+  git add -A && clear && sudo nixos-rebuild test --flake .#$HOST
   popd
 }
 

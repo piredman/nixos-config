@@ -1,9 +1,11 @@
 {
   commonAliases = {
+    nhelp = "nixos-help";
     nrh = "nixos-rebuild-host";
-    nru = "nixos-rebuild-user";
+    nrb = "nixos-rebuild-boot";
+    nrt = "nixos-rebuild-test";
     nup = "nixos-flake-update";
-    ncheck = "nix flake check";
+    nfc = "nix flake check";
 
     cd = "z";
     ".." = "cd ..";
