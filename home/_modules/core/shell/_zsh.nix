@@ -34,6 +34,7 @@ in
     sessionVariables = {
       EDITOR = "nvim";
       TERMINAL = "ghostty";
+      PATH = "$HOME/.local/bin:$PATH";
     };
   };
 
