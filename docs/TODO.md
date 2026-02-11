@@ -1,8 +1,15 @@
 ## Current cleanup
 
 ```
-sudo nix profile wipe-history --profile /nix/var/nix/profiles/system --older-than 7d
+nix-env --list-generations
+nixos-rebuild list-generations
+
+sudo nix-collect-garbage  --delete-older-than 2d
+sudo nix profile wipe-history --profile /nix/var/nix/profiles/system --older-than 2d
+
 sudo nix-collect-garbage --delete-old
+sudo nix profile wipe-history --profile /nix/var/nix/profiles/system --older-than 7d
+
 sudo nix-store --optimize
 
 lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
