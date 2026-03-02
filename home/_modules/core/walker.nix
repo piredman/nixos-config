@@ -13,14 +13,9 @@
       websearch = {
         engines = [
           {
-            name = "Kagi";
-            url = "https://kagi.com/search?q=%s";
-            prefix = "k";
-          }
-          {
-            name = "Kagi Assistant";
-            url = "https://kagi.com/assistant";
-            prefix = "ka";
+            name = "websearch";
+            url = "https://duckduckgo.com/?q=%s";
+            prefix = "web";
           }
           {
             name = "GitHub";
