@@ -14,6 +14,7 @@ let
     "gamedev"
     "notes"
     "office"
+    "content"
   ];
   moduleHelper = import ../../home/_modules/default.nix { inherit lib; };
   moduleImports = moduleHelper.importModuleGroups moduleGroups;
