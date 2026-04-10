@@ -15,7 +15,9 @@
     homeDirectory = "/home/" + userSettings.username;
     stateVersion = "25.05";
 
-    packages = [ ];
+    packages = with pkgs; [
+      ffmpeg
+    ];
     file = { };
     sessionVariables = { };
   };

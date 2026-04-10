@@ -174,7 +174,7 @@
       windowrule = [
         "suppress_event maximize, match:title ^(Picture-in-Picture)$"
         "tile on, match:class ^(Godot)$"
-        "float on, match:class ^(prototype_.*)$"
+        "float on, match:class ^(Panic.*)$"
         "tile on, match:class ^(Aseprite)$"
 
         # Floating TUIs
