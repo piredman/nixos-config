@@ -44,8 +44,12 @@
         # Fine-grained power management. Turns off GPU when not in use.
         powerManagement.finegrained = false;
 
-        # Optionally, you may need to select the appropriate driver version for your specific GPU.
-        package = config.boot.kernelPackages.nvidiaPackages.stable;
+        # Select driver package based on host settings
+        # Available: stable, legacy_580, legacy_535, legacy_470, legacy_390
+        package = let
+          drivers = config.boot.kernelPackages.nvidiaPackages;
+          driverName = systemSettings.nvidia.driver or "stable";
+        in drivers.${driverName};
       };
     })
 

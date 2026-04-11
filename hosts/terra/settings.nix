@@ -26,6 +26,7 @@
   nvidia = {
     enabled = true;
     cuda = false;
-    open = false; # open must be false if cuda is true
+    open = false;
+    driver = "stable";
   };
 }

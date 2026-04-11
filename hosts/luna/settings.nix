@@ -36,6 +36,7 @@
   nvidia = {
     enabled = true;
     cuda = true;
-    open = false; # open must be false if cuda is true
+    open = false;
+    driver = "legacy_580";
   };
 }
