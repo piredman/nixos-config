@@ -43,6 +43,8 @@ in
       usbutils # Tools for working with USB devices
       parted # Create, destroy, resize, check, and copy partitions
       rsync # file sync and backup
+      zip
+      unzip
     ];
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then
@@ -72,6 +74,16 @@ in
     };
   };
 
-  security.polkit.enable = true;
+  security = {
+    polkit.enable = true;
+    pam.loginLimits = [
+      {
+        domain = userSettings.username;
+        type = "-";
+        item = "memlock";
+        value = "unlimited";
+      }
+    ];
+  };
 
 }
