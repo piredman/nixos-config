@@ -33,6 +33,9 @@
     gtd = "git worktree delete";
     lg = "lazygit";
 
+    gssh = "ssh-setup id_ed25519";
+    nssh = "ssh-setup id_ed25519_nas";
+
     oc = "opencode";
   };
 }

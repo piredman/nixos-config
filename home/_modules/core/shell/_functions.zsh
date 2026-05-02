@@ -76,3 +76,20 @@ git-rebase() {
     echo "git rebase origin $branch"
     git rebase origin/$branch
 }
+
+
+# ~~~ ssh ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+ssh-setup() {
+  if [ -z "$1" ]; then
+    echo "Provide name of SSH key to add"
+    return 1
+  fi
+
+  if [ -z "$SSH_AUTH_SOCK" ]; then
+    eval "$(ssh-agent -s)" > /dev/null
+  fi
+
+  ssh-add ~/.ssh/$1
+}
