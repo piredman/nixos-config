@@ -24,12 +24,34 @@ let
   bluuNext = pkgs.stdenvNoCC.mkDerivation {
     pname = "bluu-next";
     version = "local";
-    src = ./blueenext;
+    src = ./bluunext;
     dontConfigure = true;
     dontBuild = true;
     installPhase = ''
       mkdir -p $out/share/fonts/opentype/bluunext
       cp -v *.otf $out/share/fonts/opentype/bluunext/
+    '';
+  };
+  dynapuff = pkgs.stdenvNoCC.mkDerivation {
+    pname = "dynapuff";
+    version = "local";
+    src = ./dynapuff;
+    dontConfigure = true;
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p $out/share/fonts/opentype/dynapuff
+      cp -v *.ttf $out/share/fonts/opentype/dynapuff/
+    '';
+  };
+  kavoon = pkgs.stdenvNoCC.mkDerivation {
+    pname = "kavoon";
+    version = "local";
+    src = ./kavoon;
+    dontConfigure = true;
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p $out/share/fonts/opentype/kavoon
+      cp -v *.ttf $out/share/fonts/opentype/kavoon/
     '';
   };
 in
@@ -38,5 +60,7 @@ in
   fonts.packages = [
     bluuNext
     momentz
+    dynapuff
+    kavoon
   ];
 }
