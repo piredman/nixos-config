@@ -104,6 +104,10 @@ sudo nix-store --optimize
 ### Check Disk Usage
 
 ```bash
+lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
+```
+
+```bash
 # Check disk usage
 df -h /nix
 

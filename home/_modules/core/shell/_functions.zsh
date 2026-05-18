@@ -1,11 +1,12 @@
 # ~~~ nix ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 nixos-help() {
   echo "NixOS Aliases:"
-  echo "  nrh  - nixos-rebuild-host: Rebuild and switch system configuration"
-  echo "  nrb  - nixos-rebuild-boot: Rebuild boot configuration only"
-  echo "  nrt  - nixos-rebuild-test: Test configuration without making permanent"
-  echo "  nup  - nixos-flake-update: Update flake inputs"
-  echo "  nfc  - nix flake check: Check flake configuration"
+  echo "  nrh    - nixos-rebuild-host: Rebuild and switch system configuration"
+  echo "  nrb    - nixos-rebuild-boot: Rebuild boot configuration only"
+  echo "  nrt    - nixos-rebuild-test: Test configuration without making permanent"
+  echo "  nup    - nixos-flake-update: Update flake inputs"
+  echo "  nfc    - nix flake check: Check flake configuration"
+  echo "  nclean - clean and optimize nixos store"
 }
 
 nixos-rebuild-host() {
@@ -30,6 +31,15 @@ nixos-rebuild-test() {
 nixos-flake-update() {
   pushd ~/.dotfiles
   git add -A && clear && nix flake update
+  lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
+  popd
+}
+
+nixos-clean() {
+  pushd ~/.dotfiles
+  sudo nix-collect-garbage --delete-older-than 7d
+  sudo nix-store --optimize
+  lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
   popd
 }
 
