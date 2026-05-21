@@ -64,6 +64,9 @@
     recursive = true;
   };
 
+  #xdg.configFile."nvim".source =
+  #  config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/${userSettings.username}/nvim";
+
   stylix.targets.neovim = {
     enable = false;
   };

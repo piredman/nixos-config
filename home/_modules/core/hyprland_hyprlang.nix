@@ -92,6 +92,7 @@
         "waybar"
         "mako"
         "systemctl --user import-environment"
+        "awww img ~/wallpapers/minimalist-earth.jpg"
         "hyprctl dispatch workspace 1"
       ];
 
