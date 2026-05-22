@@ -24,8 +24,11 @@
     enable = false;
   };
 
-  xdg.configFile."hypr/hyprland.lua".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/redman/hypr/hyprland.lua";
+  xdg.configFile = {
+    "hypr/hyprland.lua" = {
+      source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/${userSettings.username}/hypr/hyprland.lua";
+    };
+  };
 
   stylix.targets.hyprland = {
     enable = true;

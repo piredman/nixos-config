@@ -8,6 +8,7 @@
 {
   programs.neovim = {
     enable = true;
+    sideloadInitLua = true;
 
     plugins = with pkgs.vimPlugins; [
       plenary-nvim
@@ -59,13 +60,11 @@
     ];
   };
 
-  home.file.".config/nvim" = {
-    source = ../../${userSettings.username}/nvim;
-    recursive = true;
+  xdg.configFile = {
+    "nvim" = {
+      source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/${userSettings.username}/nvim";
+    };
   };
-
-  #xdg.configFile."nvim".source =
-  #  config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/${userSettings.username}/nvim";
 
   stylix.targets.neovim = {
     enable = false;
