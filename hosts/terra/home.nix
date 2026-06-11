@@ -9,7 +9,6 @@
 let
   moduleGroups = [
     "core"
-    "comms"
     "dev"
     "gamedev"
     "notes"

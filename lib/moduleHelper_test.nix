@@ -48,7 +48,7 @@ let
       name = "ValidMultiple";
       input = [
         "core"
-        "comms"
+        "notes"
       ];
     }
   ];
@@ -92,7 +92,7 @@ in
         coreOnly = moduleHelper.importModuleGroups [ "core" ];
         both = moduleHelper.importModuleGroups [
           "core"
-          "comms"
+          "notes"
         ];
       in
       builtins.length both > builtins.length coreOnly;
@@ -160,10 +160,10 @@ in
     expr =
       let
         coreOnly = moduleHelper.importModuleGroups [ "core" ];
-        commsOnly = moduleHelper.importModuleGroups [ "comms" ];
+        notesOnly = moduleHelper.importModuleGroups [ "notes" ];
         both = moduleHelper.importModuleGroups [
           "core"
-          "comms"
+          "notes"
         ];
       in
       builtins.length both >= builtins.length coreOnly;
