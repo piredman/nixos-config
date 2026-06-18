@@ -45,11 +45,17 @@ local menu = "walker"
 -------------------
 
 hl.on("hyprland.start", function()
-  hl.exec_cmd("dbus-run-session walker --gapplication-service &")
+  hl.exec_cmd("dbus-update-activation-environment --systemd DISPLAY HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+  hl.exec_cmd("systemctl --user start hyprland-session.target")
   hl.exec_cmd("waybar")
   hl.exec_cmd("mako")
-  hl.exec_cmd("systemctl --user import-environment")
-  hl.dsp.focus({ workspace = 1 })
+  hl.exec_cmd("systemctl --user start awww.service")
+  hl.timer(function()
+    hl.exec_cmd("awww restore")
+  end, { timeout = 500, type = "oneshot" })
+  hl.timer(function()
+    hl.dispatch(hl.dsp.focus({ workspace = 1 }))
+  end, { timeout = 100, type = "oneshot" })
 end)
 
 -------------------------------
@@ -59,7 +65,6 @@ end)
 hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("WLR_NO_HARDWARE_CURSORS", "1")
 hl.env("XCURSOR_SIZE", "24")
-hl.env("XCURSOR_THEME", "Adwaita")
 
 if nvidiaEnabled then
   hl.env("LIBVA_DRIVER_NAME", "nvidia")
@@ -206,7 +211,7 @@ hl.window_rule({
 
 hl.window_rule({
   name = "bluetui-floating",
-  match = { class = "bluetooth.bluetui", tag = "floating-window" },
+  match = { class = "bluetooth.bluetui" },
   float = true,
   center = true,
   size = { 800, 600 },
@@ -214,7 +219,7 @@ hl.window_rule({
 
 hl.window_rule({
   name = "wiremix-floating",
-  match = { class = "pulseaudio.wiremix", tag = "floating-window" },
+  match = { class = "pulseaudio.wiremix" },
   float = true,
   center = true,
   size = { 800, 600 },
@@ -247,3 +252,6 @@ hl.device({
   transform = 0,
   output = primaryMonitor,
 })
+
+-- Load host-specific window rules
+dofile(os.getenv("HOME") .. "/.config/hypr/host_rules.lua")
