@@ -24,14 +24,14 @@ let
           "aarch64-linux" = "arm64";
         };
 
-        platform = platformMap.${pkgs.system};
+        platform = platformMap.${pkgs.stdenv.hostPlatform.system};
 
         hashes = {
           "x86_64-linux" = "sha256:ad8c4038682310feff2d94b7cf70b75e876c57e4e40e5de9dd56dd4a8cc715f6";
           "aarch64-linux" = "sha256:cce319960d2f5238199e61e88994ecdd09af0b7eef5d65b7f686e14f19f8d7ea";
         };
 
-        hash = hashes.${pkgs.system};
+        hash = hashes.${pkgs.stdenv.hostPlatform.system};
       in
       pkgs.fetchurl {
         url = "https://github.com/imputnet/helium-linux/releases/download/${version}/helium-${version}-${platform}.AppImage";

@@ -2,13 +2,13 @@
   config,
   lib,
   pkgs,
+  pkgs-stable,
+  systemSettings,
+  userSettings,
   ...
 }:
-{
 
-  environment.systemPackages = with pkgs; [
-    streamcontroller
-  ];
+{
 
   services.udev = {
     extraRules = ''
