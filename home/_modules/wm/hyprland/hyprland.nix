@@ -10,11 +10,11 @@
 {
   home.packages = with pkgs; [
     hyprland-protocols
-    xdg-desktop-portal-hyprland
     wl-clipboard
   ];
 
   home.sessionVariables = {
+    TERMINAL = "ghostty";
     HYPR_MONITOR_PRIMARY = systemSettings.monitors.primary;
     HYPR_MONITOR_SECONDARY = systemSettings.monitors.secondary;
     HYPR_NVIDIA_ENABLED = if systemSettings.nvidia.enabled then "1" else "0";
@@ -34,23 +34,34 @@
     };
   };
 
-  xdg.configFile = {
-    "hypr/hyprland.lua" = {
-      source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/${userSettings.username}/hypr/hyprland.lua";
+  xdg = {
+    portal = {
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-hyprland
+      ];
     };
 
-    "hypr/host_rules.lua".text = lib.concatStringsSep "\n" (map (rule:
-      let
-        matchType = builtins.head (builtins.attrNames rule.match);
-        matchPattern = rule.match.${matchType};
-      in
-      ''
-        hl.window_rule({
-          match = { ${matchType} = "${matchPattern}" },
-          workspace = "${rule.workspace}",
-        })
-      ''
-    ) (systemSettings.windowRules or []));
+    configFile = {
+      "hypr/hyprland.lua" = {
+        source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/${userSettings.username}/hypr/hyprland.lua";
+      };
+
+      "hypr/host_rules.lua".text = lib.concatStringsSep "\n" (
+        map (
+          rule:
+          let
+            matchType = builtins.head (builtins.attrNames rule.match);
+            matchPattern = rule.match.${matchType};
+          in
+          ''
+            hl.window_rule({
+              match = { ${matchType} = "${matchPattern}" },
+              workspace = "${rule.workspace}",
+            })
+          ''
+        ) (systemSettings.windowRules or [ ])
+      );
+    };
   };
 
   stylix.targets.hyprland = {

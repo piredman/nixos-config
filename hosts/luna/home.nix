@@ -11,6 +11,7 @@ let
     "core"
     "dev"
     "streaming"
+    "wm"
   ];
   moduleHelper = import ../../home/_modules/default.nix { inherit lib; };
   moduleImports = moduleHelper.importModuleGroups moduleGroups;

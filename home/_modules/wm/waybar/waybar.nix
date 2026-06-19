@@ -30,10 +30,8 @@ in
 
       modules-left = [
         "custom/os"
-        "hyprland/submap"
       ];
       modules-center = [
-        "hyprland/workspaces"
       ];
       modules-right = [
         "tray"
@@ -41,14 +39,6 @@ in
         "bluetooth"
         "network"
       ];
-
-      "hyprland/workspaces" = {
-        format = "{name}";
-        format-icons = {
-          active = "";
-          default = "";
-        };
-      };
 
       "custom/os" = {
         format = "";

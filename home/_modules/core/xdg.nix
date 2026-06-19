@@ -14,10 +14,6 @@
       config = {
         common.default = "*";
       };
-
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-      ];
     };
 
     terminal-exec = {
