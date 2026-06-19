@@ -81,7 +81,7 @@ hl.config({
     gaps_in = 5,
     gaps_out = 5,
     border_size = 1,
-    layout = "dwindle",
+    layout = "scrolling",
   },
 
   cursor = { no_hardware_cursors = true },
@@ -172,6 +172,12 @@ end
 
 hl.bind(main_mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(main_mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+
+hl.bind(main_mod .. " + CTRL + S", hl.dsp.exec_cmd("hyprctl eval 'hl.config({ general = { layout = \"scrolling\" } })'"))
+hl.bind(main_mod .. " + CTRL + T", hl.dsp.exec_cmd("hyprctl eval 'hl.config({ general = { layout = \"dwindle\" } })'"))
+
+hl.bind(main_mod .. " + comma", hl.dsp.layout("colresize -0.25"))
+hl.bind(main_mod .. " + period", hl.dsp.layout("colresize +0.25"))
 
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
