@@ -10,6 +10,7 @@
     Unit = {
       Description = "polkit-kde-authentication-agent-1";
       Wants = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
 
