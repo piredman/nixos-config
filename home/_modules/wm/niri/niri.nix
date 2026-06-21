@@ -20,6 +20,11 @@
 
   home.sessionVariables = {
     NIXOS_OZONE_WL = "1";
+    TERMINAL = "ghostty";
+  };
+
+  systemd.user.sessionVariables = {
+    TERMINAL = "ghostty";
   };
 
   xdg.portal.extraPortals = with pkgs; [

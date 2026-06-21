@@ -24,6 +24,10 @@
     HYPR_NVIDIA_ENABLED = if systemSettings.nvidia.enabled then "1" else "0";
   };
 
+  systemd.user.sessionVariables = {
+    TERMINAL = "ghostty";
+  };
+
   wayland.windowManager.hyprland = {
     enable = false;
   };

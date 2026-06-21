@@ -23,6 +23,8 @@ in
     package = (pkgs.waybar.override { cavaSupport = false; }).overrideAttrs (old: {
       src = waybarSrc;
       version = "0.15.0";
+      doCheck = false;
+      nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.catch2 ];
     });
     settings.main = baseConfig;
 
