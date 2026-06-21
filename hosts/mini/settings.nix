@@ -16,6 +16,8 @@
     ];
   };
 
+   wallpaper = "minimalist-earth.jpg";
+
    audioSinks = [ ];
 
    nvidia = {

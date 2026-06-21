@@ -36,6 +36,7 @@ in
       ExecReload = "${pkgs.coreutils}/bin/kill -SIGUSR2 $MAINPID";
       KillMode = "mixed";
       Restart = "on-failure";
+      RestartSec = "2s";
     };
 
     Install = {

@@ -65,6 +65,39 @@
           ''
         ) (systemSettings.windowRules or [ ])
       );
+
+      "hypr/monitors.lua".text = lib.concatStringsSep "\n" (
+        map (configStr:
+          let
+            parts = lib.splitString "," configStr;
+            output = lib.trim (builtins.head parts);
+            mode = lib.trim (builtins.elemAt parts 1);
+            position = lib.trim (builtins.elemAt parts 2);
+            scale = lib.trim (builtins.elemAt parts 3);
+            extra = map lib.trim (lib.drop 4 parts);
+            isMirror = builtins.length extra >= 2 && builtins.elemAt extra 0 == "mirror";
+          in
+          if isMirror then
+            ''
+              hl.monitor({
+                output = "${output}",
+                mode = "${mode}",
+                position = "${position}",
+                scale = ${scale},
+                mirror = "${builtins.elemAt extra 1}",
+              })
+            ''
+          else
+            ''
+              hl.monitor({
+                output = "${output}",
+                mode = "${mode}",
+                position = "${position}",
+                scale = ${scale},
+              })
+            ''
+        ) (systemSettings.monitors.setup or [ ])
+      );
     };
   };
 

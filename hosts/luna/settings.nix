@@ -16,6 +16,8 @@
     ];
   };
 
+  wallpaper = "minimalist-earth.jpg";
+
   windowRules = [
     { workspace = "6"; match = { class = "^zen-beta$"; }; }
     { workspace = "6"; match = { class = "^chrome-dashboard.twitch.tv_.*$"; }; }

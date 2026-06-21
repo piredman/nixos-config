@@ -10,27 +10,7 @@ local nvidiaEnabled = os.getenv("HYPR_NVIDIA_ENABLED") == "1"
 ---- MONITORS ----
 ------------------
 
-hl.monitor({
-  output = primaryMonitor,
-  mode = "2560x1440@59.95",
-  position = "0x0",
-  scale = 1,
-})
-
-hl.monitor({
-  output = secondaryMonitor,
-  mode = "1920x1080@60",
-  position = "auto-right",
-  scale = 1,
-})
-
-hl.monitor({
-  output = "HDMI-A-1",
-  mode = "2560x1440",
-  position = "0x0",
-  scale = 1,
-  mirror = primaryMonitor,
-})
+dofile(os.getenv("HOME") .. "/.config/hypr/monitors.lua")
 
 ------------------
 ---- MY PROGRAMS ----
@@ -74,7 +54,7 @@ hl.config({
     gaps_in = 5,
     gaps_out = 5,
     border_size = 1,
-    layout = "scrolling",
+    layout = "dwindle",
   },
 
   cursor = { no_hardware_cursors = true },
@@ -166,7 +146,10 @@ end
 hl.bind(main_mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(main_mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-hl.bind(main_mod .. " + CTRL + S", hl.dsp.exec_cmd("hyprctl eval 'hl.config({ general = { layout = \"scrolling\" } })'"))
+hl.bind(
+  main_mod .. " + CTRL + S",
+  hl.dsp.exec_cmd("hyprctl eval 'hl.config({ general = { layout = \"scrolling\" } })'")
+)
 hl.bind(main_mod .. " + CTRL + T", hl.dsp.exec_cmd("hyprctl eval 'hl.config({ general = { layout = \"dwindle\" } })'"))
 
 hl.bind(main_mod .. " + comma", hl.dsp.layout("colresize -0.25"))

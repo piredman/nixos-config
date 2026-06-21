@@ -17,6 +17,8 @@
     ];
   };
 
+  wallpaper = "minimalist-earth.jpg";
+
   audioSinks = [
     "main"
     "chat"

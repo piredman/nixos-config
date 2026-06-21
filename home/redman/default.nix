@@ -18,7 +18,9 @@
     packages = with pkgs; [
       ffmpeg
     ];
-    file = { };
+    file = {
+      ".config/awww/wallpapers".source = ./wallpaper;
+    };
     sessionVariables = { };
   };
 
