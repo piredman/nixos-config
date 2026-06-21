@@ -45,14 +45,7 @@ local menu = "walker"
 -------------------
 
 hl.on("hyprland.start", function()
-  hl.exec_cmd("dbus-update-activation-environment --systemd DISPLAY HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-  hl.exec_cmd("systemctl --user start hyprland-session.target")
-  hl.exec_cmd("waybar")
-  hl.exec_cmd("mako")
-  hl.exec_cmd("systemctl --user start awww.service")
-  hl.timer(function()
-    hl.exec_cmd("awww restore")
-  end, { timeout = 500, type = "oneshot" })
+  hl.exec_cmd("wm-start-hyprland-session")
   hl.timer(function()
     hl.dispatch(hl.dsp.focus({ workspace = 1 }))
   end, { timeout = 100, type = "oneshot" })
@@ -141,28 +134,28 @@ local main_mod = "SUPER"
 hl.bind(main_mod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(main_mod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(main_mod .. " + Space", hl.dsp.exec_cmd(menu))
-hl.bind(main_mod .. " + SHIFT + End", hl.dsp.window.close())
-hl.bind(main_mod .. " + SHIFT + Q", hl.dsp.exit())
+hl.bind(main_mod .. " + CTRL + Q", hl.dsp.window.close())
+hl.bind(main_mod .. " + CTRL + SHIFT + Q", hl.dsp.exec_cmd("wm-exit-hyprland-session"))
 
-hl.bind(main_mod .. " + M", hl.dsp.window.fullscreen())
-hl.bind(main_mod .. " + SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(main_mod .. " + CTRL + M", hl.dsp.window.fullscreen())
+hl.bind(main_mod .. " + CTRL + F", hl.dsp.window.float({ action = "toggle" }))
 
 hl.bind(main_mod .. " + H", hl.dsp.focus({ direction = "left" }))
 hl.bind(main_mod .. " + J", hl.dsp.focus({ direction = "down" }))
 hl.bind(main_mod .. " + K", hl.dsp.focus({ direction = "up" }))
 hl.bind(main_mod .. " + L", hl.dsp.focus({ direction = "right" }))
 
-hl.bind(main_mod .. " + SHIFT + H", hl.dsp.window.move({ direction = "left" }))
-hl.bind(main_mod .. " + SHIFT + J", hl.dsp.window.move({ direction = "down" }))
-hl.bind(main_mod .. " + SHIFT + K", hl.dsp.window.move({ direction = "up" }))
-hl.bind(main_mod .. " + SHIFT + L", hl.dsp.window.move({ direction = "right" }))
+hl.bind(main_mod .. " + CTRL + H", hl.dsp.window.move({ direction = "left" }))
+hl.bind(main_mod .. " + CTRL + J", hl.dsp.window.move({ direction = "down" }))
+hl.bind(main_mod .. " + CTRL + K", hl.dsp.window.move({ direction = "up" }))
+hl.bind(main_mod .. " + CTRL + L", hl.dsp.window.move({ direction = "right" }))
 
 hl.bind(main_mod .. " + F6", hl.dsp.exec_cmd("hyprshot -z -m output"))
 hl.bind(main_mod .. " + CTRL + F6", hl.dsp.exec_cmd("hyprshot -m window"))
 hl.bind(main_mod .. " + SHIFT + F6", hl.dsp.exec_cmd("hyprshot -m region"))
 
-hl.bind(main_mod .. " + CTRL + F7", hl.dsp.exec_cmd("waybar"))
-hl.bind(main_mod .. " + SHIFT + F7", hl.dsp.exec_cmd("pkill -f waybar"))
+hl.bind(main_mod .. " + CTRL + F7", hl.dsp.exec_cmd("systemctl --user restart waybar-hyprland.service"))
+hl.bind(main_mod .. " + SHIFT + F7", hl.dsp.exec_cmd("systemctl --user stop waybar-hyprland.service"))
 
 for i = 1, 10 do
   local key = i % 10

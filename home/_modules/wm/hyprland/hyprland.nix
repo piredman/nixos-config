@@ -8,6 +8,10 @@
 }:
 
 {
+  imports = [
+    ./session.nix
+  ];
+
   home.packages = with pkgs; [
     hyprland-protocols
     wl-clipboard
