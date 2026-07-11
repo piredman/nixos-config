@@ -37,7 +37,7 @@ nixos-flake-update() {
 
 nixos-clean() {
   pushd ~/.dotfiles
-  sudo nix-collect-garbage --delete-older-than 7d
+  sudo nix-collect-garbage -d
   sudo nix-store --optimize
   lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
   popd
