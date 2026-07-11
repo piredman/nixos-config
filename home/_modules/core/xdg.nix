@@ -49,4 +49,6 @@
     };
   };
 
+  home.pointerCursor.enable = true;
+
 }

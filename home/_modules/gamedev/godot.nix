@@ -1,40 +1,31 @@
+{ lib, pkgs, ... }:
+
+let
+  godot46 = pkgs.godotPackages_4_6;
+  godot47 = pkgs.godotPackages_4_7;
+
+  templateVersion = package:
+    builtins.replaceStrings [ "-" ] [ "." ] package.version;
+in
 {
-  config,
-  lib,
-  pkgs,
-  pkgs-stable,
-  userSettings,
-  ...
-}:
-
-{
-
-  # Once nixos unstable has Godot 4.6 avalable, change back to using it.
-  /*
-    home.packages = with pkgs; [
-      godot
-      godot_4-export-templates-bin
-    ];
-
-    home.file.".local/share/godot/export_templates/${
-      builtins.replaceStrings [ "-" ] [ "." ] pkgs.godot_4-export-templates-bin.version
-    }".source =
-      pkgs.godot_4-export-templates-bin
-      + "/share/godot/export_templates/${
-        builtins.replaceStrings [ "-" ] [ "." ] pkgs.godot_4-export-templates-bin.version
-      }";
-  */
-
-  home.packages = with pkgs-stable; [
-    godotPackages_4_6.godot
-    godotPackages_4_6.export-templates-bin
+  home.packages = [
+    godot47.godot
+    (lib.lowPrio godot46.godot)
   ];
+
   home.file.".local/share/godot/export_templates/${
-    builtins.replaceStrings [ "-" ] [ "." ] pkgs-stable.godotPackages_4_6.export-templates-bin.version
+    templateVersion godot46.export-templates-bin
   }".source =
-    pkgs-stable.godotPackages_4_6.export-templates-bin
+    godot46.export-templates-bin
     + "/share/godot/export_templates/${
-      builtins.replaceStrings [ "-" ] [ "." ] pkgs-stable.godotPackages_4_6.export-templates-bin.version
+      templateVersion godot46.export-templates-bin
     }";
 
+  home.file.".local/share/godot/export_templates/${
+    templateVersion godot47.export-templates-bin
+  }".source =
+    godot47.export-templates-bin
+    + "/share/godot/export_templates/${
+      templateVersion godot47.export-templates-bin
+    }";
 }
