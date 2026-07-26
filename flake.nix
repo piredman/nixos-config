@@ -25,6 +25,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+
+    stasis.url = "github:saltnpepper97/stasis";
+    veila.url = "github:naurissteins/Veila";
   };
 
   outputs =
@@ -72,6 +75,7 @@
             ./hosts/${hostDir}/configuration.nix
             inputs.stylix.nixosModules.default
             inputs.home-manager.nixosModules.home-manager
+            inputs.veila.nixosModules.default
             {
               nixpkgs.config.allowUnfree = true;
               home-manager.useGlobalPkgs = true;
@@ -80,6 +84,7 @@
               home-manager.sharedModules = [
                 inputs.walker.homeManagerModules.default
                 inputs.zen-browser.homeModules.default
+                inputs.stasis.homeModules.default
               ];
               home-manager.extraSpecialArgs = {
                 userSettings = import ./home/${host.user}/settings.nix;

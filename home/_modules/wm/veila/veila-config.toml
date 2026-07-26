@@ -1,0 +1,15 @@
+[lock]
+auto_reload_config = true
+hide_cursor = false
+allow_empty_password = false
+
+[background]
+mode = "file"
+path = "/home/redman/wallpapers/pastel-space.png"
+dim_strength = 54
+
+[background.gradient]
+top_left = "#A85BFF"
+top_right = "#39B8FF"
+bottom_left = "#6FE2FF"
+bottom_right = "#6F4CFF"

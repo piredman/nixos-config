@@ -114,6 +114,7 @@ local main_mod = "SUPER"
 hl.bind(main_mod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(main_mod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(main_mod .. " + Space", hl.dsp.exec_cmd(menu))
+hl.bind(main_mod .. " + ALT + L", hl.dsp.exec_cmd("wm-lock-session"))
 hl.bind(main_mod .. " + CTRL + Q", hl.dsp.window.close())
 hl.bind(main_mod .. " + CTRL + SHIFT + Q", hl.dsp.exec_cmd("wm-exit-hyprland-session"))
 
