@@ -135,6 +135,7 @@ hl.bind(main_mod .. " + F6", hl.dsp.exec_cmd("hyprshot -z -m output"))
 hl.bind(main_mod .. " + CTRL + F6", hl.dsp.exec_cmd("hyprshot -m window"))
 hl.bind(main_mod .. " + SHIFT + F6", hl.dsp.exec_cmd("hyprshot -m region"))
 
+hl.bind(main_mod .. " + F7", hl.dsp.exec_cmd("wm-toggle-bar"))
 hl.bind(main_mod .. " + CTRL + F7", hl.dsp.exec_cmd("systemctl --user restart waybar-hyprland.service"))
 hl.bind(main_mod .. " + SHIFT + F7", hl.dsp.exec_cmd("systemctl --user stop waybar-hyprland.service"))
 

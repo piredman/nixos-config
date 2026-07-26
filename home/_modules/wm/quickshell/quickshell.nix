@@ -2,8 +2,13 @@
 
 let
   c = config.lib.stylix.colors.withHashtag;
+  toggleBar = pkgs.writeShellScriptBin "wm-toggle-bar" ''
+    exec ${pkgs.quickshell}/bin/qs ipc call bar toggle
+  '';
 in
 {
+  home.packages = [ toggleBar ];
+
   xdg.configFile."quickshell/shell.qml" = {
     source = config.lib.file.mkOutOfStoreSymlink
       "${config.home.homeDirectory}/.dotfiles/home/_modules/wm/quickshell/shell.qml";

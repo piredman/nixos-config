@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Io
 import QtQuick
 import qs
 
@@ -6,6 +7,15 @@ ShellRoot {
     id: root
     property string time
     property string date
+    property bool barVisible: true
+
+    IpcHandler {
+        target: "bar"
+
+        function toggle(): void {
+            root.barVisible = !root.barVisible
+        }
+    }
 
     Variants {
         model: Quickshell.screens
@@ -14,6 +24,7 @@ ShellRoot {
             id: panel
             required property var modelData
             screen: modelData
+            visible: root.barVisible
 
             property string tipText: ""
             property real tipX: 0
