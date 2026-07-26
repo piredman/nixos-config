@@ -30,7 +30,7 @@ ShellRoot {
 
             Bar {
                 anchors.fill: parent
-                screenName: modelData.name
+                screen: modelData
                 time: root.time
                 date: root.date
                 onShowTip: function(text, x, y) {

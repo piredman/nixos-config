@@ -1,5 +1,5 @@
 import Quickshell
-import Quickshell.Hyprland
+import Quickshell.WindowManager
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 import Quickshell.Networking
@@ -11,16 +11,24 @@ import qs
 
 Item {
     id: bar
-    required property string screenName
+    required property var screen
     property string time
     property string date
 
     signal showTip(string text, real x, real y)
     signal hideTip()
 
-    property var monitorWorkspaces: Hyprland.workspaces.values
-        .filter(ws => ws.monitor && ws.monitor.name === screenName)
-        .sort((a, b) => a.id - b.id)
+    property var monitorWorkspaces: WindowManager.screenProjection(screen).windowsets
+        .filter(ws => ws.shouldDisplay)
+        .sort((a, b) => {
+            var ca = a.coordinates, cb = b.coordinates
+            for (var i = 0; i < Math.max(ca.length, cb.length); i++) {
+                var va = i < ca.length ? ca[i] : 0
+                var vb = i < cb.length ? cb[i] : 0
+                if (va !== vb) return va - vb
+            }
+            return 0
+        })
 
     property string fontFamily: "CaskaydiaCove Nerd Font"
     property int fontSize: 10
@@ -91,14 +99,14 @@ Item {
                 color: "transparent"
                 border.width: 2
                 border.color: ws.active ? Colours.rosewater
-                    : (ws.windows > 0 ? Colours.lavender : Colours.surface1)
+                    : (ws.urgent ? Colours.lavender : Colours.surface1)
 
                 Text {
                     id: wsLabel
                     anchors.centerIn: parent
-                    text: ws.id
+                    text: ws.name !== "" ? ws.name : ws.coordinates[0]
                     color: ws.active ? Colours.rosewater
-                        : (ws.windows > 0 ? Colours.lavender : Colours.surface1)
+                        : (ws.urgent ? Colours.lavender : Colours.surface1)
                     font.family: bar.fontFamily
                     font.pixelSize: bar.fontSize
                     font.bold: true
