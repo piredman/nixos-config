@@ -207,6 +207,14 @@ hl.window_rule({
   size = { 800, 600 },
 })
 
+hl.window_rule({
+  name = "nmtui-floating",
+  match = { class = "network.nmtui" },
+  float = true,
+  center = true,
+  size = { 800, 600 },
+})
+
 ------------------
 ---- WORKSPACES ----
 ------------------

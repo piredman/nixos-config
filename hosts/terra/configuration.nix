@@ -15,6 +15,7 @@ let
     "printing"
     "android"
     "fonts"
+    "wm"
   ]
   ++ lib.optionals (systemSettings.nvidia.enabled) [ "nvidia" ];
   moduleHelper = import ../_modules/default.nix { inherit lib; };
