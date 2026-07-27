@@ -35,6 +35,7 @@ in
       EDITOR = "nvim";
       TERMINAL = "ghostty";
       PATH = "$HOME/.local/bin:$PATH";
+      ZVM_INIT_MODE = "sourcing";
     };
   };
 
