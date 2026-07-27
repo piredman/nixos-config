@@ -2,7 +2,6 @@
 @description "Idle management via stasis + veila lock screen"
 
 lock_after               300
-screen_off_after_lock     60
 
 default:
   enable_loginctl_integration true
@@ -21,11 +20,5 @@ default:
     command "wm-lock-session"
     notification "Locking in 5s"
     notify_seconds_before 5
-  end
-
-  dpms:
-    timeout screen_off_after_lock
-    command "stasis-dpms off"
-    resume_command "stasis-dpms on"
   end
 end
