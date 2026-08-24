@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  zen-browser,
   userSettings,
   ...
 }:
@@ -9,6 +10,17 @@
   programs.zen-browser = {
     # Using https://github.com/0xc000022070/zen-browser-flake
     enable = true;
+
+    env.XDG_SESSION_TYPE = "wayland";
+
+    unwrappedPackage =
+      (zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta-unwrapped.override {
+        inherit (config.programs.zen-browser) policies enablePrivateDesktopEntry;
+      }).overrideAttrs (old: {
+        passthru = (old.passthru or { }) // {
+          pipewireSupport = true;
+        };
+      });
 
     profiles.${userSettings.username} = rec {
       settings = {
