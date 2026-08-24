@@ -173,11 +173,17 @@ hl.window_rule({
   tile = true,
 })
 
-hl.window_rule({
-  name = "panic-float",
-  match = { class = "^(Panic.*)$" },
-  float = true,
-})
+-- hl.window_rule({
+--   name = "panic-float",
+--   match = { class = "^(Panic.*)$" },
+--   float = true,
+-- })
+hl.on("window.title", function(w)
+  if w ~= nil and w.class ~= "Godot" and w.initial_title == "Godot" and w.title:find("DEBUG") ~= nil and not w.floating then
+    hl.dispatch(hl.dsp.window.float({ action = "enable", window = w }))
+    hl.dispatch(hl.dsp.window.center({ window = w }))
+  end
+end)
 
 hl.window_rule({
   name = "aseprite-tile",
