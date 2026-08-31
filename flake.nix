@@ -18,6 +18,7 @@
     walker = {
       url = "github:abenz1267/walker";
       inputs.elephant.follows = "elephant";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     zen-browser = {
@@ -26,8 +27,14 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    stasis.url = "github:saltnpepper97/stasis";
-    veila.url = "github:naurissteins/Veila";
+    stasis = {
+      url = "github:saltnpepper97/stasis";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    veila = {
+      url = "github:naurissteins/Veila";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

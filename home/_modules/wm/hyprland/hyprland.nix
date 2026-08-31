@@ -20,7 +20,7 @@
   home.sessionVariables = {
     TERMINAL = "ghostty";
     HYPR_MONITOR_PRIMARY = systemSettings.monitors.primary;
-    HYPR_MONITOR_SECONDARY = systemSettings.monitors.secondary;
+    HYPR_MONITOR_SECONDARY = systemSettings.monitors.secondary or "";
     HYPR_NVIDIA_ENABLED = if systemSettings.nvidia.enabled then "1" else "0";
   };
 

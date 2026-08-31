@@ -192,6 +192,12 @@ hl.window_rule({
 })
 
 hl.window_rule({
+  name = "helium-tile",
+  match = { class = "^(helium|Helium)$" },
+  tile = true,
+})
+
+hl.window_rule({
   name = "floating-tui",
   match = { tag = "floating-window" },
   float = true,

@@ -8,25 +8,23 @@
   nas = import ../_settings/nas.nix;
 
   monitors = {
-    primary = "DP-1";
-    secondary = "DP-2";
+    primary = "DP-3";
     setup = [
-      "DP-1,3840x1600@59.99,0x0,1"
-      "DP-2,1920x1080@60,auto-left,1"
+      "DP-3,2560x1440@60,0x0,1"
     ];
   };
 
   wallpaper = "minimalist-earth.jpg";
 
   windowRules = [
-    { workspace = "6"; match = { class = "^zen-beta$"; }; }
-    { workspace = "6"; match = { class = "^chrome-dashboard.twitch.tv_.*$"; }; }
-    { workspace = "7"; match = { class = "^com.obsproject.Studio$"; }; }
-    { workspace = "7"; match = { class = "^chrome-vdo.ninja_.*$"; }; }
-    { workspace = "8"; match = { class = "^chrome-discord.com_.*$"; }; }
-    { workspace = "9"; match = { class = "^org.gnome.Nautilus$"; }; }
-    { workspace = "9"; match = { class = "^vlc$"; }; }
-    { workspace = "10"; match = { class = "^com.core447.StreamController$"; }; }
+    { workspace = "1"; match = { class = "^zen-beta$"; }; }
+    { workspace = "1"; match = { class = "^chrome-dashboard.twitch.tv_.*$"; }; }
+    { workspace = "2"; match = { class = "^com.obsproject.Studio$"; }; }
+    { workspace = "2"; match = { class = "^chrome-vdo.ninja_.*$"; }; }
+    { workspace = "3"; match = { class = "^chrome-discord.com_.*$"; }; }
+    { workspace = "4"; match = { class = "^org.gnome.Nautilus$"; }; }
+    { workspace = "4"; match = { class = "^vlc$"; }; }
+    { workspace = "5"; match = { class = "^com.core447.StreamController$"; }; }
   ];
 
   audioSinks = [
