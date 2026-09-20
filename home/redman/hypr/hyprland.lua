@@ -36,6 +36,8 @@ end)
 -------------------------------
 
 hl.env("XDG_SESSION_TYPE", "wayland")
+hl.env("NIXOS_OZONE_WL", "1")
+hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 hl.env("WLR_NO_HARDWARE_CURSORS", "1")
 hl.env("XCURSOR_SIZE", "24")
 
