@@ -12,7 +12,10 @@ nixos-help() {
 
 nixos-rebuild-host() {
   pushd ~/.dotfiles
-  git add -A && clear && sudo nixos-rebuild switch --flake .#$HOST
+  git add -A && clear
+  systemctl --user stop stasis.service 2>/dev/null
+  sudo nixos-rebuild switch --flake .#$HOST
+  systemctl --user start stasis.service 2>/dev/null
   restart-services
   popd
 }

@@ -188,7 +188,7 @@ environment.etc."systemd/logind.conf.d/20-inhibit-delay.conf".text = ''
      within the real deadline (read from `InhibitDelayMaxUSec` via busctl, capped ~12s).
    - On failure: critical notification "Screen did not lock before suspend".
 
-### I. Session-lock recovery — hyprland.lua `misc`
+### I. Session-lock recovery — hyprland.lua `misc` — **DONE**
 
 ```lua
 allow_session_lock_restore = true
@@ -196,6 +196,11 @@ allow_session_lock_restore = true
 
 Veila uses the session-lock protocol; if the lock client dies, a fresh one can re-acquire
 instead of leaving the desktop unlocked.
+
+Related (also DONE): `nixos-rebuild-host()` in `home/_modules/core/shell/_functions.zsh`
+stops `stasis.service` around the switch. Building while away from the keyboard lets the
+idle lock fire mid-build; the switch phase then SIGTERMs veilad while it holds the lock
+(no HM stop-wave races with a held session lock anymore).
 
 ---
 
