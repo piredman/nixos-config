@@ -4,12 +4,21 @@
   pkgs,
   ...
 }:
+let
+  wmAppRun = import ../../../lib/wm-app-run.nix { inherit pkgs; };
+in
 {
   programs.walker = {
     enable = true;
     runAsService = true;
 
     config = {
+      # Launch apps in their own app.slice systemd scope via the shared
+      # wm-app-run wrapper so oomd can kill a single runaway app instead of
+      # walker itself. NOTE: the trailing space is
+      # required - walker concatenates this prefix directly with the command.
+      app_launch_prefix = "${lib.getExe wmAppRun} ";
+
       websearch = {
         engines = [
           {
