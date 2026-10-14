@@ -25,6 +25,7 @@ See the [Bootstrap Guide](docs/BOOTSTRAP.md) for setup on machines with existing
 
 - 📦 [Bootstrap Guide](docs/BOOTSTRAP.md) - Installing on machines with existing config
 - 💻 [Useful Commands](docs/USEFUL-COMMANDS.md) - Common commands & workflows
+- 🗺️ [Stability Plan](docs/PLAN.md) - Omarchy-inspired improvement tiers & status
 
 ## Running Tests
 
@@ -42,19 +43,23 @@ nixos-config/
 │   └── _modules/            # Shared system module groups
 │       ├── core/            # Essential modules
 │       ├── android/         # Android tools
+│       ├── fonts/           # System fonts
+│       ├── gaming/          # Gaming tools
 │       ├── nvidia/          # NVIDIA GPU
 │       ├── printing/        # Printing
-│       └── virtual_camera/  # Virtual camera
+│       ├── streaming/       # Streaming tools
+│       └── wm/              # System-level WM support (quickshell, veila)
 ├── home/                    # User configurations
 │   ├── <username>/          # User-specific config
 │   └── _modules/            # Dynamic module groups
+│       ├── content/         # Media/content creation (ardour, audacity, kdenlive)
 │       ├── core/            # Essential modules
-│       ├── comms/           # Communication tools
 │       ├── dev/             # Development tools
 │       ├── gamedev/         # Game development
 │       ├── notes/           # Note-taking apps
 │       ├── office/          # Office applications
-│       └── streaming/       # Streaming tools
+│       ├── streaming/       # Streaming tools
+│       └── wm/              # WM session stack (hyprland, niri, mako, awww, stasis, veila, walker, waybar)
 ├── lib/                     # Nix utilities and tests
 ├── docs/                    # Documentation
 └── flake.nix               # Flake with auto-discovery
@@ -96,9 +101,12 @@ sudo nixos-rebuild switch --rollback
 
 ### Clean Up
 
+Cleanup is automatic — every successful rebuild (`nrh`) prunes to the 5 newest
+generations and reclaims `/boot` space. Manual override:
+
 ```bash
-sudo nix-collect-garbage --delete-older-than 7d
-sudo nix-store --optimize
+nprune      # keep newest 5 generations (default)
+nprune 10   # keep newest 10
 ```
 
 ### Check Disk Usage
@@ -122,9 +130,9 @@ nix path-info -rsSh /run/current-system | sort -hk2
 
 After bootstrap, these aliases are available for common operations:
 
-- `nrh` - Rebuild current host system (includes git add)
+- `nrh` - Rebuild current host (includes git add; auto-prunes to 5 newest generations)
 - `nup` - Update flake inputs (includes git add)
-- `nru` - Rebuild user config (legacy - use nrh for integrated setup)
+- `nprune` - Prune generations, free /boot space (manual, rarely needed)
 
 See [Useful Commands](docs/USEFUL-COMMANDS.md) for more commands.
 
@@ -203,6 +211,8 @@ See [Bootstrap Guide](docs/BOOTSTRAP.md) for detailed instructions and scenarios
 ## Contributing
 
 This is a personal configuration, but you're welcome to fork and adapt it for your own use.
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (see AGENTS.md for the repo's type/scope conventions).
 
 ## License
 

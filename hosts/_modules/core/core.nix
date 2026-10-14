@@ -45,6 +45,15 @@ in
       zip
       unzip
     ];
+    # System-wide Wayland env for Chromium/Electron/Mozilla GUIs.
+    # Do NOT set XDG_CURRENT_DESKTOP here - it is session-scoped by the WM modules.
+    sessionVariables = {
+      NIXOS_OZONE_WL = "1";
+      ELECTRON_OZONE_PLATFORM_HINT = "wayland"; # pin wayland, not auto
+      GDK_BACKEND = "wayland,x11,*";
+      QT_QPA_PLATFORM = "wayland;xcb";
+      MOZ_ENABLE_WAYLAND = "1";
+    };
     loginShellInit = ''
       if [ "$(tty)" = "/dev/tty1" ]; then
         sleep 1s
@@ -84,5 +93,11 @@ in
       }
     ];
   };
+
+  # Guarantee a Secret service so browsers like zen never fall back to
+  # the basic plaintext password store. Also auto-wires
+  # security.pam.services.login.enableGnomeKeyring, which auto-unlocks
+  # the keyring at tty login (how all these sessions start).
+  services.gnome.gnome-keyring.enable = true;
 
 }

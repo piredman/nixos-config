@@ -19,7 +19,6 @@
   ];
 
   home.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
     TERMINAL = "ghostty";
   };
 
@@ -27,9 +26,22 @@
     TERMINAL = "ghostty";
   };
 
-  xdg.portal.extraPortals = with pkgs; [
-    xdg-desktop-portal-gnome
-  ];
+  xdg.portal = {
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-gnome
+    ];
+
+    # The gnome portal handles screen capture/screenshot on niri.
+    # Per-desktop key -> niri-portals.conf, consulted only when
+    # XDG_CURRENT_DESKTOP=niri. Must be self-contained (default=gtk) since
+    # portals.conf(5) loads at most one conf per directory - the per-desktop
+    # file always wins over the generic one.
+    config.niri = {
+      default = [ "gtk" ];
+      "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
+      "org.freedesktop.impl.portal.Screenshot" = [ "gnome" ];
+    };
+  };
 
   systemd.user.targets.niri-session = {
     Unit = {

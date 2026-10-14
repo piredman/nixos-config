@@ -73,7 +73,8 @@ nix log /nix/store/xxx-nixos-system-xxx
 
 ## Generations and Cleanup
 
-**How cleanup works:** `nrh` (event: every `nixos-rebuild switch`) runs `nixos-prune` automatically:
+**How cleanup works:** `nrh` (event: every successful `nixos-rebuild switch`;
+pruning is skipped when the rebuild fails) runs `nixos-prune` automatically:
 
 1. Keeps the newest 5 generations of each profile (system, home-manager, user) via
    `nix-env --delete-generations +5`

@@ -47,9 +47,31 @@
       extraPortals = with pkgs; [
         xdg-desktop-portal-hyprland
       ];
+
+      # Route screen capture/screenshot to the hyprland portal instead of the
+      # common "gtk" default. Per-desktop key -> hyprland-portals.conf,
+      # consulted only when XDG_CURRENT_DESKTOP=Hyprland. Portals loads at most
+      # one conf per directory (per-desktop wins over generic portals.conf),
+      # so this file must be self-contained: default=gtk here covers
+      # FileChooser etc. so nothing rides the deprecated UseIn / last-resort
+      # fallback paths.
+      config.hyprland = {
+        default = [ "gtk" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
+        "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
+      };
     };
 
     configFile = {
+      # Persist share choices across sessions (no re-prompt each meeting).
+      # xdph reads hypr/xdph.conf (hyprlang); the picker still appears, this
+      # just pre-ticks the restore-token box.
+      "hypr/xdph.conf".text = ''
+        screencopy {
+            allow_token_by_default = true
+        }
+      '';
+
       "hypr/hyprland.lua" = {
         source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/${userSettings.username}/hypr/hyprland.lua";
       };

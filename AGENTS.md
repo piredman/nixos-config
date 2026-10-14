@@ -4,7 +4,7 @@
 
 This is a modular NixOS configuration with:
 - Auto-discovery of hosts and users
-- NixOS unstable (rolling release) with stable (25.05) fallback
+- NixOS unstable (rolling release) with stable (25.11) fallback
 - Bootstrap script for new system setup
 - Template-based host/user creation
 - Home Manager integration
@@ -21,19 +21,23 @@ nixos-config/
 │   └── _modules/            # Shared system module groups
 │       ├── core/            # Essential modules
 │       ├── android/         # Android tools
+│       ├── fonts/           # System fonts
+│       ├── gaming/          # Gaming tools
 │       ├── nvidia/          # NVIDIA GPU
 │       ├── printing/        # Printing
-│       └── virtual_camera/  # Virtual camera
+│       ├── streaming/       # Streaming tools
+│       └── wm/              # System-level WM support (quickshell, veila)
 ├── home/                    # User configurations
 │   ├── <username>/          # Per-user config
 │   └── _modules/            # Dynamic module groups
+│       ├── content/         # Media/content creation (ardour, audacity, kdenlive)
 │       ├── core/            # Essential modules
-│       ├── comms/           # Communication tools
 │       ├── dev/             # Development tools
 │       ├── gamedev/         # Game development
 │       ├── notes/           # Note-taking apps
 │       ├── office/          # Office applications
-│       └── streaming/       # Streaming tools
+│       ├── streaming/       # Streaming tools
+│       └── wm/              # WM session stack (hyprland, niri, mako, awww, stasis, veila, walker, waybar)
 ├── lib/                     # Nix utilities and tests
 ├── docs/                    # Documentation
 └── flake.nix               # Auto-discovers hosts/users
@@ -53,7 +57,7 @@ nixos-config/
 
 ### Package Management
 - `pkgs` - nixos-unstable (default)
-- `pkgs-stable` - nixos-25.05 (fallback)
+- `pkgs-stable` - nixos-25.11 (fallback)
 - Both available in all configs via `specialArgs`/`extraSpecialArgs`
 
 ### Bootstrap Workflow
@@ -97,14 +101,11 @@ nix flake update && sudo nixos-rebuild switch --flake .#terra
 
 ### Maintenance
 ```bash
+# Generations/cleanup is automatic: every successful nrh runs nprune (keeps 5
+# newest generations, frees /boot). Manual: nprune [n]. See docs/USEFUL-COMMANDS.md.
+
 # Rollback system
 sudo nixos-rebuild switch --rollback
-
-# Clean old generations
-sudo nix-collect-garbage --delete-older-than 7d
-
-# Optimize store
-sudo nix-store --optimize
 ```
 
 ## Code Style
@@ -137,7 +138,7 @@ let
     # "android"  # Android tools (optional)
     # "nvidia"   # NVIDIA GPU (optional)
     # "printing" # Printing (optional)
-    # "virtual_camera" # Virtual camera (optional)
+    # "streaming" # Streaming tools (optional)
   ];
   moduleHelper = import ../_modules/default.nix { inherit lib; };
   moduleImports = moduleHelper.importModuleGroups moduleGroups;
@@ -217,10 +218,11 @@ let
     "core"      # Essential (always include)
     "dev"       # Development tools
     "notes"     # Note-taking apps
-    # "comms"   # Communication tools
+    # "content" # Media creation (ardour, audacity, kdenlive)
     # "gamedev" # Game development
     # "office"  # Office applications
     # "streaming" # Streaming tools
+    # "wm"      # WM session stack (all current hosts load this)
   ];
   
   moduleHelper = import ../../home/_modules/default.nix { inherit lib; };
@@ -441,9 +443,37 @@ When helping users, refer them to appropriate docs.
 ### Git Workflow
 1. Make configuration changes
 2. Test locally
-3. Commit: descriptive message
+3. Commit: conventional commit message (see below)
 4. Push to remote
 5. Other hosts pull and rebuild when ready
+
+### Conventional Commits
+Follow https://www.conventionalcommits.org (v1.0.0). Format:
+
+```
+<type>(<scope>): <lowercase summary>
+```
+
+- **Types:** `feat` (new config behavior/app), `fix` (bug/reliability fix), `docs`
+  (AGENTS/README/docs changes), `refactor` (no behavior change), `chore`
+  (flake.lock updates, maintenance, housekeeping), `style`
+- **Scope (optional):** host name (`terra`, `luna`, `mini`), module (`shell`,
+  `hyprland`, `niri`, `wm`, `core`), or app (`zen`, `obsidian`)
+- **Summary:** lowercase, imperative, no period, under ~72 chars
+- Body (blank line after summary) for *why*, never for *what changed* - the diff shows that
+
+Examples:
+
+```
+feat: portal routing per-compositor with xdph restore tokens
+fix(terra): survive lockscreen death during rebuilds
+chore: update flake inputs to nixos-unstable 26.11
+refactor(shell): auto-prune generations after nrh instead of clean
+docs: sync repo structure and module groups with actual state
+```
+
+One logical change per commit; split feature from doc-sync commits (feat vs docs).
+Never mix an unverified rebuild into a doc-only commit.
 
 ## Troubleshooting
 
@@ -502,20 +532,24 @@ journalctl -xe
 ### Module Structure
 
 System module groups in hosts/_modules/:
-- `core/` - Essential modules (boot loader, environment, locale, nix settings, networking, programs, services, stylix, users, etc.)
+- `core/` - Essential modules (boot loader, environment, locale, nix settings, networking, programs, services, stylix, users, gnome-keyring, etc.)
 - `android/` - Android tools (udev rules, adb, fastboot)
+- `fonts/` - System fonts
+- `gaming/` - Gaming tools
 - `nvidia/` - NVIDIA GPU configuration
 - `printing/` - Printing support
-- `virtual_camera/` - Virtual camera (v4l2loopback)
+- `streaming/` - Streaming tools
+- `wm/` - System-level WM support (quickshell, veila config)
 
 Home module groups in home/_modules/:
-- `core/` - Essential (shell, waybar, ghostty, git, hyprland, neovim, polkit, ssh, starship, syncthing, terminal, tmux, vlc, walker, xdg, yazi, zen-browser, etc.)
-- `comms/` - Communication (vesktop)
+- `core/` - Essential (shell, waybar, ghostty, git, neovim, polkit, ssh, starship, syncthing, terminal, tmux, xdg, zen-browser, etc.)
+- `content/` - Media creation (ardour, audacity, kdenlive)
 - `dev/` - Development (opencode)
 - `gamedev/` - Game development (aseprite, godot, inkscape)
 - `notes/` - Note-taking (logseq, obsidian)
 - `office/` - Office (libreoffice, sparrow)
 - `streaming/` - Streaming (obs-studio)
+- `wm/` - WM session stack (hyprland, niri, walker, mako, awww, stasis, veila, quickshell, waybar, elephant)
 
 ## Notes for AI Assistants
 
@@ -529,6 +563,10 @@ Home module groups in home/_modules/:
 - Prefer modular configurations - one application per .nix file in home/username/
 - Use `programs.<app>` options when available rather than raw config files
 - Keep system packages minimal, put user-specific packages in home-manager
-- XDG portals: both hyprland and gtk portals are configured for compatibility
-- **Shell aliases available after bootstrap:** `nrh` (rebuild host), `nup` (update flake), `nru` (rebuild user - legacy)
+- XDG portals: hyprland + gtk portals are installed; per-desktop portal routing
+  (ScreenCast, Screenshot) lives in the WM modules via `xdg.portal.config.<desktop>`
+  per-desktop keys, and each per-desktop conf must be self-contained (`default = [ "gtk" ]`).
+  Do NOT add interface mappings on `common` - the wm group imports both compositors
+  on every host and common keys would merge across them; see docs/PLAN.md Tier 2C.
+- **Shell aliases available after bootstrap:** `nrh` (rebuild host; auto-prunes to 5 gens), `nup` (update flake), `nprune <n>` (manual generation prune)
 - **IMPORTANT: NEVER run nixos-rebuild, home-manager, sudo, or nix commands** - you are not running on the target NixOS system and these commands are not available. Only edit configuration files and let the user apply changes manually. `nixos-rebuild switch` is always a manual step.

@@ -36,8 +36,6 @@ end)
 -------------------------------
 
 hl.env("XDG_SESSION_TYPE", "wayland")
-hl.env("NIXOS_OZONE_WL", "1")
-hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 hl.env("WLR_NO_HARDWARE_CURSORS", "1")
 hl.env("XCURSOR_SIZE", "24")
 
@@ -168,6 +166,12 @@ hl.window_rule({
   name = "suppress-pip",
   match = { title = "^(Picture-in-Picture)$" },
   suppress_event = "maximize",
+})
+
+hl.window_rule({
+  name = "portal-float",
+  match = { class = "^(xdg-desktop-portal-gtk)$" },
+  float = true,
 })
 
 hl.window_rule({

@@ -12,7 +12,8 @@ declarative — these changes encode the fixes once.
 | Tier 1A — zram + VM tuning | **DONE** — deployed on terra (rebuilt + rebooted, verified live: zramctl, sysctls) |
 | Tier 1B — oomd slice isolation + app scoping | **DONE** — deployed on terra (verified live: `oomctl`, drop-ins, ghostty session scoped in `app.slice`) |
 | Tier 1 rebuild on luna / mini | **PENDING** — apply with `nrh` on each host |
-| Tiers 2–5 | **PENDING** |
+| Tier 2 C-G (portal, env, keyring, rules) | **CODED** — review fixes applied (per-desktop portal conf, xdph.conf, services.* keyring); verification pending |
+| Tiers 3–5 | **PENDING** |
 
 ## Scope decision
 
@@ -105,26 +106,42 @@ Current bug: `xdg.portal.config.common.default = ["gtk"]` forces the GTK portal 
 including ScreenCast, even on Hyprland hosts where the hyprland portal is installed.
 
 ```nix
-xdg.portal.config = {
-    common.default = [ "gtk" ];
+# Per-desktop keys: outer key is the lowercase XDG_CURRENT_DESKTOP (or "common"),
+# generating <desktop>-portals.conf which takes precedence over generic portals.conf.
+# xdg-desktop-portal loads at most ONE conf per directory - the per-desktop file
+# always wins over the generated generic portals.conf - so include default=[ "gtk" ]
+# in the per-desktop file (FileChooser etc. must not fall back to deprecated
+# UseIn / last-resort resolution). Keep core/xdg.nix's common.default for
+# non-compositor sessions.
+xdg.portal.config.hyprland = {
+    default = [ "gtk" ];
     "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
     "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
-    "org.freedesktop.impl.portal.ScreenShare" = [ "hyprland" ];
 };
 ```
+
+Note: do NOT map these on `common` — the wm module group recursively imports both
+wm/hyprland/ and wm/niri/ on every host, so two modules setting common would merge into
+ScreenCast=hyprland;gnome and the wrong backend would win per session. There is no
+`ScreenShare` interface in the xdg-desktop-portal registry (ScreenCast + Screenshot +
+RemoteDesktop are the real ones).
 
 For the niri path (`home/_modules/wm/niri/niri.nix`), map the same interfaces to `gnome`.
 
 ### D. xdph share-token QoL — hypr portal config
 
 Add omarchy's `allow_token_by_default = true` so share choices persist across sessions
-(no re-prompt every meeting). Set via the hyprland portal's config file
-(`~/.config/xdg-desktop-portal-hyprland/config.toml` or equivalent for current xdph versions):
+(no re-prompt every meeting). Current xdph (v1.4+) reads `~/.config/hypr/xdph.conf`
+in hyprlang format:
 
-```toml
-[screencopy]
-allow_token_by_default = true
+```conf
+screencopy {
+    allow_token_by_default = true
+}
 ```
+
+Note: this only pre-ticks the "Allow restore token" box in the share picker — the
+picker still appears.
 
 ### E. Chromium/Electron env hardening — move to system-wide
 
@@ -153,6 +170,9 @@ Secret provider exists at system level:
 ```nix
 services.gnome.gnome-keyring.enable = true;
 ```
+
+This also auto-wires `security.pam.services.login.enableGnomeKeyring` so the keyring
+auto-unlocks at the tty1 login that starts these sessions.
 
 Verify zen keeps its stored logins across rebuilds.
 

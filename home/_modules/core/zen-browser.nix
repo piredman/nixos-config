@@ -116,8 +116,4 @@
     enable = true;
     profileNames = [ userSettings.username ];
   };
-
-  home.sessionVariables = {
-    MOZ_ENABLE_WAYLAND = "1";
-  };
 }

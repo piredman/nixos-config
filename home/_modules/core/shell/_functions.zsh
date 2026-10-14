@@ -11,10 +11,15 @@ nixos-help() {
 }
 
 nixos-rebuild-host() {
-  pushd ~/.dotfiles
+  pushd ~/.dotfiles || return
   git add -A && clear
   systemctl --user stop stasis.service 2>/dev/null
-  sudo nixos-rebuild switch --flake .#$HOST
+  if ! sudo nixos-rebuild switch --flake .#$HOST; then
+    systemctl --user start stasis.service 2>/dev/null
+    popd
+    echo "Rebuild failed - generation pruning skipped."
+    return 1
+  fi
   systemctl --user start stasis.service 2>/dev/null
   restart-services
   popd
@@ -37,19 +42,19 @@ nixos-prune() {
 }
 
 nixos-rebuild-boot() {
-  pushd ~/.dotfiles
+  pushd ~/.dotfiles || return
   git add -A && clear && sudo nixos-rebuild boot --flake .#$HOST
   popd
 }
 
 nixos-rebuild-test() {
-  pushd ~/.dotfiles
+  pushd ~/.dotfiles || return
   git add -A && clear && sudo nixos-rebuild test --flake .#$HOST
   popd
 }
 
 nixos-flake-update() {
-  pushd ~/.dotfiles
+  pushd ~/.dotfiles || return
   git add -A && clear && nix flake update
   lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
   popd

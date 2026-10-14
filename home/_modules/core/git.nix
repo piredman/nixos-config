@@ -26,7 +26,14 @@
       };
     };
 
-    lazygit.enable = true;
+    lazygit = {
+      enable = true;
+      settings = {
+        gui = {
+          sidePanelWidth = 0.3333;
+        };
+      };
+    };
   };
 
 }
