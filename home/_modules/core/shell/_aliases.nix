@@ -6,7 +6,7 @@
     nrt = "nixos-rebuild-test";
     nup = "nixos-flake-update";
     nfc = "nix flake check";
-    nclean = "nixos-clean";
+    nprune = "nixos-prune";
 
     cd = "z";
     ".." = "cd ..";

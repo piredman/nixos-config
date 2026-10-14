@@ -6,7 +6,7 @@ nixos-help() {
   echo "  nrt    - nixos-rebuild-test: Test configuration without making permanent"
   echo "  nup    - nixos-flake-update: Update flake inputs"
   echo "  nfc    - nix flake check: Check flake configuration"
-  echo "  nclean - clean and optimize nixos store"
+  echo "  nprune - keep only newest 5 generations, free /boot space (nprune <n> to keep n)"
   echo "  pdf2md - convert PDF to Markdown (usage: pdf2md <file.pdf> [out.md])"
 }
 
@@ -18,6 +18,22 @@ nixos-rebuild-host() {
   systemctl --user start stasis.service 2>/dev/null
   restart-services
   popd
+  nixos-prune
+}
+
+# Delete all but the newest $1 (default 5) generations of every profile,
+# then re-sync systemd-boot so the freed generations leave /boot.
+# Without the switch-to-configuration step, /boot never shrinks until
+# the next rebuild, which is why plain GC commands don't clear it.
+nixos-prune() {
+  local keep="${1:-5}"
+  echo "Pruning to keep ${keep} newest generations (all profiles)..."
+  sudo nix-env -p /nix/var/nix/profiles/system --delete-generations "+$keep"
+  nix-env -p ~/.local/state/nix/profiles/home-manager --delete-generations "+$keep"
+  nix-env --delete-generations "+$keep"
+  sudo nix-collect-garbage
+  sudo /run/current-system/bin/switch-to-configuration boot
+  lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
 }
 
 nixos-rebuild-boot() {
@@ -35,14 +51,6 @@ nixos-rebuild-test() {
 nixos-flake-update() {
   pushd ~/.dotfiles
   git add -A && clear && nix flake update
-  lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
-  popd
-}
-
-nixos-clean() {
-  pushd ~/.dotfiles
-  sudo nix-collect-garbage -d
-  sudo nix-store --optimize
   lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
   popd
 }

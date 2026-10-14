@@ -394,9 +394,9 @@ programs.ghostty = {
 
 All documentation is in `docs/`:
 - `BOOTSTRAP.md` - Bootstrap scenarios and workflows
-- `PACKAGES.md` - Package management (stable vs unstable)
-- `DAILY-USAGE.md` - Common commands and operations
-- `ADVANCED.md` - Advanced configuration topics
+- `POST-BOOTSTRAP.md` - Post-install setup steps
+- `USEFUL-COMMANDS.md` - Build/rollback commands, generation cleanup (`nprune`) internals
+- `PLAN.md` - Omarchy-inspired stability improvement tiers and status
 
 When helping users, refer them to appropriate docs.
 

@@ -71,6 +71,40 @@ journalctl -xe
 nix log /nix/store/xxx-nixos-system-xxx
 ```
 
+## Generations and Cleanup
+
+**How cleanup works:** `nrh` (event: every `nixos-rebuild switch`) runs `nixos-prune` automatically:
+
+1. Keeps the newest 5 generations of each profile (system, home-manager, user) via
+   `nix-env --delete-generations +5`
+2. Releases the store paths those generations were pinning (`sudo nix-collect-garbage`,
+   without `-d`, so no generations beyond profiles' newest 5 are touched)
+3. Resyncs the systemd-boot entry list via
+   `sudo /run/current-system/bin/switch-to-configuration boot` — this is the step that
+   actually reclaims freed space on `/boot`; plain GC commands alone do not update the ESP
+4. `/boot` therefore plateaus (~20% used) instead of ratcheting up with every rebuild
+
+Manual override: `nprune <n>` keeps n generations instead of 5. `nprune` with no argument
+runs as configured. `configurationLimit = 5` in `hosts/_modules/core/core.nix` limits the
+boot menu to match.
+
+To inspect state:
+
+```bash
+nix-env --list-generations
+sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
+```
+
+Emergency nuke (kills ALL history — use NixOS generations instead whenever possible):
+
+```bash
+sudo nix-collect-garbage -d
+```
+
+`nix-store --optimize` is unnecessary here — `auto-optimise-store = true` in
+`hosts/_modules/core/core.nix` dedupes store paths as they're written.
+
 ## See Also
 
 - [Bootstrap Guide](BOOTSTRAP.md) - Initial setup
