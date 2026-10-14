@@ -283,12 +283,34 @@
         "type": "github"
       }
     },
+    "opencode": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791847211,
+        "narHash": "sha256-ejjWi7rKsKy5mDNnKtMfRFx4nUNJjlKwNG5GsKiMUNk=",
+        "owner": "anomalyco",
+        "repo": "opencode",
+        "rev": "2bf145b931a51e976f096b201b617a4fb488312b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "anomalyco",
+        "repo": "opencode",
+        "rev": "2bf145b931a51e976f096b201b617a4fb488312b",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "elephant": "elephant",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-stable": "nixpkgs-stable",
+        "opencode": "opencode",
         "stasis": "stasis",
         "stylix": "stylix",
         "veila": "veila",
