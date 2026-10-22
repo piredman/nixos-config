@@ -38,5 +38,6 @@
     nssh = "ssh-setup id_ed25519_nas";
 
     oc = "opencode";
+    t = "tmux-attach";
   };
 }

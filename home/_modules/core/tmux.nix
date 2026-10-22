@@ -18,8 +18,21 @@
 
     plugins = with pkgs.tmuxPlugins; [
       vim-tmux-navigator
-      resurrect
-      continuum
+      {
+        plugin = resurrect;
+        extraConfig = ''
+          set -g @resurrect-capture-pane-contents 'on'
+        '';
+      }
+      {
+        plugin = continuum;
+        extraConfig = ''
+          set -g @continuum-restore 'on'
+          # status-right must be set before continuum loads (it prepends its auto-save hook)
+          set -g status-right "#{E:@catppuccin_status_application}"
+          set -ag status-right "#{E:@catppuccin_status_session}"
+        '';
+      }
       catppuccin
       tmux-sessionx
       tmux-fzf
@@ -62,9 +75,6 @@
       unbind -T copy-mode-vi MouseDragEnd1Pane
 
       # Plugin settings
-      # tmux-resurrect
-      set -g @resurrect-capture-pane-contents 'on'
-      set -g @continuum-restore 'on'
 
       # catppuccin/tmux
       set -g @catppuccin_flavor "mocha"
@@ -81,8 +91,6 @@
       set -g status-right-length 100
       set -g status-left-length 100
       set -g status-left ""
-      set -g status-right "#{E:@catppuccin_status_application}"
-      set -ag status-right "#{E:@catppuccin_status_session}"
 
       # sessionx settings
       set -g @sessionx-window-height '85%'

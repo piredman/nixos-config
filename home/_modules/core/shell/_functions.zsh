@@ -182,3 +182,22 @@ ssh-setup() {
 
   ssh-add ~/.ssh/$1
 }
+
+
+# ~~~ tmux ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Attach to tmux. On a fresh server, attach to the session that was active
+# in the last resurrect save so continuum's auto-restore fills it in; plain
+# `tmux` creates an empty unnamed session before the restore lands.
+tmux-attach() {
+  if [ -n "$TMUX" ]; then
+    echo "already inside tmux" >&2
+    return 1
+  fi
+  if tmux has-session 2>/dev/null; then
+    exec tmux attach
+  fi
+  local last
+  last=$(awk -F'\t' '$1 == "state" { print $2; exit }' "$HOME/.tmux/resurrect/last" 2>/dev/null)
+  exec tmux new -A -s "${last:-main}"
+}
