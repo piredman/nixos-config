@@ -18,6 +18,10 @@ in
 
   services.stasis = {
     enable = true;
+    # Use nixpkgs' stasis package instead of the module's default (the flake's
+    # own git build, whose cargo test is timing-flaky in the build sandbox).
+    # nixpkgs 1.7.0 already sets doCheck = false and is Hydra-cached.
+    package = pkgs.stasis;
     extraConfig = builtins.readFile ./stasis.rune;
     extraPathPackages = [
       lockDisplaySession
