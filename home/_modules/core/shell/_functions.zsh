@@ -6,15 +6,19 @@ nixos-help() {
   echo "  nrt    - nixos-rebuild-test: Test configuration without making permanent"
   echo "  nup    - nixos-flake-update: Update flake inputs"
   echo "  nfc    - nix flake check: Check flake configuration"
-  echo "  nprune - keep only newest 5 generations, free /boot space (nprune <n> to keep n)"
+  echo "  nprune - keep $(nixos-generation-limit) generations total, free /boot space (nprune <n> to override)"
   echo "  pdf2md - convert PDF to Markdown (usage: pdf2md <file.pdf> [out.md])"
 }
 
 nixos-rebuild-host() {
   pushd ~/.dotfiles || return
-  git add -A && clear
+  if ! git add -A; then
+    popd
+    return 1
+  fi
+  clear
   systemctl --user stop stasis.service 2>/dev/null
-  if ! sudo nixos-rebuild switch --flake .#$HOST; then
+  if ! sudo nixos-rebuild switch --flake ".#$HOST"; then
     systemctl --user start stasis.service 2>/dev/null
     popd
     echo "Rebuild failed - generation pruning skipped."
@@ -23,34 +27,72 @@ nixos-rebuild-host() {
   systemctl --user start stasis.service 2>/dev/null
   restart-services
   popd
-  nixos-prune
+  if ! nixos-prune; then
+    echo "Rebuild succeeded, but cleanup failed; inspect the error before rebuilding again." >&2
+    return 1
+  fi
 }
 
-# Delete all but the newest $1 (default 5) generations of every profile,
-# then re-sync systemd-boot so the freed generations leave /boot.
-# Without the switch-to-configuration step, /boot never shrinks until
-# the next rebuild, which is why plain GC commands don't clear it.
+# Keep the shell and bootloader policy in sync with the active NixOS configuration.
+nixos-generation-limit() {
+  local keep
+  if [[ -r /etc/nixos-generation-retention ]]; then
+    read -r keep < /etc/nixos-generation-retention || return 1
+  else
+    # Migration only: the file is installed by the first rebuild with this policy.
+    keep=3
+  fi
+  if [[ ! "$keep" =~ '^[1-9][0-9]*$' ]]; then
+    echo "Invalid generation retention in /etc/nixos-generation-retention." >&2
+    return 1
+  fi
+  print -r -- "$keep"
+}
+
+# Retain the configured count (including current), sync boot entries, then GC.
+# Never collect store paths while a failed bootloader sync leaves old entries behind.
 nixos-prune() {
-  local keep="${1:-5}"
-  echo "Pruning to keep ${keep} newest generations (all profiles)..."
-  sudo nix-env -p /nix/var/nix/profiles/system --delete-generations "+$keep"
-  nix-env -p ~/.local/state/nix/profiles/home-manager --delete-generations "+$keep"
-  nix-env --delete-generations "+$keep"
-  sudo nix-collect-garbage
-  sudo /run/current-system/bin/switch-to-configuration boot
+  local limit keep activeSystem profileSystem
+  limit=$(nixos-generation-limit) || return 1
+  keep="${1:-$limit}"
+  if (( $# > 1 )) || [[ ! "$keep" =~ '^[1-9][0-9]*$' ]]; then
+    echo "Usage: nprune [positive generation count]" >&2
+    return 2
+  fi
+
+  activeSystem=$(readlink -e /run/current-system) || return 1
+  profileSystem=$(readlink -e /nix/var/nix/profiles/system) || return 1
+  if [[ "$activeSystem" != "$profileSystem" ]]; then
+    echo "Pruning skipped: running configuration differs from the system profile." >&2
+    echo "Finish the pending boot/test/rollback before pruning generations." >&2
+    return 1
+  fi
+
+  echo "Pruning profiles to ${keep} generations total; boot menu limit is ${limit}."
+  sudo nix-env -p /nix/var/nix/profiles/system --delete-generations "+$keep" || return 1
+  sudo /nix/var/nix/profiles/system/bin/switch-to-configuration boot || return 1
+  if [[ -e "$HOME/.local/state/nix/profiles/home-manager" ]]; then
+    nix-env -p "$HOME/.local/state/nix/profiles/home-manager" --delete-generations "+$keep" || return 1
+  fi
+  nix-env --delete-generations "+$keep" || return 1
+  sudo nix-collect-garbage || return 1
   lsblk -o NAME,MOUNTPOINT,SIZE,FSUSED,FSAVAIL,FSUSE%
 }
 
 nixos-rebuild-boot() {
   pushd ~/.dotfiles || return
-  git add -A && clear && sudo nixos-rebuild boot --flake .#$HOST
+  local result=0
+  git add -A && clear && sudo nixos-rebuild boot --flake ".#$HOST" || result=$?
   popd
+  return "$result"
 }
 
 nixos-rebuild-test() {
   pushd ~/.dotfiles || return
-  git add -A && clear && sudo nixos-rebuild test --flake .#$HOST
+  local result=0
+  git add -A && clear && sudo nixos-rebuild test --flake ".#$HOST" || result=$?
   popd
+  return "$result"
 }
 
 nixos-flake-update() {

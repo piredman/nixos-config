@@ -19,7 +19,7 @@ in
     loader = {
       systemd-boot = {
         enable = true;
-        configurationLimit = 5;
+        configurationLimit = 3;
       };
 
       efi.canTouchEfiVariables = true;
@@ -69,7 +69,8 @@ in
     gc = {
       automatic = true;
       dates = "weekly";
-      options = "--delete-older-than 1w";
+      # Generation retention is count-based in nprune; do not age out backups.
+      options = "";
     };
 
     optimise.automatic = true;
