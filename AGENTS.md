@@ -101,7 +101,7 @@ nix flake update && sudo nixos-rebuild switch --flake .#terra
 
 ### Maintenance
 ```bash
-# Generations/cleanup is automatic: every successful nrh runs nprune (keeps 5
+# Generations/cleanup is automatic: every successful nrh runs nprune (keeps 3 total
 # newest generations, frees /boot). Manual: nprune [n]. See docs/USEFUL-COMMANDS.md.
 
 # Rollback system
@@ -568,5 +568,6 @@ Home module groups in home/_modules/:
   per-desktop keys, and each per-desktop conf must be self-contained (`default = [ "gtk" ]`).
   Do NOT add interface mappings on `common` - the wm group imports both compositors
   on every host and common keys would merge across them; see docs/PLAN.md Tier 2C.
-- **Shell aliases available after bootstrap:** `nrh` (rebuild host; auto-prunes to 5 gens), `nup` (update flake), `nprune <n>` (manual generation prune)
+- **Shell aliases available after bootstrap:** `nrh` (rebuild host; auto-prunes to 3 total gens), `nup` (update flake), `nprune <n>` (manual generation prune)
+- Boot retention is `configurationLimit = 3` in `hosts/_modules/core/core.nix`; nprune reads the active limit from `/etc/nixos-generation-retention`. `boot-space.nix` checks planned ESP capacity before bootloader installation, with 128 MiB headroom. Weekly GC must not delete generations by age. Keep NVIDIA initrd loading unchanged for this policy.
 - **IMPORTANT: NEVER run nixos-rebuild, home-manager, sudo, or nix commands** - you are not running on the target NixOS system and these commands are not available. Only edit configuration files and let the user apply changes manually. `nixos-rebuild switch` is always a manual step.

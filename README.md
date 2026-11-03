@@ -101,13 +101,20 @@ sudo nixos-rebuild switch --rollback
 
 ### Clean Up
 
-Cleanup is automatic — every successful rebuild (`nrh`) prunes to the 5 newest
-generations and reclaims `/boot` space. Manual override:
+Cleanup is automatic — every successful rebuild (`nrh`) retains 3 total generations
+(current plus 2 rollback generations) and resyncs `/boot`. A pre-switch capacity
+check reserves 128 MiB of boot-space headroom without changing NVIDIA loading.
+Manual cleanup:
 
 ```bash
-nprune      # keep newest 5 generations (default)
-nprune 10   # keep newest 10
+nprune      # use the active system's retention limit (3)
+nprune 3    # explicitly retain 3 total generations
 ```
+
+The boot menu is capped at 3 even if you manually retain more profile history.
+Weekly garbage collection preserves retained generations. See
+[Generations and Cleanup](docs/USEFUL-COMMANDS.md#generations-and-cleanup) for capacity
+checks and failure recovery.
 
 ### Check Disk Usage
 
@@ -130,7 +137,7 @@ nix path-info -rsSh /run/current-system | sort -hk2
 
 After bootstrap, these aliases are available for common operations:
 
-- `nrh` - Rebuild current host (includes git add; auto-prunes to 5 newest generations)
+- `nrh` - Rebuild current host (includes git add; auto-prunes to 3 total generations)
 - `nup` - Update flake inputs (includes git add)
 - `nprune` - Prune generations, free /boot space (manual, rarely needed)
 
