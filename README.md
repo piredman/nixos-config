@@ -25,6 +25,7 @@ See the [Bootstrap Guide](docs/BOOTSTRAP.md) for setup on machines with existing
 
 - 📦 [Bootstrap Guide](docs/BOOTSTRAP.md) - Installing on machines with existing config
 - 💻 [Useful Commands](docs/USEFUL-COMMANDS.md) - Common commands & workflows
+- 🔐 [Aegis Desktop](docs/AEGIS-DESKTOP.md) - Pinned authenticator package for terra and luna
 - 🗺️ [Stability Plan](docs/PLAN.md) - Omarchy-inspired improvement tiers & status
 
 ## Running Tests
@@ -47,6 +48,7 @@ nixos-config/
 │       ├── gaming/          # Gaming tools
 │       ├── nvidia/          # NVIDIA GPU
 │       ├── printing/        # Printing
+│       ├── security/        # Authenticator system integration (polkit policy)
 │       ├── streaming/       # Streaming tools
 │       └── wm/              # System-level WM support (quickshell, veila)
 ├── home/                    # User configurations
@@ -58,6 +60,7 @@ nixos-config/
 │       ├── gamedev/         # Game development
 │       ├── notes/           # Note-taking apps
 │       ├── office/          # Office applications
+│       ├── security/        # Authenticator applications (aegis-desktop)
 │       ├── streaming/       # Streaming tools
 │       └── wm/              # WM session stack (hyprland, niri, mako, awww, stasis, veila, walker, waybar)
 ├── lib/                     # Nix utilities and tests

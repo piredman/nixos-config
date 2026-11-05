@@ -9,6 +9,7 @@
 let
   moduleGroups = [
     "core"
+    "security"
     "dev"
     "streaming"
     "wm"

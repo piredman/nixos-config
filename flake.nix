@@ -88,7 +88,12 @@
           system = host.arch;
           modules = [
             ./hosts/${hostDir}/configuration.nix
-            { nixpkgs.overlays = [ inputs.opencode.overlays.default ]; }
+            {
+              nixpkgs.overlays = [
+                inputs.opencode.overlays.default
+                (final: prev: { aegis-desktop = final.callPackage ./pkgs/aegis-desktop { }; })
+              ];
+            }
             inputs.stylix.nixosModules.default
             inputs.home-manager.nixosModules.home-manager
             inputs.veila.nixosModules.default
@@ -126,5 +131,8 @@
     in
     {
       nixosConfigurations = builtins.listToAttrs (map mkHostConfig hostDirs);
+
+      packages.x86_64-linux.aegis-desktop =
+        inputs.nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/aegis-desktop { };
     };
 }

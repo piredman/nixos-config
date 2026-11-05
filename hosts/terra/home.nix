@@ -9,6 +9,7 @@
 let
   moduleGroups = [
     "core"
+    "security"
     "dev"
     "gamedev"
     "notes"

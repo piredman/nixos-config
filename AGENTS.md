@@ -112,7 +112,7 @@ sudo nixos-rebuild switch --rollback
 
 ### Nix Expressions
 - **Language:** Nix
-- **Indentation:** 4 spaces (not tabs)
+- **Indentation:** 2 spaces via nixfmt (run nixfmt before committing; not tabs)
 - **Imports:** Place at top in `imports = [ ./file.nix ];` block
 - **Variables:** camelCase (e.g., `systemSettings`, `userSettings`)
 - **Attribute sets:** Use `{ }` with consistent spacing
@@ -130,7 +130,15 @@ sudo nixos-rebuild switch --rollback
 
 **Host Configuration** (`hosts/hostname/configuration.nix`):
 ```nix
-{ config, lib, pkgs, pkgs-stable, systemSettings, userSettings, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-stable,
+  systemSettings,
+  userSettings,
+  ...
+}:
 
 let
   moduleGroups = [
@@ -146,7 +154,8 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-  ] ++ moduleImports;
+  ]
+  ++ moduleImports;
 
   system.stateVersion = "25.05";
 }
@@ -154,25 +163,32 @@ in
 
 **User Configuration** (`home/username/default.nix`):
 ```nix
-{ config, lib, pkgs, pkgs-stable, userSettings, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-stable,
+  userSettings,
+  ...
+}:
 
 {
-    # Module imports are handled by the host configuration via dynamic module groups
-    # This keeps user config clean and focused on user-specific settings
+  # Module imports are handled by the host configuration via dynamic module groups
+  # This keeps user config clean and focused on user-specific settings
 
-    fonts.fontconfig.enable = true;
+  fonts.fontconfig.enable = true;
 
-    home = {
-        username = userSettings.username;
-        homeDirectory = "/home/" + userSettings.username;
-        stateVersion = "25.05";
+  home = {
+    username = userSettings.username;
+    homeDirectory = "/home/" + userSettings.username;
+    stateVersion = "25.05";
 
-        packages = with pkgs; [ ];
-        file = { };
-        sessionVariables = { };
-    };
+    packages = with pkgs; [ ];
+    file = { };
+    sessionVariables = { };
+  };
 
-    programs.home-manager.enable = true;
+  programs.home-manager.enable = true;
 }
 ```
 
@@ -180,27 +196,30 @@ in
 ```nix
 # hosts/hostname/settings.nix
 {
-    hostname = "hostname";
-    arch = "x86_64-linux";              # System architecture
-    user = "username";                   # Primary user
-    timezone = "America/Edmonton";
-    locale = "en_GB.UTF-8";
-    luks.device = "/dev/disk/by-uuid/...";  # LUKS encryption (optional)
-    nas = import ../_settings/nas.nix;       # NAS mounts (optional)
-    monitors = {                              # Monitor setup (optional)
-        primary = "DP-1";
-        secondary = "DP-2";
-        setup = [ 
-            "DP-1,2560x1440@60,0x0,1"
-            "DP-2,1920x1080@60,auto-right,1"
-        ];
-    };
+  hostname = "hostname";
+  arch = "x86_64-linux"; # System architecture
+  user = "username"; # Primary user
+  timezone = "America/Edmonton";
+  locale = "en_GB.UTF-8";
+  luks.device = "/dev/disk/by-uuid/..."; # LUKS encryption (optional)
+  nas = import ../_settings/nas.nix; # NAS mounts (optional)
+  monitors = {
+    # Monitor setup (optional)
+    primary = "DP-1";
+    secondary = "DP-2";
+    setup = [
+      "DP-1,2560x1440@60,0x0,1"
+      "DP-2,1920x1080@60,auto-right,1"
+    ];
+  };
 }
+```
 
+```nix
 # home/username/settings.nix
 {
-    username = "username";
-    name = "Full Name";
+  username = "username";
+  name = "Full Name";
 }
 ```
 
@@ -210,28 +229,35 @@ Each host has a `home.nix` file that controls which home-manager module groups a
 
 **hosts/hostname/home.nix:**
 ```nix
-{ config, pkgs, userSettings, lib, ... }:
+{
+  config,
+  pkgs,
+  userSettings,
+  lib,
+  ...
+}:
 
 let
   # Specify which module groups to load for this host
-  moduleGroups = [ 
-    "core"      # Essential (always include)
-    "dev"       # Development tools
-    "notes"     # Note-taking apps
+  moduleGroups = [
+    "core" # Essential (always include)
+    "dev" # Development tools
+    "notes" # Note-taking apps
     # "content" # Media creation (ardour, audacity, kdenlive)
     # "gamedev" # Game development
     # "office"  # Office applications
     # "streaming" # Streaming tools
     # "wm"      # WM session stack (all current hosts load this)
   ];
-  
+
   moduleHelper = import ../../home/_modules/default.nix { inherit lib; };
   moduleImports = moduleHelper.importModuleGroups moduleGroups;
 in
 {
   imports = [
     ../../home/${userSettings.username}/default.nix
-  ] ++ moduleImports;
+  ]
+  ++ moduleImports;
 
   home = {
     username = userSettings.username;
@@ -313,8 +339,8 @@ mkdir -p home/newuser
 ```bash
 cat > home/newuser/settings.nix <<EOF
 {
-    username = "newuser";
-    name = "Full Name";
+  username = "newuser";
+  name = "Full Name";
 }
 EOF
 ```
@@ -336,31 +362,41 @@ Flake auto-discovers the new user on next rebuild.
 Edit or create a module in `hosts/_modules/`:
 ```nix
 # hosts/_modules/core.nix (or create custom module)
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
-    environment.systemPackages = with pkgs; [
-        package-name
-    ];
+  environment.systemPackages = with pkgs; [
+    package-name
+  ];
 }
 ```
 
 **User-specific (preferred):**
 Create or edit a module in `home/username/`:
 ```nix
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
-    home.packages = with pkgs; [
-        package-name
-    ];
+  home.packages = with pkgs; [
+    package-name
+  ];
 }
 ```
 
 Then import it in `home/username/default.nix`:
 ```nix
 imports = [
-    ./module-name.nix
+  ./module-name.nix
 ];
 ```
 
@@ -372,8 +408,8 @@ pkgs-stable.package-name
 **Using programs options (preferred when available):**
 ```nix
 programs.ghostty = {
-    enable = true;
-    settings = { ... };
+  enable = true;
+  settings = { ... };
 };
 ```
 
@@ -538,6 +574,7 @@ System module groups in hosts/_modules/:
 - `gaming/` - Gaming tools
 - `nvidia/` - NVIDIA GPU configuration
 - `printing/` - Printing support
+- `security/` - Authenticator system integration (aegis-desktop polkit policy)
 - `streaming/` - Streaming tools
 - `wm/` - System-level WM support (quickshell, veila config)
 
@@ -548,6 +585,7 @@ Home module groups in home/_modules/:
 - `gamedev/` - Game development (aseprite, godot, inkscape)
 - `notes/` - Note-taking (logseq, obsidian)
 - `office/` - Office (libreoffice, sparrow)
+- `security/` - Authenticator applications (aegis-desktop)
 - `streaming/` - Streaming (obs-studio)
 - `wm/` - WM session stack (hyprland, niri, walker, mako, awww, stasis, veila, quickshell, waybar, elephant)
 

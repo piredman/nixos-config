@@ -11,6 +11,7 @@
 let
   moduleGroups = [
     "core"
+    "security"
     "streaming"
     "fonts"
   ]
