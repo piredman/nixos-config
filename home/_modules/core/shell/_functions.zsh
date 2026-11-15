@@ -237,9 +237,10 @@ tmux-attach() {
     return 1
   fi
   if tmux has-session 2>/dev/null; then
-    exec tmux attach
+    tmux attach
+    return
   fi
   local last
   last=$(awk -F'\t' '$1 == "state" { print $2; exit }' "$HOME/.tmux/resurrect/last" 2>/dev/null)
-  exec tmux new -A -s "${last:-main}"
+  tmux new -A -s "${last:-main}"
 }

@@ -41,6 +41,9 @@
     extraConfig = ''
       # Terminal settings
       set -ag terminal-overrides ",xterm-256color:RGB"
+      set -as terminal-features ",*:extkeys"
+      set -s extended-keys always
+      set -s extended-keys-format csi-u
       set -g allow-passthrough on
 
       set -g status-position top
