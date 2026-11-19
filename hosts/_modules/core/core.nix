@@ -54,12 +54,6 @@ in
       QT_QPA_PLATFORM = "wayland;xcb";
       MOZ_ENABLE_WAYLAND = "1";
     };
-    loginShellInit = ''
-      if [ "$(tty)" = "/dev/tty1" ]; then
-        sleep 1s
-        start-hyprland
-      fi
-    '';
   };
 
   time.timeZone = systemSettings.timezone;

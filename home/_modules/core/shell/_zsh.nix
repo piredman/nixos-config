@@ -24,6 +24,12 @@ in
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = "source ${./_functions.zsh}";
+    profileExtra = ''
+      if [ "$(tty)" = "/dev/tty1" ]; then
+        sleep 1s
+        start-hyprland
+      fi
+    '';
     plugins = [
       {
         name = "vi-mode";
