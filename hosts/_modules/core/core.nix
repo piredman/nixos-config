@@ -85,20 +85,27 @@ in
 
   security = {
     polkit.enable = true;
-    pam.loginLimits = [
-      {
-        domain = userSettings.username;
-        type = "-";
-        item = "memlock";
-        value = "unlimited";
-      }
-    ];
+    pam = {
+      # Prevent password-based TTY logins from creating an encrypted login.keyring
+      # that conflicts with the passwordless default keyring (Omarchy's
+      # install/login/sddm.sh). Sessions start via tty1 autologin behind LUKS.
+      services.login.enableGnomeKeyring = lib.mkForce false;
+      loginLimits = [
+        {
+          domain = userSettings.username;
+          type = "-";
+          item = "memlock";
+          value = "unlimited";
+        }
+      ];
+    };
   };
 
-  # Guarantee a Secret service so browsers like zen never fall back to
-  # the basic plaintext password store. Also auto-wires
-  # security.pam.services.login.enableGnomeKeyring, which auto-unlocks
-  # the keyring at tty login (how all these sessions start).
+  # Guarantee a D-Bus Secret Service (org.freedesktop.secrets + Secret portal)
+  # for Chromium/Electron apps (helium, obsidian, proton-pass) and libsecret
+  # consumers (proton-pass-cli, aegis-desktop). Backed by the passwordless
+  # default keyring seeded in home/_modules/core/xdg.nix; LUKS handles
+  # encryption at rest.
   services.gnome.gnome-keyring.enable = true;
 
 }

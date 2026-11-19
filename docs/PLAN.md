@@ -117,16 +117,20 @@ xdg.portal.config.hyprland = {
     default = [ "gtk" ];
     "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
     "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
+    "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
 };
 ```
 
-Note: do NOT map these on `common` — the wm module group recursively imports both
-wm/hyprland/ and wm/niri/ on every host, so two modules setting common would merge into
-ScreenCast=hyprland;gnome and the wrong backend would win per session. There is no
+Note: do NOT map compositor-specific interfaces (`ScreenCast`, `Screenshot`) on `common` — the wm
+module group recursively imports both wm/hyprland/ and wm/niri/ on every host, so two modules
+setting common would merge into ScreenCast=hyprland;gnome and the wrong backend would win per
+session. `Secret` is mapped to `gnome-keyring` in `core/xdg.nix` (`common`) as well as in the
+self-contained `hyprland` and `niri` portal configs (Omarchy migration 1788261467). There is no
 `ScreenShare` interface in the xdg-desktop-portal registry (ScreenCast + Screenshot +
 RemoteDesktop are the real ones).
 
-For the niri path (`home/_modules/wm/niri/niri.nix`), map the same interfaces to `gnome`.
+For the niri path (`home/_modules/wm/niri/niri.nix`), map `ScreenCast` and `Screenshot` to `gnome`
+and `Secret` to `gnome-keyring`.
 
 ### D. xdph share-token QoL — hypr portal config
 
@@ -161,20 +165,23 @@ environment.sessionVariables = {
 - Do NOT set `XDG_CURRENT_DESKTOP` here — that is correctly session-scoped in
   `home/_modules/wm/{hyprland,niri}/session.nix` via dbus-update.
 
-### F. zen-browser keyring / password store
+### F. Chromium/Electron & libsecret keyring / password store
 
-Omarchy migration 1784508556: without a portal Secret provider, browsers can fall back to the
-`basic` store → cookies/passwords undecryptable after keyring swap (silent logouts). Guarantee a
-Secret provider exists at system level:
+Omarchy migrations 1784508556 & 1788261467 + `install/user/default-keyring.sh` + `install/login/sddm.sh`:
+Chromium/Electron apps (helium, obsidian, proton-pass) and libsecret consumers (proton-pass-cli,
+aegis-desktop) use `org.freedesktop.secrets` / `org.freedesktop.impl.portal.Secret`. Without a
+consistent Secret provider, Chromium apps can flip between `basic` (`v10`) and `gnome-libsecret`
+(`v11`) keys (silent logouts). Because all hosts use LUKS full-disk encryption with `tty1`
+autologin (`services.getty.autologinUser`), PAM never receives a login password:
 
 ```nix
 services.gnome.gnome-keyring.enable = true;
+security.pam.services.login.enableGnomeKeyring = lib.mkForce false;
 ```
 
-This also auto-wires `security.pam.services.login.enableGnomeKeyring` so the keyring
-auto-unlocks at the tty1 login that starts these sessions.
-
-Verify zen keeps its stored logins across rebuilds.
+`home/_modules/core/xdg.nix` seeds a passwordless `Default_keyring.keyring` via
+`home.activation.defaultKeyring` when `~/.local/share/keyrings/default` is absent, matching
+Omarchy's `install/user/default-keyring.sh` (LUKS handles encryption at rest).
 
 ### G. Portal window rules — `home/redman/hypr/hyprland.lua`
 
