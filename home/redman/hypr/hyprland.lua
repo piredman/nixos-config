@@ -164,8 +164,10 @@ hl.bind(main_mod .. " + period", hl.dsp.layout("colresize +0.25"))
 
 hl.window_rule({
   name = "suppress-pip",
-  match = { title = "^(Picture-in-Picture)$" },
+  match = { title = "^(Picture-in-[Pp]icture)$" },
   suppress_event = "maximize",
+  tile = true,
+  no_max_size = true,
 })
 
 hl.window_rule({
