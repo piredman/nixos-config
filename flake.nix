@@ -9,14 +9,6 @@
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Pinned to last-known-good nix packaging; upstream broke their flake on
-    # 2026-10-13 (3731aace: build.ts imports root script/native-arch.ts which
-    # their nix fileset excludes). Revert to github:anomalyco/opencode once fixed.
-    opencode = {
-      url = "github:anomalyco/opencode/2bf145b931a51e976f096b201b617a4fb488312b";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -90,7 +82,6 @@
             ./hosts/${hostDir}/configuration.nix
             {
               nixpkgs.overlays = [
-                inputs.opencode.overlays.default
                 (final: prev: { aegis-desktop = final.callPackage ./pkgs/aegis-desktop { }; })
               ];
             }
